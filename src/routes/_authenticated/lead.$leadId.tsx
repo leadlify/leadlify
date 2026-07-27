@@ -134,7 +134,7 @@ function LeadDetailPage() {
   });
 
   const updateLead = useMutation({
-    mutationFn: async (patch: Record<string, unknown>) => {
+    mutationFn: async (patch: { status?: LeadStatus; notes?: string }) => {
       const { error } = await supabase.from("leads").update(patch).eq("id", leadId);
       if (error) throw new Error(error.message);
     },
