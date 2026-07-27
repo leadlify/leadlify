@@ -1,7 +1,8 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BarChart3,
+  ShieldCheck,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -17,6 +18,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
+import { isAdminQuery } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -27,12 +29,16 @@ const NAV = [
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
+const ADMIN_ITEM = { to: "/admin", label: "Admin", icon: ShieldCheck } as const;
+
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const admin = useQuery(isAdminQuery);
+  const items = admin.data ? [...NAV, ADMIN_ITEM] : [...NAV];
 
   return (
     <nav className="flex flex-col gap-1">
-      {NAV.map((item) => {
+      {items.map((item) => {
         const active = pathname === item.to || pathname.startsWith(`${item.to}/`);
         return (
           <Link
