@@ -14,7 +14,185 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      email_history: {
+        Row: {
+          body: string
+          created_at: string
+          error_message: string | null
+          gmail_message_id: string | null
+          gmail_thread_id: string | null
+          id: string
+          lead_id: string | null
+          replied: boolean
+          replied_at: string | null
+          sent_at: string | null
+          sent_status: string
+          subject: string
+          to_email: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          error_message?: string | null
+          gmail_message_id?: string | null
+          gmail_thread_id?: string | null
+          id?: string
+          lead_id?: string | null
+          replied?: boolean
+          replied_at?: string | null
+          sent_at?: string | null
+          sent_status?: string
+          subject: string
+          to_email: string
+          user_id?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          error_message?: string | null
+          gmail_message_id?: string | null
+          gmail_thread_id?: string | null
+          id?: string
+          lead_id?: string | null
+          replied?: boolean
+          replied_at?: string | null
+          sent_at?: string | null
+          sent_status?: string
+          subject?: string
+          to_email?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_history_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          address: string | null
+          analysis: Json | null
+          business_category: string | null
+          business_name: string
+          city: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          generated_email: string | null
+          google_rating: number | null
+          id: string
+          mobile_friendly: boolean | null
+          notes: string | null
+          owner_name: string | null
+          phone: string | null
+          place_id: string | null
+          review_count: number | null
+          seo_score: number | null
+          ssl_enabled: boolean | null
+          status: Database["public"]["Enums"]["lead_status"]
+          updated_at: string
+          user_id: string
+          website: string | null
+          website_speed: number | null
+          website_status: string | null
+        }
+        Insert: {
+          address?: string | null
+          analysis?: Json | null
+          business_category?: string | null
+          business_name: string
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          generated_email?: string | null
+          google_rating?: number | null
+          id?: string
+          mobile_friendly?: boolean | null
+          notes?: string | null
+          owner_name?: string | null
+          phone?: string | null
+          place_id?: string | null
+          review_count?: number | null
+          seo_score?: number | null
+          ssl_enabled?: boolean | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+          website_speed?: number | null
+          website_status?: string | null
+        }
+        Update: {
+          address?: string | null
+          analysis?: Json | null
+          business_category?: string | null
+          business_name?: string
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          generated_email?: string | null
+          google_rating?: number | null
+          id?: string
+          mobile_friendly?: boolean | null
+          notes?: string | null
+          owner_name?: string | null
+          phone?: string | null
+          place_id?: string | null
+          review_count?: number | null
+          seo_score?: number | null
+          ssl_enabled?: boolean | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+          website_speed?: number | null
+          website_status?: string | null
+        }
+        Relationships: []
+      }
+      settings: {
+        Row: {
+          created_at: string
+          email_tone: string
+          id: string
+          sender_email: string | null
+          sender_name: string | null
+          service_description: string | null
+          signature: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_tone?: string
+          id?: string
+          sender_email?: string | null
+          sender_name?: string | null
+          service_description?: string | null
+          signature?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          email_tone?: string
+          id?: string
+          sender_email?: string | null
+          sender_name?: string | null
+          service_description?: string | null
+          signature?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +201,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      lead_status:
+        | "new"
+        | "contacted"
+        | "replied"
+        | "interested"
+        | "closed"
+        | "lost"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +334,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      lead_status: [
+        "new",
+        "contacted",
+        "replied",
+        "interested",
+        "closed",
+        "lost",
+      ],
+    },
   },
 } as const
