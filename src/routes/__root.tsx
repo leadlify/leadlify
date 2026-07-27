@@ -95,13 +95,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "LeadForge — AI Lead Generation & Cold Email CRM" },
+      { name: "twitter:description", content: "Find local businesses, audit their websites with AI, and send personalised cold emails from Gmail." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/71de0dc0-c45a-4564-8ebd-84b65465aefa" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/71de0dc0-c45a-4564-8ebd-84b65465aefa" },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
   shellComponent: RootShell,
