@@ -74,3 +74,69 @@ export function errorMessage(error: unknown, fallback = "Something went wrong.")
   if (error instanceof Error && error.message) return error.message;
   return fallback;
 }
+
+export type Profile = Tables<"profiles">;
+export type Payment = Tables<"payments">;
+
+export const isAdminQuery = queryOptions({
+  queryKey: ["is-admin"],
+  queryFn: async (): Promise<boolean> => {
+    const { data, error } = await supabase.from("user_roles").select("role");
+    if (error) return false;
+    return (data ?? []).some((row) => row.role === "admin");
+  },
+});
+
+export const allProfilesQuery = queryOptions({
+  queryKey: ["admin", "profiles"],
+  queryFn: async (): Promise<Profile[]> => {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(1000);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  },
+});
+
+export const allPaymentsQuery = queryOptions({
+  queryKey: ["admin", "payments"],
+  queryFn: async (): Promise<Payment[]> => {
+    const { data, error } = await supabase
+      .from("payments")
+      .select("*")
+      .order("paid_at", { ascending: false })
+      .limit(1000);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  },
+});
+
+export const allLeadsQuery = queryOptions({
+  queryKey: ["admin", "leads"],
+  queryFn: async (): Promise<Pick<Lead, "id" | "user_id" | "created_at" | "status">[]> => {
+    const { data, error } = await supabase
+      .from("leads")
+      .select("id,user_id,created_at,status")
+      .order("created_at", { ascending: false })
+      .limit(5000);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  },
+});
+
+export const allEmailsQuery = queryOptions({
+  queryKey: ["admin", "emails"],
+  queryFn: async (): Promise<
+    Pick<EmailRecord, "id" | "user_id" | "created_at" | "sent_status" | "replied">[]
+  > => {
+    const { data, error } = await supabase
+      .from("email_history")
+      .select("id,user_id,created_at,sent_status,replied")
+      .order("created_at", { ascending: false })
+      .limit(5000);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  },
+});
