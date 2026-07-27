@@ -104,20 +104,30 @@ export const findLeads = createServerFn({ method: "POST" })
       return { imported: 0, duplicates: 0, found: 0 };
     }
 
-    const rows = collected.slice(0, data.maxLeads).map((place) => ({
-      user_id: userId,
-      place_id: place.id ?? null,
-      business_name: place.displayName?.text ?? "Unknown business",
-      business_category: place.primaryTypeDisplayName?.text ?? data.businessType,
-      website: place.websiteUri ?? null,
-      phone: place.nationalPhoneNumber ?? place.internationalPhoneNumber ?? null,
-      address: place.formattedAddress ?? null,
-      city: data.city || null,
-      country: data.country || null,
-      google_rating: place.rating ?? null,
-      review_count: place.userRatingCount ?? 0,
-      website_status: place.websiteUri ? "unchecked" : "missing",
-    }));
+    const seen = new Set<string>();
+    const rows = collected
+      .slice(0, data.maxLeads)
+      .filter((place) => {
+        const key = place.id ?? "";
+        if (!key) return true;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .map((place) => ({
+        user_id: userId,
+        place_id: place.id ?? null,
+        business_name: place.displayName?.text ?? "Unknown business",
+        business_category: place.primaryTypeDisplayName?.text ?? data.businessType,
+        website: place.websiteUri ?? null,
+        phone: place.nationalPhoneNumber ?? place.internationalPhoneNumber ?? null,
+        address: place.formattedAddress ?? null,
+        city: data.city || null,
+        country: data.country || null,
+        google_rating: place.rating ?? null,
+        review_count: place.userRatingCount ?? 0,
+        website_status: place.websiteUri ? "unchecked" : "missing",
+      }));
 
     const { data: inserted, error } = await supabase
       .from("leads")
@@ -125,12 +135,13 @@ export const findLeads = createServerFn({ method: "POST" })
       .select("id");
 
     if (error) {
-      // Unique-name collisions surface here; treat them as duplicates, not failures.
+      // Unique collisions surface here; treat them as duplicates, not failures.
       if (error.code !== "23505") {
         console.error("[find-leads] insert", error);
-        throw new UpstreamError(500, "Could not save the leads that were found.");
+        throw new UpstreamError(500, `Could not save the leads that were found: ${error.message}`);
       }
     }
+
 
     const imported = inserted?.length ?? 0;
     return {
