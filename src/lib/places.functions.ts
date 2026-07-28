@@ -8,8 +8,9 @@ const SearchInput = z.object({
   city: z.string().trim().max(80).optional().default(""),
   businessType: z.string().trim().min(1, "Business type is required").max(80),
   keyword: z.string().trim().max(80).optional().default(""),
-  maxLeads: z.number().int().min(1).max(60).default(20),
+  maxLeads: z.number().int().min(1).max(50).default(20),
   radiusKm: z.number().min(1).max(50).default(10),
+  onlyWithoutWebsite: z.boolean().optional().default(false),
 });
 
 type PlacesResponse = {
