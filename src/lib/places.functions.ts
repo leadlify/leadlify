@@ -8,8 +8,9 @@ const SearchInput = z.object({
   city: z.string().trim().max(80).optional().default(""),
   businessType: z.string().trim().min(1, "Business type is required").max(80),
   keyword: z.string().trim().max(80).optional().default(""),
-  maxLeads: z.number().int().min(1).max(60).default(20),
+  maxLeads: z.number().int().min(1).max(50).default(20),
   radiusKm: z.number().min(1).max(50).default(10),
+  onlyWithoutWebsite: z.boolean().optional().default(false),
 });
 
 type PlacesResponse = {
@@ -84,8 +85,12 @@ export const findLeads = createServerFn({ method: "POST" })
 
     const collected: NonNullable<PlacesResponse["places"]> = [];
     let pageToken: string | undefined;
+    let pages = 0;
+    // Fetch extra pages when filtering to websiteless businesses, since most results have sites.
+    const targetRaw = data.onlyWithoutWebsite ? data.maxLeads * 6 : data.maxLeads;
+    const maxPages = data.onlyWithoutWebsite ? 10 : 5;
 
-    while (collected.length < data.maxLeads) {
+    while (collected.length < targetRaw && pages < maxPages) {
       const payload = (await callGoogle({
         connector: "google_maps",
         path: "/places/v1/places:searchText",
@@ -94,6 +99,7 @@ export const findLeads = createServerFn({ method: "POST" })
         body: pageToken ? { ...body, pageToken } : body,
       })) as PlacesResponse & { nextPageToken?: string };
 
+      pages += 1;
       const batch = payload.places ?? [];
       collected.push(...batch);
       pageToken = payload.nextPageToken;
@@ -106,7 +112,7 @@ export const findLeads = createServerFn({ method: "POST" })
 
     const seen = new Set<string>();
     const rows = collected
-      .slice(0, data.maxLeads)
+      .filter((place) => (data.onlyWithoutWebsite ? !place.websiteUri : true))
       .filter((place) => {
         const key = place.id ?? "";
         if (!key) return true;
@@ -114,6 +120,7 @@ export const findLeads = createServerFn({ method: "POST" })
         seen.add(key);
         return true;
       })
+      .slice(0, data.maxLeads)
       .map((place) => ({
         user_id: userId,
         place_id: place.id ?? null,
@@ -128,6 +135,11 @@ export const findLeads = createServerFn({ method: "POST" })
         review_count: place.userRatingCount ?? 0,
         website_status: place.websiteUri ? "unchecked" : "missing",
       }));
+
+    if (rows.length === 0) {
+      return { imported: 0, duplicates: 0, found: collected.length };
+    }
+
 
     const { data: inserted, error } = await supabase
       .from("leads")
