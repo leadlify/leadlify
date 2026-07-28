@@ -56,10 +56,13 @@ function FindLeadsPage() {
   const [keyword, setKeyword] = useState("");
   const [maxLeads, setMaxLeads] = useState(20);
   const [radiusKm, setRadiusKm] = useState(10);
+  const [onlyWithoutWebsite, setOnlyWithoutWebsite] = useState(false);
 
   const mutation = useMutation({
     mutationFn: () =>
-      search({ data: { country, city, businessType, keyword, maxLeads, radiusKm } }),
+      search({
+        data: { country, city, businessType, keyword, maxLeads, radiusKm, onlyWithoutWebsite },
+      }),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["leads"] });
       if (result.found === 0) {
