@@ -20,6 +20,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { openConnectorPopup, waitForOAuthCompletion } from "@/lib/appUserConnectorClient";
+import { disconnectGmail, startGmailConnect } from "@/lib/gmail-connect.functions";
 import { getGmailProfile } from "@/lib/outreach.functions";
 import { errorMessage, settingsQuery } from "@/lib/queries";
 
@@ -45,6 +47,8 @@ function SettingsPage() {
   const queryClient = useQueryClient();
   const settings = useQuery(settingsQuery);
   const profileFn = useServerFn(getGmailProfile);
+  const startConnect = useServerFn(startGmailConnect);
+  const disconnectFn = useServerFn(disconnectGmail);
   const gmail = useQuery({ queryKey: ["gmail-profile"], queryFn: () => profileFn({}) });
 
   const [form, setForm] = useState({
@@ -83,6 +87,35 @@ function SettingsPage() {
     onError: (error) => toast.error(errorMessage(error)),
   });
 
+  const connect = useMutation({
+    mutationFn: async () => {
+      const popup = openConnectorPopup();
+      try {
+        const { authorizationUrl } = await startConnect({});
+        const completion = waitForOAuthCompletion(popup, "google_mail");
+        popup.location.href = authorizationUrl;
+        await completion;
+      } catch (error) {
+        popup.close();
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gmail-profile"] });
+      toast.success("Gmail connected — your emails will now send from your own account.");
+    },
+    onError: (error) => toast.error(errorMessage(error, "Could not connect Gmail.")),
+  });
+
+  const disconnect = useMutation({
+    mutationFn: () => disconnectFn({}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gmail-profile"] });
+      toast.success("Gmail disconnected.");
+    },
+    onError: (error) => toast.error(errorMessage(error, "Could not disconnect Gmail.")),
+  });
+
   return (
     <AppShell title="Settings" description="How your outreach emails are written and signed">
       <div className="grid max-w-3xl gap-6">
@@ -94,7 +127,7 @@ function SettingsPage() {
             </CardTitle>
             <CardDescription>Emails are sent from this connected mailbox.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             {gmail.isLoading ? (
               <Skeleton className="h-12 w-full" />
             ) : gmail.data?.connected ? (
@@ -110,17 +143,41 @@ function SettingsPage() {
                 </div>
               </div>
             ) : (
-              <div className="border-destructive/30 bg-destructive/10 flex items-center gap-3 rounded-lg border p-4">
-                <XCircle className="text-destructive size-5 shrink-0" />
+              <div className="border-warning/30 bg-warning/10 flex items-center gap-3 rounded-lg border p-4">
+                <XCircle className="text-warning size-5 shrink-0" />
                 <div>
-                  <p className="text-foreground text-sm font-medium">Gmail is not reachable</p>
+                  <p className="text-foreground text-sm font-medium">
+                    No Gmail account connected
+                  </p>
                   <p className="text-muted-foreground text-xs">
-                    {"reason" in (gmail.data ?? {}) ? String(gmail.data?.reason) : "Reconnect the Gmail connector to send email."}
+                    Connect your own Gmail so outreach is sent from your address and replies come
+                    back to your inbox.
                   </p>
                 </div>
               </div>
             )}
+
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={() => connect.mutate()} disabled={connect.isPending}>
+                {connect.isPending ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Mail className="size-4" />
+                )}
+                {gmail.data?.connected ? "Reconnect Gmail" : "Connect Gmail"}
+              </Button>
+              {gmail.data?.connected ? (
+                <Button
+                  variant="outline"
+                  onClick={() => disconnect.mutate()}
+                  disabled={disconnect.isPending}
+                >
+                  Disconnect
+                </Button>
+              ) : null}
+            </div>
           </CardContent>
+
         </Card>
 
         <Card className="shadow-card border-border/60">
