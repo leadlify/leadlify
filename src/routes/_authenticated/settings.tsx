@@ -47,6 +47,8 @@ function SettingsPage() {
   const queryClient = useQueryClient();
   const settings = useQuery(settingsQuery);
   const profileFn = useServerFn(getGmailProfile);
+  const startConnect = useServerFn(startGmailConnect);
+  const disconnectFn = useServerFn(disconnectGmail);
   const gmail = useQuery({ queryKey: ["gmail-profile"], queryFn: () => profileFn({}) });
 
   const [form, setForm] = useState({
