@@ -20,6 +20,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { openConnectorPopup, waitForOAuthCompletion } from "@/lib/appUserConnectorClient";
+import { disconnectGmail, startGmailConnect } from "@/lib/gmail-connect.functions";
 import { getGmailProfile } from "@/lib/outreach.functions";
 import { errorMessage, settingsQuery } from "@/lib/queries";
 
