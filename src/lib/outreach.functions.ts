@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { callAI, callGoogle, parseAIJson, UpstreamError } from "@/lib/ai.server";
+import { callAI, parseAIJson, UpstreamError } from "@/lib/ai.server";
 
 const GenerateInput = z.object({
   leadId: z.string().uuid(),
@@ -94,12 +94,13 @@ function toBase64Url(input: string): string {
 /** Returns the connected Gmail mailbox, or null when Gmail is not reachable. */
 export const getGmailProfile = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async () => {
+  .handler(async ({ context }) => {
     try {
-      const profile = (await callGoogle({
-        connector: "google_mail",
-        path: "/gmail/v1/users/me/profile",
-      })) as { emailAddress?: string; messagesTotal?: number };
+      const { callUserGmail } = await import("@/server/appUserConnections.server");
+      const profile = (await callUserGmail(
+        context.userId,
+        "/gmail/v1/users/me/profile",
+      )) as { emailAddress?: string; messagesTotal?: number };
       return {
         connected: true as const,
         email: profile.emailAddress ?? null,
@@ -110,7 +111,10 @@ export const getGmailProfile = createServerFn({ method: "GET" })
         connected: false as const,
         email: null,
         messagesTotal: 0,
-        reason: error instanceof Error ? error.message : "Gmail is not reachable.",
+        reason:
+          error instanceof Error
+            ? error.message
+            : "Connect your Gmail account in Settings to send emails.",
       };
     }
   });
@@ -147,9 +151,8 @@ export const sendLeadEmail = createServerFn({ method: "POST" })
     ].join("\r\n");
 
     try {
-      const sent = (await callGoogle({
-        connector: "google_mail",
-        path: "/gmail/v1/users/me/messages/send",
+      const { callUserGmail } = await import("@/server/appUserConnections.server");
+      const sent = (await callUserGmail(userId, "/gmail/v1/users/me/messages/send", {
         method: "POST",
         body: { raw: toBase64Url(mime) },
       })) as { id?: string; threadId?: string };
@@ -186,7 +189,8 @@ export const sendLeadEmail = createServerFn({ method: "POST" })
 export const syncReplies = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase } = context;
+    const { supabase, userId } = context;
+    const { callUserGmail } = await import("@/server/appUserConnections.server");
 
     const { data: sent } = await supabase
       .from("email_history")
@@ -201,10 +205,10 @@ export const syncReplies = createServerFn({ method: "POST" })
     let replies = 0;
     for (const row of sent) {
       try {
-        const thread = (await callGoogle({
-          connector: "google_mail",
-          path: `/gmail/v1/users/me/threads/${row.gmail_thread_id}?format=metadata`,
-        })) as { messages?: Array<{ labelIds?: string[] }> };
+        const thread = (await callUserGmail(
+          userId,
+          `/gmail/v1/users/me/threads/${row.gmail_thread_id}?format=metadata`,
+        )) as { messages?: Array<{ labelIds?: string[] }> };
 
         const inbound = (thread.messages ?? []).some((m) => m.labelIds?.includes("INBOX"));
         if (!inbound) continue;

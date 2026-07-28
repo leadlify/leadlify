@@ -20,6 +20,7 @@ import { Route as AuthenticatedFindLeadsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as OauthGmailReturnRouteImport } from './routes/oauth/gmail.return'
 import { Route as AuthenticatedLeadLeadIdRouteImport } from './routes/_authenticated/lead.$leadId'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -76,6 +77,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const OauthGmailReturnRoute = OauthGmailReturnRouteImport.update({
+  id: '/oauth/gmail/return',
+  path: '/oauth/gmail/return',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedLeadLeadIdRoute = AuthenticatedLeadLeadIdRouteImport.update({
   id: '/lead/$leadId',
   path: '/lead/$leadId',
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/leads': typeof AuthenticatedLeadsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/lead/$leadId': typeof AuthenticatedLeadLeadIdRoute
+  '/oauth/gmail/return': typeof OauthGmailReturnRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/leads': typeof AuthenticatedLeadsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/lead/$leadId': typeof AuthenticatedLeadLeadIdRoute
+  '/oauth/gmail/return': typeof OauthGmailReturnRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/lead/$leadId': typeof AuthenticatedLeadLeadIdRoute
+  '/oauth/gmail/return': typeof OauthGmailReturnRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
     | '/leads'
     | '/settings'
     | '/lead/$leadId'
+    | '/oauth/gmail/return'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/leads'
     | '/settings'
     | '/lead/$leadId'
+    | '/oauth/gmail/return'
   id:
     | '__root__'
     | '/'
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/_authenticated/leads'
     | '/_authenticated/settings'
     | '/_authenticated/lead/$leadId'
+    | '/oauth/gmail/return'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -172,6 +184,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  OauthGmailReturnRoute: typeof OauthGmailReturnRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -253,6 +266,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/oauth/gmail/return': {
+      id: '/oauth/gmail/return'
+      path: '/oauth/gmail/return'
+      fullPath: '/oauth/gmail/return'
+      preLoaderRoute: typeof OauthGmailReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/lead/$leadId': {
       id: '/_authenticated/lead/$leadId'
       path: '/lead/$leadId'
@@ -292,6 +312,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  OauthGmailReturnRoute: OauthGmailReturnRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
