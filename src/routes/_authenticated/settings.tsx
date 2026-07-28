@@ -83,6 +83,35 @@ function SettingsPage() {
     onError: (error) => toast.error(errorMessage(error)),
   });
 
+  const connect = useMutation({
+    mutationFn: async () => {
+      const popup = openConnectorPopup();
+      try {
+        const { authorizationUrl } = await startConnect({});
+        const completion = waitForOAuthCompletion(popup, "google_mail");
+        popup.location.href = authorizationUrl;
+        await completion;
+      } catch (error) {
+        popup.close();
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gmail-profile"] });
+      toast.success("Gmail connected — your emails will now send from your own account.");
+    },
+    onError: (error) => toast.error(errorMessage(error, "Could not connect Gmail.")),
+  });
+
+  const disconnect = useMutation({
+    mutationFn: () => disconnectFn({}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gmail-profile"] });
+      toast.success("Gmail disconnected.");
+    },
+    onError: (error) => toast.error(errorMessage(error, "Could not disconnect Gmail.")),
+  });
+
   return (
     <AppShell title="Settings" description="How your outreach emails are written and signed">
       <div className="grid max-w-3xl gap-6">
