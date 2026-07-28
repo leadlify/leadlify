@@ -158,7 +158,7 @@ function FindLeadsPage() {
                   <Slider
                     value={[maxLeads]}
                     min={5}
-                    max={60}
+                    max={50}
                     step={5}
                     onValueChange={([v]) => setMaxLeads(v)}
                   />
@@ -179,6 +179,23 @@ function FindLeadsPage() {
                   />
                 </div>
               </div>
+
+              <div className="border-border/60 bg-muted/40 flex items-start justify-between gap-4 rounded-xl border p-4">
+                <div className="space-y-1">
+                  <Label htmlFor="no-website" className="text-sm font-medium">
+                    Only businesses without a website
+                  </Label>
+                  <p className="text-muted-foreground text-xs">
+                    Best prospects for a web design pitch. Searching may take a little longer.
+                  </p>
+                </div>
+                <Switch
+                  id="no-website"
+                  checked={onlyWithoutWebsite}
+                  onCheckedChange={setOnlyWithoutWebsite}
+                />
+              </div>
+
 
               <Button type="submit" className="w-full sm:w-auto" disabled={mutation.isPending}>
                 {mutation.isPending ? (
