@@ -171,5 +171,7 @@ export const findLeads = createServerFn({ method: "POST" })
       found: collected.length,
       imported,
       duplicates: Math.max(rows.length - imported, 0),
+      quotaRemaining: Math.max(quota.remaining - imported, 0),
     };
   });
+
