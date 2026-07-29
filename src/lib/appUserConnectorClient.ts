@@ -8,8 +8,9 @@ export function openConnectorPopup(): Window {
 
 export function waitForOAuthCompletion(popup: Window, connectorId: string) {
   return new Promise<void>((resolve, reject) => {
-    let poll: number | undefined;
     // eslint-disable-next-line prefer-const
+    let poll: number | undefined;
+
     const cleanup = () => {
       window.removeEventListener("message", onMessage);
       if (poll !== undefined) window.clearInterval(poll);
