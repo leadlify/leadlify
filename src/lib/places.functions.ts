@@ -68,7 +68,7 @@ export const findLeads = createServerFn({ method: "POST" })
 
     const body: Record<string, unknown> = {
       textQuery,
-      maxResultCount: Math.min(data.maxLeads, 20),
+      maxResultCount: Math.min(maxLeads, 20),
     };
 
     // Bias results to the requested city radius when we can resolve coordinates.
@@ -98,7 +98,7 @@ export const findLeads = createServerFn({ method: "POST" })
     let pageToken: string | undefined;
     let pages = 0;
     // Fetch extra pages when filtering to websiteless businesses, since most results have sites.
-    const targetRaw = data.onlyWithoutWebsite ? data.maxLeads * 6 : data.maxLeads;
+    const targetRaw = data.onlyWithoutWebsite ? maxLeads * 6 : maxLeads;
     const maxPages = data.onlyWithoutWebsite ? 10 : 5;
 
     while (collected.length < targetRaw && pages < maxPages) {
@@ -131,7 +131,7 @@ export const findLeads = createServerFn({ method: "POST" })
         seen.add(key);
         return true;
       })
-      .slice(0, data.maxLeads)
+      .slice(0, maxLeads)
       .map((place) => ({
         user_id: userId,
         place_id: place.id ?? null,
