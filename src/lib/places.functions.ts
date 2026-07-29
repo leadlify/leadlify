@@ -49,11 +49,22 @@ export const findLeads = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
+    const { readLeadQuota } = await import("@/server/quota.server");
+    const quota = await readLeadQuota(supabase, userId);
+    if (quota.remaining <= 0) {
+      throw new UpstreamError(
+        429,
+        `You have used your monthly limit of ${quota.quota} leads. It resets on the 1st of next month.`,
+      );
+    }
+    const maxLeads = Math.min(data.maxLeads, quota.remaining);
+
     const locationParts = [data.city, data.country].filter(Boolean).join(", ");
     const textQuery = [data.businessType, data.keyword, locationParts ? `in ${locationParts}` : ""]
       .filter(Boolean)
       .join(" ")
       .trim();
+
 
     const body: Record<string, unknown> = {
       textQuery,
