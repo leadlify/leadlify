@@ -109,6 +109,21 @@ function AdminPage() {
     onError: (error) => toast.error(errorMessage(error)),
   });
 
+  const quotaMutation = useMutation({
+    mutationFn: async ({ id, quota }: { id: string; quota: number }) => {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ monthly_lead_quota: quota })
+        .eq("id", id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "profiles"] });
+      toast.success("Quota updated");
+    },
+    onError: (error) => toast.error(error instanceof Error ? error.message : "Update failed"),
+  });
+
   if (admin.isLoading || !enabled) {
     return (
       <AppShell title="Admin panel" description="Checking access…">
@@ -138,21 +153,6 @@ function AdminPage() {
     emails: sent.filter((e) => dayKey(e.created_at) === day).length,
     leads: (leads.data ?? []).filter((l) => dayKey(l.created_at) === day).length,
   }));
-
-  const quotaMutation = useMutation({
-    mutationFn: async ({ id, quota }: { id: string; quota: number }) => {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ monthly_lead_quota: quota })
-        .eq("id", id);
-      if (error) throw new Error(error.message);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "profiles"] });
-      toast.success("Quota updated");
-    },
-    onError: (error) => toast.error(error instanceof Error ? error.message : "Update failed"),
-  });
 
   const rows = users.map((u) => {
     const uid = u.id;
