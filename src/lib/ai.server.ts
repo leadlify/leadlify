@@ -116,9 +116,11 @@ export async function callGoogle(opts: {
 
   if (response.status === 403) {
     const details =
-      ((await response.json().catch(() => null)) as {
-        error?: { details?: Array<{ reason?: string }> };
-      } | null)?.error?.details ?? [];
+      (
+        (await response.json().catch(() => null)) as {
+          error?: { details?: Array<{ reason?: string }> };
+        } | null
+      )?.error?.details ?? [];
     const reason = details.find((d) => d.reason)?.reason;
     if (reason === "API_KEY_HTTP_REFERRER_BLOCKED") {
       throw new UpstreamError(

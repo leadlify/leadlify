@@ -146,9 +146,7 @@ function SettingsPage() {
               <div className="border-warning/30 bg-warning/10 flex items-center gap-3 rounded-lg border p-4">
                 <XCircle className="text-warning size-5 shrink-0" />
                 <div>
-                  <p className="text-foreground text-sm font-medium">
-                    No Gmail account connected
-                  </p>
+                  <p className="text-foreground text-sm font-medium">No Gmail account connected</p>
                   <p className="text-muted-foreground text-xs">
                     Connect your own Gmail so outreach is sent from your address and replies come
                     back to your inbox.
@@ -177,7 +175,6 @@ function SettingsPage() {
               ) : null}
             </div>
           </CardContent>
-
         </Card>
 
         <Card className="shadow-card border-border/60">

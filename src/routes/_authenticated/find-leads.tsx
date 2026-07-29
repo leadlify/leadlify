@@ -1,7 +1,7 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Radar, Sparkles } from "lucide-react";
+import { Gauge, Loader2, Radar, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { findLeads } from "@/lib/places.functions";
+import { getLeadQuota } from "@/lib/quota.functions";
+import { Progress } from "@/components/ui/progress";
 import { errorMessage } from "@/lib/queries";
 
 export const Route = createFileRoute("/_authenticated/find-leads")({
@@ -49,6 +51,8 @@ function FindLeadsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const search = useServerFn(findLeads);
+  const quotaFn = useServerFn(getLeadQuota);
+  const quota = useQuery({ queryKey: ["lead-quota"], queryFn: () => quotaFn({}) });
 
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
@@ -65,6 +69,7 @@ function FindLeadsPage() {
       }),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["leads"] });
+      queryClient.invalidateQueries({ queryKey: ["lead-quota"] });
       if (result.found === 0) {
         toast.warning("No businesses matched that search. Try a broader area or keyword.");
         return;
@@ -200,7 +205,6 @@ function FindLeadsPage() {
                 />
               </div>
 
-
               <Button type="submit" className="w-full sm:w-auto" disabled={mutation.isPending}>
                 {mutation.isPending ? (
                   <Loader2 className="size-4 animate-spin" />
@@ -213,27 +217,57 @@ function FindLeadsPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-card border-border/60 h-fit">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Sparkles className="text-secondary size-4" />
-              Quick picks
-            </CardTitle>
-            <CardDescription>Common niches that usually have dated websites.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            {SUGGESTIONS.map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => setBusinessType(item)}
-                className="border-border bg-muted/50 hover:border-primary/40 hover:bg-primary/10 hover:text-primary rounded-full border px-3 py-1.5 text-xs font-medium transition-all"
-              >
-                {item}
-              </button>
-            ))}
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          <Card className="shadow-card border-border/60 h-fit">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Gauge className="text-primary size-4" />
+                Monthly lead quota
+              </CardTitle>
+              <CardDescription>
+                {quota.data
+                  ? `${quota.data.used} of ${quota.data.quota} leads imported this month`
+                  : "Loading your allowance…"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Progress
+                value={
+                  quota.data
+                    ? Math.min((quota.data.used / Math.max(quota.data.quota, 1)) * 100, 100)
+                    : 0
+                }
+              />
+              <p className="text-muted-foreground text-xs">
+                {quota.data
+                  ? `${quota.data.remaining} left · resets ${new Date(quota.data.resetsOn).toLocaleDateString()}`
+                  : ""}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-card border-border/60 h-fit">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Sparkles className="text-secondary size-4" />
+                Quick picks
+              </CardTitle>
+              <CardDescription>Common niches that usually have dated websites.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-2">
+              {SUGGESTIONS.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setBusinessType(item)}
+                  className="border-border bg-muted/50 hover:border-primary/40 hover:bg-primary/10 hover:text-primary rounded-full border px-3 py-1.5 text-xs font-medium transition-all"
+                >
+                  {item}
+                </button>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </AppShell>
   );

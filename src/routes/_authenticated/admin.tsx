@@ -109,6 +109,21 @@ function AdminPage() {
     onError: (error) => toast.error(errorMessage(error)),
   });
 
+  const quotaMutation = useMutation({
+    mutationFn: async ({ id, quota }: { id: string; quota: number }) => {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ monthly_lead_quota: quota })
+        .eq("id", id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "profiles"] });
+      toast.success("Quota updated");
+    },
+    onError: (error) => toast.error(error instanceof Error ? error.message : "Update failed"),
+  });
+
   if (admin.isLoading || !enabled) {
     return (
       <AppShell title="Admin panel" description="Checking access…">
@@ -203,7 +218,11 @@ function AdminPage() {
                     <stop offset="100%" stopColor="var(--color-secondary)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="var(--color-border)"
+                  vertical={false}
+                />
                 <XAxis dataKey="day" tickLine={false} axisLine={false} fontSize={11} />
                 <YAxis allowDecimals={false} tickLine={false} axisLine={false} fontSize={11} />
                 <Tooltip contentStyle={tooltipStyle} />
@@ -250,12 +269,13 @@ function AdminPage() {
                   <TableHead className="text-right">Sent</TableHead>
                   <TableHead className="text-right">Replies</TableHead>
                   <TableHead className="text-right">Revenue</TableHead>
+                  <TableHead className="text-right">Monthly quota</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {rows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-muted-foreground py-10 text-center">
+                    <TableCell colSpan={8} className="text-muted-foreground py-10 text-center">
                       No users yet.
                     </TableCell>
                   </TableRow>
@@ -270,6 +290,21 @@ function AdminPage() {
                       <TableCell className="text-right tabular-nums">{r.replies}</TableCell>
                       <TableCell className="text-right tabular-nums">
                         ${r.revenue.toFixed(2)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Input
+                          type="number"
+                          min={0}
+                          max={100000}
+                          className="ml-auto h-8 w-24 text-right tabular-nums"
+                          defaultValue={r.monthly_lead_quota}
+                          onBlur={(e) => {
+                            const next = Number(e.target.value);
+                            if (!Number.isFinite(next) || next < 0 || next === r.monthly_lead_quota)
+                              return;
+                            quotaMutation.mutate({ id: r.id, quota: Math.round(next) });
+                          }}
+                        />
                       </TableCell>
                     </TableRow>
                   ))

@@ -1,7 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 
-import { authorizeAppUserOAuth, exchangeAppUserOAuthCode } from "@/integrations/lovable/appUserConnector";
+import {
+  authorizeAppUserOAuth,
+  exchangeAppUserOAuthCode,
+} from "@/integrations/lovable/appUserConnector";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   GATEWAY_BASE_URL,

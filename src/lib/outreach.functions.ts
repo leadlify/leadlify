@@ -57,7 +57,8 @@ export const generateLeadEmail = createServerFn({ method: "POST" })
           website: lead.website,
           location: [lead.city, lead.country].filter(Boolean).join(", "),
         },
-        website_audit: lead.analysis ?? "No audit has been run yet — keep claims general but relevant.",
+        website_audit:
+          lead.analysis ?? "No audit has been run yet — keep claims general but relevant.",
         sender: {
           name: settings?.sender_name ?? "",
           email: settings?.sender_email ?? "",
@@ -97,10 +98,10 @@ export const getGmailProfile = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     try {
       const { callUserGmail } = await import("@/server/appUserConnections.server");
-      const profile = (await callUserGmail(
-        context.userId,
-        "/gmail/v1/users/me/profile",
-      )) as { emailAddress?: string; messagesTotal?: number };
+      const profile = (await callUserGmail(context.userId, "/gmail/v1/users/me/profile")) as {
+        emailAddress?: string;
+        messagesTotal?: number;
+      };
       return {
         connected: true as const,
         email: profile.emailAddress ?? null,
@@ -139,7 +140,8 @@ export const sendLeadEmail = createServerFn({ method: "POST" })
       .select("id")
       .single();
 
-    if (logError || !log) throw new UpstreamError(500, "Could not record the email before sending.");
+    if (logError || !log)
+      throw new UpstreamError(500, "Could not record the email before sending.");
 
     const mime = [
       `To: ${data.to}`,

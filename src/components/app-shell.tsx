@@ -14,6 +14,7 @@ import {
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
+import { GmailStatus } from "@/components/gmail-status";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -143,6 +144,7 @@ export function AppShell({
             </div>
 
             <div className="flex items-center gap-2">
+              <GmailStatus className="hidden md:flex" />
               {actions}
               <ThemeToggle />
             </div>
