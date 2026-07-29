@@ -118,7 +118,7 @@ export const findLeads = createServerFn({ method: "POST" })
     }
 
     if (collected.length === 0) {
-      return { imported: 0, duplicates: 0, found: 0 };
+      return { imported: 0, duplicates: 0, found: 0, quotaRemaining: quota.remaining };
     }
 
     const seen = new Set<string>();
@@ -148,7 +148,7 @@ export const findLeads = createServerFn({ method: "POST" })
       }));
 
     if (rows.length === 0) {
-      return { imported: 0, duplicates: 0, found: collected.length };
+      return { imported: 0, duplicates: 0, found: collected.length, quotaRemaining: quota.remaining };
     }
 
 
