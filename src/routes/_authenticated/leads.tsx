@@ -123,9 +123,12 @@ function LeadsPage() {
 
   const remove = useMutation({
     mutationFn: async (ids: string[]) => {
-      const { error } = await supabase.from("leads").delete().in("id", ids);
+      const { data, error } = await supabase.from("leads").delete().in("id", ids).select("id");
       if (error) throw new Error(error.message);
-      return ids.length;
+      if (!data || data.length === 0) {
+        throw new Error("Those leads could not be deleted — refresh the page and try again.");
+      }
+      return data.length;
     },
     onSuccess: (count) => {
       setSelected([]);
@@ -134,6 +137,7 @@ function LeadsPage() {
     },
     onError: (error) => toast.error(errorMessage(error)),
   });
+
 
   const checkReplies = useMutation({
     mutationFn: () => sync(),
