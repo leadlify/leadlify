@@ -65,7 +65,6 @@ export const findLeads = createServerFn({ method: "POST" })
       .join(" ")
       .trim();
 
-
     const body: Record<string, unknown> = {
       textQuery,
       maxResultCount: Math.min(maxLeads, 20),
@@ -148,9 +147,13 @@ export const findLeads = createServerFn({ method: "POST" })
       }));
 
     if (rows.length === 0) {
-      return { imported: 0, duplicates: 0, found: collected.length, quotaRemaining: quota.remaining };
+      return {
+        imported: 0,
+        duplicates: 0,
+        found: collected.length,
+        quotaRemaining: quota.remaining,
+      };
     }
-
 
     const { data: inserted, error } = await supabase
       .from("leads")
@@ -165,7 +168,6 @@ export const findLeads = createServerFn({ method: "POST" })
       }
     }
 
-
     const imported = inserted?.length ?? 0;
     return {
       found: collected.length,
@@ -174,4 +176,3 @@ export const findLeads = createServerFn({ method: "POST" })
       quotaRemaining: Math.max(quota.remaining - imported, 0),
     };
   });
-

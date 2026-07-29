@@ -53,7 +53,9 @@ export function StatCard({
           )}
           {hint ? <p className="text-muted-foreground mt-1 truncate text-xs">{hint}</p> : null}
         </div>
-        <span className={cn("grid size-11 shrink-0 place-items-center rounded-xl", toneClasses[tone])}>
+        <span
+          className={cn("grid size-11 shrink-0 place-items-center rounded-xl", toneClasses[tone])}
+        >
           <Icon className="size-5" />
         </span>
       </CardContent>

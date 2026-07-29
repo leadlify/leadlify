@@ -14,7 +14,6 @@ import { supabase } from "@/integrations/supabase/client";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
-
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -96,9 +95,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "LeadForge — AI Lead Generation & Cold Email CRM" },
-      { name: "twitter:description", content: "Find local businesses, audit their websites with AI, and send personalised cold emails from Gmail." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/71de0dc0-c45a-4564-8ebd-84b65465aefa" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/71de0dc0-c45a-4564-8ebd-84b65465aefa" },
+      {
+        name: "twitter:description",
+        content:
+          "Find local businesses, audit their websites with AI, and send personalised cold emails from Gmail.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/71de0dc0-c45a-4564-8ebd-84b65465aefa",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/71de0dc0-c45a-4564-8ebd-84b65465aefa",
+      },
     ],
     links: [
       {
@@ -154,4 +165,3 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
-

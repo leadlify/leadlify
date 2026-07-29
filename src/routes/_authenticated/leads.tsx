@@ -138,7 +138,6 @@ function LeadsPage() {
     onError: (error) => toast.error(errorMessage(error)),
   });
 
-
   const checkReplies = useMutation({
     mutationFn: () => sync(),
     onSuccess: (result) => {

@@ -1,13 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  CheckCircle2,
-  Clock,
-  Mail,
-  MessageSquareReply,
-  TrendingUp,
-  Users,
-} from "lucide-react";
+import { CheckCircle2, Clock, Mail, MessageSquareReply, TrendingUp, Users } from "lucide-react";
 import {
   Area,
   AreaChart,
@@ -102,7 +95,13 @@ function DashboardPage() {
       }
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <StatCard label="Total leads" value={rows.length} icon={Users} loading={loading} delay={0} />
+        <StatCard
+          label="Total leads"
+          value={rows.length}
+          icon={Users}
+          loading={loading}
+          delay={0}
+        />
         <StatCard
           label="Emails sent"
           value={sent.length}
@@ -162,7 +161,11 @@ function DashboardPage() {
                       <stop offset="100%" stopColor="var(--color-chart-3)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="var(--color-border)"
+                    vertical={false}
+                  />
                   <XAxis
                     dataKey="label"
                     tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }}
@@ -295,9 +298,7 @@ function DashboardPage() {
             {loading ? (
               Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)
             ) : (emails.data ?? []).length === 0 ? (
-              <p className="text-muted-foreground py-6 text-center text-sm">
-                No emails sent yet.
-              </p>
+              <p className="text-muted-foreground py-6 text-center text-sm">No emails sent yet.</p>
             ) : (
               (emails.data ?? []).slice(0, 5).map((email) => (
                 <div

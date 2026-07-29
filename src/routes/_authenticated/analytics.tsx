@@ -142,7 +142,11 @@ function AnalyticsPage() {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={niches} layout="vertical" margin={{ left: 24, right: 12 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="var(--color-border)"
+                    horizontal={false}
+                  />
                   <XAxis
                     type="number"
                     allowDecimals={false}
@@ -185,7 +189,11 @@ function AnalyticsPage() {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={buckets} margin={{ left: -18, right: 12 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="var(--color-border)"
+                    vertical={false}
+                  />
                   <XAxis
                     dataKey="name"
                     tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }}
@@ -199,7 +207,12 @@ function AnalyticsPage() {
                     tickLine={false}
                   />
                   <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--color-muted)" }} />
-                  <Bar dataKey="count" name="Sites" radius={[6, 6, 0, 0]} fill="var(--color-chart-3)" />
+                  <Bar
+                    dataKey="count"
+                    name="Sites"
+                    radius={[6, 6, 0, 0]}
+                    fill="var(--color-chart-3)"
+                  />
                 </BarChart>
               </ResponsiveContainer>
             )}

@@ -194,8 +194,8 @@ function Landing() {
               AI lead generation + cold email CRM
             </span>
             <h1 className="text-foreground mt-6 text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
-              Find the businesses with{" "}
-              <span className="text-primary">no website</span> — and win them as clients
+              Find the businesses with <span className="text-primary">no website</span> — and win
+              them as clients
             </h1>
             <p className="text-muted-foreground mx-auto mt-5 max-w-xl text-base text-pretty sm:text-lg">
               LeadForge pulls up to 50 local businesses per search, grades their web presence with

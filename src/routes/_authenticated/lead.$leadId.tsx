@@ -200,8 +200,16 @@ function LeadDetailPage() {
                 icon={MapPin}
                 value={[record.address, record.city, record.country].filter(Boolean).join(", ")}
               />
-              <Detail icon={Phone} value={record.phone} href={record.phone ? `tel:${record.phone}` : undefined} />
-              <Detail icon={Mail} value={record.email} href={record.email ? `mailto:${record.email}` : undefined} />
+              <Detail
+                icon={Phone}
+                value={record.phone}
+                href={record.phone ? `tel:${record.phone}` : undefined}
+              />
+              <Detail
+                icon={Mail}
+                value={record.email}
+                href={record.email ? `mailto:${record.email}` : undefined}
+              />
               <Detail
                 icon={Globe}
                 value={record.website?.replace(/^https?:\/\//, "")}
@@ -333,7 +341,11 @@ function LeadDetailPage() {
 
                     <div className="grid gap-5 sm:grid-cols-2">
                       <List title="Problems found" items={analysis.problems} tone="destructive" />
-                      <List title="Redesign opportunities" items={analysis.opportunities} tone="accent" />
+                      <List
+                        title="Redesign opportunities"
+                        items={analysis.opportunities}
+                        tone="accent"
+                      />
                     </div>
                   </div>
                 )}
@@ -432,7 +444,9 @@ function LeadDetailPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {emails.isLoading ? (
-                  Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-16 w-full" />
+                  ))
                 ) : (emails.data ?? []).length === 0 ? (
                   <p className="text-muted-foreground py-10 text-center text-sm">
                     No emails sent to this lead yet.

@@ -205,7 +205,6 @@ function FindLeadsPage() {
                 />
               </div>
 
-
               <Button type="submit" className="w-full sm:w-auto" disabled={mutation.isPending}>
                 {mutation.isPending ? (
                   <Loader2 className="size-4 animate-spin" />
@@ -219,51 +218,55 @@ function FindLeadsPage() {
         </Card>
 
         <div className="space-y-6">
-        <Card className="shadow-card border-border/60 h-fit">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Gauge className="text-primary size-4" />
-              Monthly lead quota
-            </CardTitle>
-            <CardDescription>
-              {quota.data
-                ? `${quota.data.used} of ${quota.data.quota} leads imported this month`
-                : "Loading your allowance…"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Progress
-              value={quota.data ? Math.min((quota.data.used / Math.max(quota.data.quota, 1)) * 100, 100) : 0}
-            />
-            <p className="text-muted-foreground text-xs">
-              {quota.data
-                ? `${quota.data.remaining} left · resets ${new Date(quota.data.resetsOn).toLocaleDateString()}`
-                : ""}
-            </p>
-          </CardContent>
-        </Card>
+          <Card className="shadow-card border-border/60 h-fit">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Gauge className="text-primary size-4" />
+                Monthly lead quota
+              </CardTitle>
+              <CardDescription>
+                {quota.data
+                  ? `${quota.data.used} of ${quota.data.quota} leads imported this month`
+                  : "Loading your allowance…"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Progress
+                value={
+                  quota.data
+                    ? Math.min((quota.data.used / Math.max(quota.data.quota, 1)) * 100, 100)
+                    : 0
+                }
+              />
+              <p className="text-muted-foreground text-xs">
+                {quota.data
+                  ? `${quota.data.remaining} left · resets ${new Date(quota.data.resetsOn).toLocaleDateString()}`
+                  : ""}
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card className="shadow-card border-border/60 h-fit">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Sparkles className="text-secondary size-4" />
-              Quick picks
-            </CardTitle>
-            <CardDescription>Common niches that usually have dated websites.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            {SUGGESTIONS.map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => setBusinessType(item)}
-                className="border-border bg-muted/50 hover:border-primary/40 hover:bg-primary/10 hover:text-primary rounded-full border px-3 py-1.5 text-xs font-medium transition-all"
-              >
-                {item}
-              </button>
-            ))}
-          </CardContent>
-        </Card>
+          <Card className="shadow-card border-border/60 h-fit">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Sparkles className="text-secondary size-4" />
+                Quick picks
+              </CardTitle>
+              <CardDescription>Common niches that usually have dated websites.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-2">
+              {SUGGESTIONS.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setBusinessType(item)}
+                  className="border-border bg-muted/50 hover:border-primary/40 hover:bg-primary/10 hover:text-primary rounded-full border px-3 py-1.5 text-xs font-medium transition-all"
+                >
+                  {item}
+                </button>
+              ))}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </AppShell>

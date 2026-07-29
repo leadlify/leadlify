@@ -218,7 +218,11 @@ function AdminPage() {
                     <stop offset="100%" stopColor="var(--color-secondary)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="var(--color-border)"
+                  vertical={false}
+                />
                 <XAxis dataKey="day" tickLine={false} axisLine={false} fontSize={11} />
                 <YAxis allowDecimals={false} tickLine={false} axisLine={false} fontSize={11} />
                 <Tooltip contentStyle={tooltipStyle} />

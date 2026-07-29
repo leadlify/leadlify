@@ -228,7 +228,11 @@ function AuthPage() {
 
           <Button type="submit" className="w-full" disabled={busy}>
             {busy ? <Loader2 className="size-4 animate-spin" /> : null}
-            {mode === "login" ? "Sign in" : mode === "signup" ? "Create account" : "Send reset link"}
+            {mode === "login"
+              ? "Sign in"
+              : mode === "signup"
+                ? "Create account"
+                : "Send reset link"}
           </Button>
 
           <div className="flex flex-col items-center gap-2 pt-1">

@@ -1,10 +1,7 @@
 /**
  * Per-user Gmail connection storage + gateway calls. Server-only.
  */
-import {
-  callAsAppUser,
-  disconnectAppUser,
-} from "@/integrations/lovable/appUserConnector";
+import { callAsAppUser, disconnectAppUser } from "@/integrations/lovable/appUserConnector";
 import { decryptConnectionKey, encryptConnectionKey } from "@/server/connectionKeyCrypto";
 
 export const GATEWAY_BASE_URL = "https://connector-gateway.lovable.dev";
