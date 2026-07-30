@@ -147,6 +147,11 @@ export const sendLeadEmail = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
+    // Every outbound email carries the WhatsApp contact number.
+    const bodyText = data.body.includes(WHATSAPP_NUMBER)
+      ? data.body
+      : `${data.body}\n\nWhatsApp: ${WHATSAPP_NUMBER}`;
+
     const { data: log, error: logError } = await supabase
       .from("email_history")
       .insert({
@@ -154,7 +159,7 @@ export const sendLeadEmail = createServerFn({ method: "POST" })
         lead_id: data.leadId,
         to_email: data.to,
         subject: data.subject,
-        body: data.body,
+        body: bodyText,
         sent_status: "pending",
       })
       .select("id")
@@ -169,7 +174,7 @@ export const sendLeadEmail = createServerFn({ method: "POST" })
       "MIME-Version: 1.0",
       'Content-Type: text/plain; charset="UTF-8"',
       "",
-      data.body,
+      bodyText,
     ].join("\r\n");
 
     try {
