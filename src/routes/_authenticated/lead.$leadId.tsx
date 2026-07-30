@@ -89,10 +89,21 @@ function LeadDetailPage() {
 
   const lead = useQuery(leadQuery(leadId));
   const emails = useQuery(leadEmailsQuery(leadId));
+  const demoSite = useQuery(demoSiteQuery(leadId));
 
   const analyze = useServerFn(analyzeLeadWebsite);
   const generate = useServerFn(generateLeadEmail);
   const send = useServerFn(sendLeadEmail);
+  const buildWebsite = useServerFn(generateDemoWebsite);
+
+  const runWebsite = useMutation({
+    mutationFn: () => buildWebsite({ data: { leadId } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["demo-site", leadId] });
+      toast.success("Demo website ready — the link will be added to the email");
+    },
+    onError: (error) => toast.error(errorMessage(error, "Could not build the demo website.")),
+  });
 
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
