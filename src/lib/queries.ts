@@ -140,3 +140,19 @@ export const allEmailsQuery = queryOptions({
     return data ?? [];
   },
 });
+
+export type DemoSite = Tables<"demo_sites">;
+
+export const demoSiteQuery = (leadId: string) =>
+  queryOptions({
+    queryKey: ["demo-site", leadId],
+    queryFn: async (): Promise<Pick<DemoSite, "id" | "slug" | "updated_at"> | null> => {
+      const { data, error } = await supabase
+        .from("demo_sites")
+        .select("id,slug,updated_at")
+        .eq("lead_id", leadId)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      return data;
+    },
+  });
