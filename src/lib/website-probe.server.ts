@@ -115,3 +115,59 @@ export async function probeWebsite(rawUrl: string): Promise<SiteProbe> {
 
   return base;
 }
+
+const BAD_EMAIL = /\.(png|jpe?g|gif|webp|svg|css|js)$/i;
+const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.-]{2,}/g;
+
+function pickEmail(html: string): string | null {
+  const text = html.replace(/mailto:/gi, "");
+  const matches = text.match(EMAIL_RE) ?? [];
+  const clean = matches
+    .map((m) => m.trim().replace(/[.,;:)]+$/, ""))
+    .filter((m) => !BAD_EMAIL.test(m))
+    .filter((m) => !/(sentry|example|wixpress|godaddy|@2x|domain\.com)/i.test(m));
+  // Prefer role addresses that businesses actually read.
+  const preferred = clean.find((m) => /^(info|contact|hello|sales|admin|office|enquir)/i.test(m));
+  return preferred ?? clean[0] ?? null;
+}
+
+async function fetchHtml(url: string, timeoutMs = 8000): Promise<string | null> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const res = await fetch(url, {
+      redirect: "follow",
+      signal: controller.signal,
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; LeadAuditBot/1.0)" },
+    });
+    clearTimeout(timer);
+    if (!res.ok) return null;
+    return (await res.text()).slice(0, 300_000);
+  } catch {
+    return null;
+  }
+}
+
+/** Best-effort discovery of a public contact email from a business website. */
+export async function discoverEmail(rawUrl: string): Promise<string | null> {
+  let base: URL;
+  try {
+    base = new URL(rawUrl.startsWith("http") ? rawUrl : `https://${rawUrl}`);
+  } catch {
+    return null;
+  }
+
+  const home = await fetchHtml(base.toString());
+  if (home) {
+    const found = pickEmail(home);
+    if (found) return found;
+  }
+
+  for (const path of ["/contact", "/contact-us", "/about"]) {
+    const html = await fetchHtml(new URL(path, base).toString(), 6000);
+    if (!html) continue;
+    const found = pickEmail(html);
+    if (found) return found;
+  }
+  return null;
+}
