@@ -121,7 +121,7 @@ export const findLeads = createServerFn({ method: "POST" })
     }
 
     const seen = new Set<string>();
-    const rows = collected
+    const selected = collected
       .filter((place) => (data.onlyWithoutWebsite ? !place.websiteUri : true))
       .filter((place) => {
         const key = place.id ?? "";
@@ -130,21 +130,43 @@ export const findLeads = createServerFn({ method: "POST" })
         seen.add(key);
         return true;
       })
-      .slice(0, maxLeads)
-      .map((place) => ({
-        user_id: userId,
-        place_id: place.id ?? null,
-        business_name: place.displayName?.text ?? "Unknown business",
-        business_category: place.primaryTypeDisplayName?.text ?? data.businessType,
-        website: place.websiteUri ?? null,
-        phone: place.nationalPhoneNumber ?? place.internationalPhoneNumber ?? null,
-        address: place.formattedAddress ?? null,
-        city: data.city || null,
-        country: data.country || null,
-        google_rating: place.rating ?? null,
-        review_count: place.userRatingCount ?? 0,
-        website_status: place.websiteUri ? "unchecked" : "missing",
-      }));
+      .slice(0, maxLeads);
+
+    // Best-effort: scrape a public contact email from each business website (batched).
+    const { discoverEmail } = await import("@/lib/website-probe.server");
+    const emails = new Map<string, string>();
+    const withSites = selected.filter((p) => p.websiteUri).slice(0, 30);
+    for (let i = 0; i < withSites.length; i += 6) {
+      const batch = withSites.slice(i, i + 6);
+      const results = await Promise.all(
+        batch.map(async (place) => {
+          try {
+            return [place.id ?? "", await discoverEmail(place.websiteUri!)] as const;
+          } catch {
+            return [place.id ?? "", null] as const;
+          }
+        }),
+      );
+      results.forEach(([id, email]) => {
+        if (id && email) emails.set(id, email);
+      });
+    }
+
+    const rows = selected.map((place) => ({
+      user_id: userId,
+      place_id: place.id ?? null,
+      business_name: place.displayName?.text ?? "Unknown business",
+      business_category: place.primaryTypeDisplayName?.text ?? data.businessType,
+      website: place.websiteUri ?? null,
+      email: (place.id ? emails.get(place.id) : null) ?? null,
+      phone: place.nationalPhoneNumber ?? place.internationalPhoneNumber ?? null,
+      address: place.formattedAddress ?? null,
+      city: data.city || null,
+      country: data.country || null,
+      google_rating: place.rating ?? null,
+      review_count: place.userRatingCount ?? 0,
+      website_status: place.websiteUri ? "unchecked" : "missing",
+    }));
 
     if (rows.length === 0) {
       return {

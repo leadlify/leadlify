@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { callAI, parseAIJson, UpstreamError } from "@/lib/ai.server";
@@ -15,12 +16,17 @@ const SendInput = z.object({
   body: z.string().trim().min(1, "Email body is required.").max(20000),
 });
 
+const WHATSAPP_NUMBER = "03701480852";
+
 const EMAIL_SYSTEM = `You write short, high-converting cold outreach emails offering web design services.
 Rules: sound human and specific, never use hype or filler, no emojis, no "I hope this email finds you well".
 Reference the business by name, name 2-3 concrete problems found on their current site, state the business
 benefit of fixing them, and close with one low-friction call to action (a short reply or a 15-minute call).
-Keep the body under 160 words. Respond with ONLY JSON: {"subject": "...", "body": "..."}
-The body must be plain text with real line breaks, and must end with the sender's sign-off.`;
+If a demo_website_url is provided, mention that you already built a free demo site for them and include the
+full URL on its own line. Always end with a contact line containing the WhatsApp number exactly as given.
+Keep the body under 180 words. Respond with ONLY JSON: {"subject": "...", "body": "..."}
+The body must be plain text with real line breaks, and must end with the sender's sign-off followed by the
+WhatsApp line.`;
 
 /** Generates a personalised cold email for a lead using the stored website audit. */
 export const generateLeadEmail = createServerFn({ method: "POST" })
@@ -29,7 +35,7 @@ export const generateLeadEmail = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
-    const [{ data: lead, error }, { data: settings }] = await Promise.all([
+    const [{ data: lead, error }, { data: settings }, { data: demo }] = await Promise.all([
       supabase
         .from("leads")
         .select("business_name, owner_name, business_category, website, city, country, analysis")
@@ -40,10 +46,14 @@ export const generateLeadEmail = createServerFn({ method: "POST" })
         .select("sender_name, sender_email, signature, email_tone, service_description")
         .eq("user_id", userId)
         .maybeSingle(),
+      supabase.from("demo_sites").select("slug").eq("lead_id", data.leadId).maybeSingle(),
     ]);
 
     if (error) throw new UpstreamError(500, "Could not load that lead.");
     if (!lead) throw new UpstreamError(404, "Lead not found.");
+
+    const origin = new URL(getRequest().url).origin;
+    const demoUrl = demo?.slug ? `${origin}/site/${demo.slug}` : null;
 
     const raw = await callAI({
       system: EMAIL_SYSTEM,
@@ -59,6 +69,8 @@ export const generateLeadEmail = createServerFn({ method: "POST" })
         },
         website_audit:
           lead.analysis ?? "No audit has been run yet — keep claims general but relevant.",
+        demo_website_url: demoUrl,
+        whatsapp_number: WHATSAPP_NUMBER,
         sender: {
           name: settings?.sender_name ?? "",
           email: settings?.sender_email ?? "",
@@ -73,6 +85,14 @@ export const generateLeadEmail = createServerFn({ method: "POST" })
     const email = parseAIJson<{ subject: string; body: string }>(raw);
     if (!email.subject || !email.body) {
       throw new UpstreamError(502, "The AI did not return a usable email. Try regenerating.");
+    }
+
+    // Guarantee the demo link and WhatsApp number are always present.
+    if (demoUrl && !email.body.includes(demoUrl)) {
+      email.body += `\n\nI already built a free demo site for you: ${demoUrl}`;
+    }
+    if (!email.body.includes(WHATSAPP_NUMBER)) {
+      email.body += `\n\nWhatsApp: ${WHATSAPP_NUMBER}`;
     }
 
     await supabase
@@ -127,6 +147,11 @@ export const sendLeadEmail = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
+    // Every outbound email carries the WhatsApp contact number.
+    const bodyText = data.body.includes(WHATSAPP_NUMBER)
+      ? data.body
+      : `${data.body}\n\nWhatsApp: ${WHATSAPP_NUMBER}`;
+
     const { data: log, error: logError } = await supabase
       .from("email_history")
       .insert({
@@ -134,7 +159,7 @@ export const sendLeadEmail = createServerFn({ method: "POST" })
         lead_id: data.leadId,
         to_email: data.to,
         subject: data.subject,
-        body: data.body,
+        body: bodyText,
         sent_status: "pending",
       })
       .select("id")
@@ -149,7 +174,7 @@ export const sendLeadEmail = createServerFn({ method: "POST" })
       "MIME-Version: 1.0",
       'Content-Type: text/plain; charset="UTF-8"',
       "",
-      data.body,
+      bodyText,
     ].join("\r\n");
 
     try {

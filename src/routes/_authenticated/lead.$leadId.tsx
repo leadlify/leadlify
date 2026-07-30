@@ -6,6 +6,7 @@ import {
   Building2,
   Gauge,
   Globe,
+  LayoutTemplate,
   Loader2,
   Mail,
   MapPin,
@@ -44,7 +45,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { WebsiteAnalysis } from "@/lib/analysis.functions";
 import { analyzeLeadWebsite } from "@/lib/analysis.functions";
 import { generateLeadEmail, sendLeadEmail } from "@/lib/outreach.functions";
-import { errorMessage, leadEmailsQuery, leadQuery } from "@/lib/queries";
+import { demoSiteQuery, errorMessage, leadEmailsQuery, leadQuery } from "@/lib/queries";
+import { generateDemoWebsite } from "@/lib/website-builder.functions";
 
 export const Route = createFileRoute("/_authenticated/lead/$leadId")({
   head: () => ({
@@ -87,10 +89,21 @@ function LeadDetailPage() {
 
   const lead = useQuery(leadQuery(leadId));
   const emails = useQuery(leadEmailsQuery(leadId));
+  const demoSite = useQuery(demoSiteQuery(leadId));
 
   const analyze = useServerFn(analyzeLeadWebsite);
   const generate = useServerFn(generateLeadEmail);
   const send = useServerFn(sendLeadEmail);
+  const buildWebsite = useServerFn(generateDemoWebsite);
+
+  const runWebsite = useMutation({
+    mutationFn: () => buildWebsite({ data: { leadId } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["demo-site", leadId] });
+      toast.success("Demo website ready — the link will be added to the email");
+    },
+    onError: (error) => toast.error(errorMessage(error, "Could not build the demo website.")),
+  });
 
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
@@ -354,6 +367,56 @@ function LeadDetailPage() {
           </TabsContent>
 
           <TabsContent value="email" className="mt-4">
+            <Card className="shadow-card border-border/60 mb-4">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <LayoutTemplate className="text-primary size-4" />
+                  Demo website
+                </CardTitle>
+                <CardDescription>
+                  Builds a professional demo site from this business&apos;s details. The link is
+                  added automatically to the cold email.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {demoSite.data ? (
+                  <div className="bg-muted/40 flex flex-wrap items-center justify-between gap-3 rounded-lg p-3">
+                    <a
+                      href={`/site/${demoSite.data.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary truncate text-sm font-medium underline-offset-4 hover:underline"
+                    >
+                      /site/{demoSite.data.slug}
+                    </a>
+                    <span className="text-muted-foreground text-xs">
+                      Updated {new Date(demoSite.data.updated_at).toLocaleString()}
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-sm">
+                    No demo website generated for this lead yet.
+                  </p>
+                )}
+                <Button
+                  variant="outline"
+                  onClick={() => runWebsite.mutate()}
+                  disabled={runWebsite.isPending}
+                >
+                  {runWebsite.isPending ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <LayoutTemplate className="size-4" />
+                  )}
+                  {runWebsite.isPending
+                    ? "Building website…"
+                    : demoSite.data
+                      ? "Regenerate website"
+                      : "Generate website"}
+                </Button>
+              </CardContent>
+            </Card>
+
             <Card className="shadow-card border-border/60">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
@@ -362,6 +425,7 @@ function LeadDetailPage() {
                 </CardTitle>
                 <CardDescription>
                   Generated from the audit above and your settings. Always review before sending.
+                  Every email includes your WhatsApp number 03701480852.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
