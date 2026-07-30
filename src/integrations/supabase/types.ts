@@ -44,6 +44,47 @@ export type Database = {
         }
         Relationships: []
       }
+      demo_sites: {
+        Row: {
+          business_name: string
+          created_at: string
+          html: string
+          id: string
+          lead_id: string | null
+          slug: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          business_name: string
+          created_at?: string
+          html: string
+          id?: string
+          lead_id?: string | null
+          slug: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          business_name?: string
+          created_at?: string
+          html?: string
+          id?: string
+          lead_id?: string | null
+          slug?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_sites_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_history: {
         Row: {
           body: string
