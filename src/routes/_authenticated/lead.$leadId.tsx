@@ -6,6 +6,7 @@ import {
   Building2,
   Gauge,
   Globe,
+  LayoutTemplate,
   Loader2,
   Mail,
   MapPin,
@@ -44,7 +45,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { WebsiteAnalysis } from "@/lib/analysis.functions";
 import { analyzeLeadWebsite } from "@/lib/analysis.functions";
 import { generateLeadEmail, sendLeadEmail } from "@/lib/outreach.functions";
-import { errorMessage, leadEmailsQuery, leadQuery } from "@/lib/queries";
+import { demoSiteQuery, errorMessage, leadEmailsQuery, leadQuery } from "@/lib/queries";
+import { generateDemoWebsite } from "@/lib/website-builder.functions";
 
 export const Route = createFileRoute("/_authenticated/lead/$leadId")({
   head: () => ({
