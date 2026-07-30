@@ -15,12 +15,17 @@ const SendInput = z.object({
   body: z.string().trim().min(1, "Email body is required.").max(20000),
 });
 
+const WHATSAPP_NUMBER = "03701480852";
+
 const EMAIL_SYSTEM = `You write short, high-converting cold outreach emails offering web design services.
 Rules: sound human and specific, never use hype or filler, no emojis, no "I hope this email finds you well".
 Reference the business by name, name 2-3 concrete problems found on their current site, state the business
 benefit of fixing them, and close with one low-friction call to action (a short reply or a 15-minute call).
-Keep the body under 160 words. Respond with ONLY JSON: {"subject": "...", "body": "..."}
-The body must be plain text with real line breaks, and must end with the sender's sign-off.`;
+If a demo_website_url is provided, mention that you already built a free demo site for them and include the
+full URL on its own line. Always end with a contact line containing the WhatsApp number exactly as given.
+Keep the body under 180 words. Respond with ONLY JSON: {"subject": "...", "body": "..."}
+The body must be plain text with real line breaks, and must end with the sender's sign-off followed by the
+WhatsApp line.`;
 
 /** Generates a personalised cold email for a lead using the stored website audit. */
 export const generateLeadEmail = createServerFn({ method: "POST" })
