@@ -34,7 +34,7 @@ export const generateLeadEmail = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
-    const [{ data: lead, error }, { data: settings }] = await Promise.all([
+    const [{ data: lead, error }, { data: settings }, { data: demo }] = await Promise.all([
       supabase
         .from("leads")
         .select("business_name, owner_name, business_category, website, city, country, analysis")
@@ -45,10 +45,14 @@ export const generateLeadEmail = createServerFn({ method: "POST" })
         .select("sender_name, sender_email, signature, email_tone, service_description")
         .eq("user_id", userId)
         .maybeSingle(),
+      supabase.from("demo_sites").select("slug").eq("lead_id", data.leadId).maybeSingle(),
     ]);
 
     if (error) throw new UpstreamError(500, "Could not load that lead.");
     if (!lead) throw new UpstreamError(404, "Lead not found.");
+
+    const origin = new URL(getRequest().url).origin;
+    const demoUrl = demo?.slug ? `${origin}/site/${demo.slug}` : null;
 
     const raw = await callAI({
       system: EMAIL_SYSTEM,
@@ -64,6 +68,8 @@ export const generateLeadEmail = createServerFn({ method: "POST" })
         },
         website_audit:
           lead.analysis ?? "No audit has been run yet — keep claims general but relevant.",
+        demo_website_url: demoUrl,
+        whatsapp_number: WHATSAPP_NUMBER,
         sender: {
           name: settings?.sender_name ?? "",
           email: settings?.sender_email ?? "",
@@ -78,6 +84,14 @@ export const generateLeadEmail = createServerFn({ method: "POST" })
     const email = parseAIJson<{ subject: string; body: string }>(raw);
     if (!email.subject || !email.body) {
       throw new UpstreamError(502, "The AI did not return a usable email. Try regenerating.");
+    }
+
+    // Guarantee the demo link and WhatsApp number are always present.
+    if (demoUrl && !email.body.includes(demoUrl)) {
+      email.body += `\n\nI already built a free demo site for you: ${demoUrl}`;
+    }
+    if (!email.body.includes(WHATSAPP_NUMBER)) {
+      email.body += `\n\nWhatsApp: ${WHATSAPP_NUMBER}`;
     }
 
     await supabase
