@@ -120,19 +120,19 @@ function SettingsPage() {
         const completion = waitForOAuthCompletion(popup, "google_mail");
         popup.location.href = authorizationUrl;
         await completion;
+        const result = await queryClient.fetchQuery({
+          queryKey: ["gmail-profile"],
+          queryFn: () => profileFn({}),
+        });
+        if (!result.connected) {
+          throw new Error(result.reason || "Google consent finished, but Gmail could not be verified.");
+        }
       } catch (error) {
         popup.close();
         throw error;
       }
     },
-    onSuccess: async () => {
-      const result = await queryClient.fetchQuery({
-        queryKey: ["gmail-profile"],
-        queryFn: () => profileFn({}),
-      });
-      if (!result.connected) {
-        throw new Error(result.reason || "Google consent finished, but Gmail could not be verified.");
-      }
+    onSuccess: () => {
       setOauthError(null);
       toast.success("Gmail connected — your emails will now send from your own account.");
     },
