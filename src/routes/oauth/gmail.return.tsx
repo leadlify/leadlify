@@ -26,11 +26,13 @@ function GmailOAuthReturn() {
       type: "appUserConnectorOAuthComplete" | "appUserConnectorOAuthFailed",
       error?: string,
     ) => {
-      window.opener?.postMessage(
-        { type, connectorId: "google_mail", ...(error ? { error } : {}) },
-        window.location.origin,
-      );
-      window.close();
+      if (window.opener) {
+        window.opener.postMessage(
+          { type, connectorId: "google_mail", ...(error ? { error } : {}) },
+          window.location.origin,
+        );
+        window.close();
+      }
     };
 
     if (params.get("success") !== "true") {
@@ -61,8 +63,11 @@ function GmailOAuthReturn() {
   }, []);
 
   return (
-    <main className="bg-background text-muted-foreground grid min-h-screen place-items-center p-6 text-sm">
-      <p>{message}</p>
+    <main className="bg-background grid min-h-screen place-items-center p-6 text-center">
+      <div className="max-w-md space-y-2">
+        <p className="text-foreground text-sm font-medium">Gmail authorisation</p>
+        <p className="text-muted-foreground text-sm leading-relaxed">{message}</p>
+      </div>
     </main>
   );
 }
