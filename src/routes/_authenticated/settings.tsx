@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { CheckCircle2, Loader2, Mail, Save, XCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Loader2, Mail, RefreshCw, Save, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/app-shell";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -43,6 +44,28 @@ export const Route = createFileRoute("/_authenticated/settings")({
 
 const TONES = ["professional", "friendly", "direct", "consultative"] as const;
 
+function oauthErrorMessage(error: unknown) {
+  const fallback = "Google could not authorise this Gmail account.";
+  const raw = errorMessage(error, fallback);
+  const jsonStart = raw.indexOf("{");
+  if (jsonStart >= 0) {
+    try {
+      const payload = JSON.parse(raw.slice(jsonStart)) as {
+        error?: string | { message?: string; description?: string };
+        message?: string;
+        error_description?: string;
+      };
+      if (typeof payload.error === "object") {
+        return payload.error.message ?? payload.error.description ?? raw;
+      }
+      return payload.error_description ?? payload.message ?? payload.error ?? raw;
+    } catch {
+      return raw;
+    }
+  }
+  return raw;
+}
+
 function SettingsPage() {
   const queryClient = useQueryClient();
   const settings = useQuery(settingsQuery);
@@ -50,6 +73,7 @@ function SettingsPage() {
   const startConnect = useServerFn(startGmailConnect);
   const disconnectFn = useServerFn(disconnectGmail);
   const gmail = useQuery({ queryKey: ["gmail-profile"], queryFn: () => profileFn({}) });
+  const [oauthError, setOauthError] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     sender_name: "",
@@ -89,6 +113,7 @@ function SettingsPage() {
 
   const connect = useMutation({
     mutationFn: async () => {
+      setOauthError(null);
       const popup = openConnectorPopup();
       try {
         const { authorizationUrl } = await startConnect({});
@@ -100,11 +125,22 @@ function SettingsPage() {
         throw error;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["gmail-profile"] });
+    onSuccess: async () => {
+      const result = await queryClient.fetchQuery({
+        queryKey: ["gmail-profile"],
+        queryFn: () => profileFn({}),
+      });
+      if (!result.connected) {
+        throw new Error(result.reason || "Google consent finished, but Gmail could not be verified.");
+      }
+      setOauthError(null);
       toast.success("Gmail connected — your emails will now send from your own account.");
     },
-    onError: (error) => toast.error(errorMessage(error, "Could not connect Gmail.")),
+    onError: (error) => {
+      const message = oauthErrorMessage(error);
+      setOauthError(message);
+      toast.error("Gmail authorisation failed", { description: message });
+    },
   });
 
   const disconnect = useMutation({
@@ -151,18 +187,44 @@ function SettingsPage() {
                     Connect your own Gmail so outreach is sent from your address and replies come
                     back to your inbox.
                   </p>
+                  {gmail.data?.reason ? (
+                    <p className="text-warning mt-1 text-xs">{gmail.data.reason}</p>
+                  ) : null}
                 </div>
               </div>
             )}
+
+            {oauthError ? (
+              <Alert variant="destructive">
+                <AlertTriangle className="size-4" />
+                <AlertTitle>Google authorisation failed</AlertTitle>
+                <AlertDescription className="space-y-2">
+                  <p className="break-words">{oauthError}</p>
+                  <p>
+                    Retry below and approve every requested Gmail permission. If Google reports a
+                    redirect mismatch, add the connector gateway callback URL to your Google OAuth
+                    client.
+                  </p>
+                </AlertDescription>
+              </Alert>
+            ) : null}
 
             <div className="flex flex-wrap gap-2">
               <Button onClick={() => connect.mutate()} disabled={connect.isPending}>
                 {connect.isPending ? (
                   <Loader2 className="size-4 animate-spin" />
+                ) : gmail.data?.connected ? (
+                  <RefreshCw className="size-4" />
                 ) : (
                   <Mail className="size-4" />
                 )}
-                {gmail.data?.connected ? "Reconnect Gmail" : "Connect Gmail"}
+                {connect.isPending
+                  ? "Waiting for Google…"
+                  : gmail.data?.connected
+                    ? "Re-authorise Gmail"
+                    : oauthError
+                      ? "Retry Gmail connection"
+                      : "Connect Gmail"}
               </Button>
               {gmail.data?.connected ? (
                 <Button

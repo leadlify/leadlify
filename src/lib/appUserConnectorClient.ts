@@ -10,10 +10,12 @@ export function waitForOAuthCompletion(popup: Window, connectorId: string) {
   return new Promise<void>((resolve, reject) => {
     // eslint-disable-next-line prefer-const
     let poll: number | undefined;
+    let timeout: number | undefined;
 
     const cleanup = () => {
       window.removeEventListener("message", onMessage);
       if (poll !== undefined) window.clearInterval(poll);
+      if (timeout !== undefined) window.clearTimeout(timeout);
     };
     const onMessage = (event: MessageEvent) => {
       const payload = event.data as { type?: string; connectorId?: string; error?: string };
@@ -40,5 +42,10 @@ export function waitForOAuthCompletion(popup: Window, connectorId: string) {
       cleanup();
       reject(new Error("The window was closed before the connection finished."));
     }, 500);
+    timeout = window.setTimeout(() => {
+      cleanup();
+      popup.close();
+      reject(new Error("Google did not finish authorisation within 5 minutes. Please try again."));
+    }, 300_000);
   });
 }
