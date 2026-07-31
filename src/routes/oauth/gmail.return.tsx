@@ -22,14 +22,21 @@ function GmailOAuthReturn() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const notify = (type: "appUserConnectorOAuthComplete" | "appUserConnectorOAuthFailed") => {
-      window.opener?.postMessage({ type, connectorId: "google_mail" }, window.location.origin);
+    const notify = (
+      type: "appUserConnectorOAuthComplete" | "appUserConnectorOAuthFailed",
+      error?: string,
+    ) => {
+      window.opener?.postMessage(
+        { type, connectorId: "google_mail", ...(error ? { error } : {}) },
+        window.location.origin,
+      );
       window.close();
     };
 
     if (params.get("success") !== "true") {
-      setMessage(params.get("error") ?? "Gmail authorisation did not complete.");
-      notify("appUserConnectorOAuthFailed");
+      const error = params.get("error_description") ?? params.get("error") ?? "Gmail authorisation did not complete.";
+      setMessage(error);
+      notify("appUserConnectorOAuthFailed", error);
       return;
     }
 
@@ -40,15 +47,16 @@ function GmailOAuthReturn() {
         return;
       }
       setMessage("Gmail authorisation completed without an exchange code.");
-      notify("appUserConnectorOAuthFailed");
+      notify("appUserConnectorOAuthFailed", "Gmail authorisation completed without an exchange code.");
       return;
     }
 
     void completeGmailConnect({ data: { code } })
       .then(() => notify("appUserConnectorOAuthComplete"))
-      .catch(() => {
-        setMessage("Could not finish the Gmail connection.");
-        notify("appUserConnectorOAuthFailed");
+      .catch((error: unknown) => {
+        const message = error instanceof Error ? error.message : "Could not finish the Gmail connection.";
+        setMessage(message);
+        notify("appUserConnectorOAuthFailed", message);
       });
   }, []);
 
