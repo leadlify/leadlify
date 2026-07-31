@@ -68,18 +68,24 @@ export const findLeads = createServerFn({ method: "POST" })
     const body: Record<string, unknown> = {
       textQuery,
       maxResultCount: Math.min(maxLeads, 20),
+      includePureServiceAreaBusinesses: true,
     };
 
-    // Bias results to the requested city radius when we can resolve coordinates.
-    if (locationParts) {
+    // Apply a radius only around a specific city. A country-only radius would
+    // incorrectly restrict international searches to the country's centroid.
+    if (data.city) {
       try {
         const geo = (await callGoogle({
           connector: "google_maps",
           path: `/maps/api/geocode/json?address=${encodeURIComponent(locationParts)}`,
         })) as {
-          results?: Array<{ geometry?: { location?: { lat: number; lng: number } } }>;
+          results?: Array<{
+            geometry?: { location?: { lat: number; lng: number } };
+            address_components?: Array<{ short_name?: string; types?: string[] }>;
+          }>;
         };
-        const loc = geo.results?.[0]?.geometry?.location;
+        const firstResult = geo.results?.[0];
+        const loc = firstResult?.geometry?.location;
         if (loc) {
           body.locationBias = {
             circle: {
@@ -88,6 +94,10 @@ export const findLeads = createServerFn({ method: "POST" })
             },
           };
         }
+        const countryCode = firstResult?.address_components?.find((part) =>
+          part.types?.includes("country"),
+        )?.short_name;
+        if (countryCode?.length === 2) body.regionCode = countryCode.toUpperCase();
       } catch (error) {
         console.warn("[find-leads] geocode fallback", error);
       }
@@ -141,7 +151,8 @@ export const findLeads = createServerFn({ method: "POST" })
       const results = await Promise.all(
         batch.map(async (place) => {
           try {
-            return [place.id ?? "", await discoverEmail(place.websiteUri!)] as const;
+            const website = place.websiteUri;
+            return [place.id ?? "", website ? await discoverEmail(website) : null] as const;
           } catch {
             return [place.id ?? "", null] as const;
           }

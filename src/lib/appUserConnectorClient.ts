@@ -16,11 +16,12 @@ export function waitForOAuthCompletion(popup: Window, connectorId: string) {
       if (poll !== undefined) window.clearInterval(poll);
     };
     const onMessage = (event: MessageEvent) => {
-      const type = (event.data as { type?: string; connectorId?: string })?.type;
+      const payload = event.data as { type?: string; connectorId?: string; error?: string };
+      const type = payload?.type;
       if (
         event.origin !== window.location.origin ||
         event.source !== popup ||
-        (event.data as { connectorId?: string })?.connectorId !== connectorId ||
+        payload?.connectorId !== connectorId ||
         (type !== "appUserConnectorOAuthComplete" && type !== "appUserConnectorOAuthFailed")
       ) {
         return;
@@ -31,7 +32,7 @@ export function waitForOAuthCompletion(popup: Window, connectorId: string) {
         return;
       }
       popup.close();
-      reject(new Error("Gmail connection failed."));
+      reject(new Error(payload.error || "Gmail connection failed."));
     };
     window.addEventListener("message", onMessage);
     poll = window.setInterval(() => {

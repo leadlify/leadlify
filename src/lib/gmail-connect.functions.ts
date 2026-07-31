@@ -32,15 +32,26 @@ export const startGmailConnect = createServerFn({ method: "POST" })
 
     const existing = await getConnectionKeyForUser(context.userId, GMAIL_CONNECTOR_ID);
 
-    const { authorizationUrl } = await authorizeAppUserOAuth({
-      gatewayBaseUrl: GATEWAY_BASE_URL,
-      connectorId: GMAIL_CONNECTOR_ID,
-      appUserId: context.userId,
-      clientAPIKey,
-      returnUrl,
-      connectionAPIKey: existing ?? undefined,
-      credentialsConfiguration: { scopes: GMAIL_SCOPES },
-    });
+    let authorizationUrl: string;
+    try {
+      ({ authorizationUrl } = await authorizeAppUserOAuth({
+        gatewayBaseUrl: GATEWAY_BASE_URL,
+        connectorId: GMAIL_CONNECTOR_ID,
+        appUserId: context.userId,
+        clientAPIKey,
+        returnUrl,
+        connectionAPIKey: existing ?? undefined,
+        credentialsConfiguration: {
+          scopes: GMAIL_SCOPES,
+          access_type: "offline",
+          prompt: "consent",
+        },
+      }));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Gmail OAuth could not start.";
+      console.error("[gmail-connect] OAuth start failed", message);
+      throw new Error(message);
+    }
 
     return { authorizationUrl };
   });
