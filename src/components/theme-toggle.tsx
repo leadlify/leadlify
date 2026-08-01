@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
-const STORAGE_KEY = "leadforge-theme";
+const STORAGE_KEY = "leadlify-theme";
 
 export function useTheme() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
