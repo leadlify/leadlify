@@ -26,6 +26,10 @@ function GmailOAuthReturn() {
       type: "appUserConnectorOAuthComplete" | "appUserConnectorOAuthFailed",
       error?: string,
     ) => {
+      localStorage.setItem(
+        "leadlify:gmail-oauth",
+        JSON.stringify({ type, connectorId: "google_mail", ...(error ? { error } : {}), at: Date.now() }),
+      );
       if (window.opener) {
         window.opener.postMessage(
           { type, connectorId: "google_mail", ...(error ? { error } : {}) },
@@ -33,6 +37,7 @@ function GmailOAuthReturn() {
         );
         window.close();
       }
+      setMessage(error ?? "Gmail connected. You can close this window and return to Leadlify.");
     };
 
     const oauthError = params.get("error_description") ?? params.get("error");

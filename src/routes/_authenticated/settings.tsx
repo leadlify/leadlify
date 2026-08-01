@@ -116,7 +116,13 @@ function SettingsPage() {
       setOauthError(null);
       const popup = openConnectorPopup();
       try {
-        const { authorizationUrl } = await startConnect({ data: { fresh: true } });
+        localStorage.removeItem("leadlify:gmail-oauth");
+        const { authorizationUrl } = await startConnect({
+          data: {
+            fresh: true,
+            returnUrl: `${window.location.origin}/oauth/gmail/return`,
+          },
+        });
         const completion = waitForOAuthCompletion(popup, "google_mail");
         popup.location.href = authorizationUrl;
         await completion;
