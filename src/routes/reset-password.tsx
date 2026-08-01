@@ -12,13 +12,13 @@ export const Route = createFileRoute("/reset-password")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Choose a new password — LeadForge" },
-      { name: "description", content: "Set a new password for your LeadForge workspace account." },
+      { title: "Choose a new password — Leadlify" },
+      { name: "description", content: "Set a new password for your Leadlify workspace account." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Choose a new password — LeadForge" },
+      { property: "og:title", content: "Choose a new password — Leadlify" },
       {
         property: "og:description",
-        content: "Set a new password for your LeadForge workspace account.",
+        content: "Set a new password for your Leadlify workspace account.",
       },
     ],
   }),

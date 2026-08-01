@@ -14,8 +14,24 @@ export function waitForOAuthCompletion(popup: Window, connectorId: string) {
 
     const cleanup = () => {
       window.removeEventListener("message", onMessage);
+      window.removeEventListener("storage", onStorage);
       if (poll !== undefined) window.clearInterval(poll);
       if (timeout !== undefined) window.clearTimeout(timeout);
+    };
+    const finish = (payload: { type?: string; connectorId?: string; error?: string }) => {
+      if (payload.connectorId !== connectorId) return;
+      if (payload.type !== "appUserConnectorOAuthComplete" && payload.type !== "appUserConnectorOAuthFailed") return;
+      cleanup();
+      if (payload.type === "appUserConnectorOAuthComplete") resolve();
+      else reject(new Error(payload.error || "Gmail connection failed."));
+    };
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== "leadlify:gmail-oauth" || !event.newValue) return;
+      try {
+        finish(JSON.parse(event.newValue) as { type?: string; connectorId?: string; error?: string });
+      } catch {
+        return;
+      }
     };
     const onMessage = (event: MessageEvent) => {
       const payload = event.data as { type?: string; connectorId?: string; error?: string };
@@ -28,15 +44,10 @@ export function waitForOAuthCompletion(popup: Window, connectorId: string) {
       ) {
         return;
       }
-      cleanup();
-      if (type === "appUserConnectorOAuthComplete") {
-        resolve();
-        return;
-      }
-      popup.close();
-      reject(new Error(payload.error || "Gmail connection failed."));
+      finish(payload);
     };
     window.addEventListener("message", onMessage);
+    window.addEventListener("storage", onStorage);
     poll = window.setInterval(() => {
       if (!popup.closed) return;
       cleanup();

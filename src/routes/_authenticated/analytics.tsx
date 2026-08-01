@@ -21,10 +21,10 @@ import { emailsQuery, leadsQuery } from "@/lib/queries";
 export const Route = createFileRoute("/_authenticated/analytics")({
   head: () => ({
     meta: [
-      { title: "Analytics — LeadForge" },
+      { title: "Analytics — Leadlify" },
       { name: "description", content: "Reply rates, top niches and website audit score spread." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Analytics — LeadForge" },
+      { property: "og:title", content: "Analytics — Leadlify" },
       {
         property: "og:description",
         content: "Reply rates, top niches and website audit score spread.",

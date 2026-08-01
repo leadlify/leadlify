@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
+import { z } from "zod";
 
 import {
   authorizeAppUserOAuth,
@@ -20,17 +20,26 @@ import {
 /** Starts the per-user Gmail OAuth consent and returns the provider URL for a popup. */
 export const startGmailConnect = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((input: unknown) =>
+    z.object({ fresh: z.boolean().optional(), returnUrl: z.string().url() }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
     const clientAPIKey = process.env.GOOGLE_MAIL_APP_USER_CONNECTOR_CLIENT_API_KEY;
     if (!clientAPIKey) {
       throw new Error("Gmail connector client is not configured for this project.");
     }
 
-    const request = getRequest();
-    if (!request) throw new Error("OAuth must start from an app request.");
-    const returnUrl = new URL("/oauth/gmail/return", request.url).toString();
+    const returnUrl = new URL(data.returnUrl);
+    if (returnUrl.pathname !== "/oauth/gmail/return") {
+      throw new Error("Invalid Gmail OAuth return URL.");
+    }
 
-    const existing = await getConnectionKeyForUser(context.userId, GMAIL_CONNECTOR_ID);
+    if (data.fresh) {
+      await removeConnectionForUser(context.userId, GMAIL_CONNECTOR_ID);
+    }
+    const existing = data.fresh
+      ? null
+      : await getConnectionKeyForUser(context.userId, GMAIL_CONNECTOR_ID);
 
     let authorizationUrl: string;
     try {
@@ -39,7 +48,7 @@ export const startGmailConnect = createServerFn({ method: "POST" })
         connectorId: GMAIL_CONNECTOR_ID,
         appUserId: context.userId,
         clientAPIKey,
-        returnUrl,
+        returnUrl: returnUrl.toString(),
         connectionAPIKey: existing ?? undefined,
         credentialsConfiguration: {
           scopes: GMAIL_SCOPES,

@@ -270,24 +270,33 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          monthly_email_quota: number
           monthly_lead_quota: number
+          plan: string
           updated_at: string
+          website_builder_enabled: boolean
         }
         Insert: {
           created_at?: string
           email?: string | null
           full_name?: string | null
           id: string
+          monthly_email_quota?: number
           monthly_lead_quota?: number
+          plan?: string
           updated_at?: string
+          website_builder_enabled?: boolean
         }
         Update: {
           created_at?: string
           email?: string | null
           full_name?: string | null
           id?: string
+          monthly_email_quota?: number
           monthly_lead_quota?: number
+          plan?: string
           updated_at?: string
+          website_builder_enabled?: boolean
         }
         Relationships: []
       }

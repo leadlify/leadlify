@@ -7,11 +7,11 @@ export const Route = createFileRoute("/oauth/gmail/return")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Connecting Gmail — LeadForge" },
-      { name: "description", content: "Finishing your Gmail connection for LeadForge." },
+      { title: "Connecting Gmail — Leadlify" },
+      { name: "description", content: "Finishing your Gmail connection for Leadlify." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Connecting Gmail — LeadForge" },
-      { property: "og:description", content: "Finishing your Gmail connection for LeadForge." },
+      { property: "og:title", content: "Connecting Gmail — Leadlify" },
+      { property: "og:description", content: "Finishing your Gmail connection for Leadlify." },
     ],
   }),
   component: GmailOAuthReturn,
@@ -26,6 +26,10 @@ function GmailOAuthReturn() {
       type: "appUserConnectorOAuthComplete" | "appUserConnectorOAuthFailed",
       error?: string,
     ) => {
+      localStorage.setItem(
+        "leadlify:gmail-oauth",
+        JSON.stringify({ type, connectorId: "google_mail", ...(error ? { error } : {}), at: Date.now() }),
+      );
       if (window.opener) {
         window.opener.postMessage(
           { type, connectorId: "google_mail", ...(error ? { error } : {}) },
@@ -33,10 +37,12 @@ function GmailOAuthReturn() {
         );
         window.close();
       }
+      setMessage(error ?? "Gmail connected. You can close this window and return to Leadlify.");
     };
 
-    if (params.get("success") !== "true") {
-      const error = params.get("error_description") ?? params.get("error") ?? "Gmail authorisation did not complete.";
+    const oauthError = params.get("error_description") ?? params.get("error");
+    if (oauthError) {
+      const error = oauthError;
       setMessage(error);
       notify("appUserConnectorOAuthFailed", error);
       return;
@@ -44,10 +50,6 @@ function GmailOAuthReturn() {
 
     const code = params.get("code");
     if (!code) {
-      if (params.get("offline_access_allowed") === "false") {
-        notify("appUserConnectorOAuthComplete");
-        return;
-      }
       setMessage("Gmail authorisation completed without an exchange code.");
       notify("appUserConnectorOAuthFailed", "Gmail authorisation completed without an exchange code.");
       return;

@@ -79,14 +79,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "LeadForge — AI Lead Generation & Cold Email CRM" },
+      { title: "Leadlify — AI Lead Generation & Cold Email CRM" },
       {
         name: "description",
         content:
           "Find local businesses, audit their websites with AI, and send personalised cold emails from Gmail.",
       },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "LeadForge — AI Lead Generation & Cold Email CRM" },
+      { property: "og:title", content: "Leadlify — AI Lead Generation & Cold Email CRM" },
       {
         property: "og:description",
         content:
@@ -94,7 +94,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "LeadForge — AI Lead Generation & Cold Email CRM" },
+      { name: "twitter:title", content: "Leadlify — AI Lead Generation & Cold Email CRM" },
       {
         name: "twitter:description",
         content:
@@ -132,7 +132,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <script
           // Applies the saved theme before paint so there is no light/dark flash.
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem("leadforge-theme");if(t==="dark"||(!t&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}`,
+            __html: `try{var t=localStorage.getItem("leadlify-theme")||localStorage.getItem("leadforge-theme");if(t==="dark"||(!t&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}`,
           }}
         />
       </head>

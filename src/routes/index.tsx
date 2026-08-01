@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Clock,
   Globe2,
+  Instagram,
   Mail,
   MapPin,
   Radar,
@@ -13,6 +14,7 @@ import {
   Sparkles,
   Star,
   Users,
+  MessageCircle,
   Zap,
 } from "lucide-react";
 
@@ -23,13 +25,13 @@ import { Card, CardContent } from "@/components/ui/card";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "LeadForge — Find Businesses With No Website & Pitch Them" },
+      { title: "Leadlify — Find Businesses With No Website" },
       {
         name: "description",
         content:
           "Find local businesses with no website or a bad one, audit them with AI, and send personalised cold emails from your own Gmail — all inside one lightweight CRM.",
       },
-      { property: "og:title", content: "LeadForge — Find Leads & Send AI Cold Emails" },
+      { property: "og:title", content: "Leadlify — Find Leads & Send AI Cold Emails" },
       {
         property: "og:description",
         content:
@@ -37,7 +39,7 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "LeadForge — Find Leads & Send AI Cold Emails" },
+      { name: "twitter:title", content: "Leadlify — Find Leads & Send AI Cold Emails" },
       {
         name: "twitter:description",
         content: "AI lead generation and cold email CRM for web designers and agencies.",
@@ -51,7 +53,7 @@ const FEATURES = [
   {
     icon: MapPin,
     title: "Businesses with no website",
-    body: "Flip one switch and LeadForge only imports businesses that have no website at all — the easiest web design pitch there is.",
+    body: "Flip one switch and Leadlify only imports businesses that have no website at all — the easiest web design pitch there is.",
   },
   {
     icon: Radar,
@@ -131,19 +133,41 @@ const AUDIENCE = [
 const FAQ = [
   {
     q: "Where do the leads come from?",
-    a: "Live Google Places data. You choose the country, city, business type, keyword and radius, and LeadForge imports up to 50 matching businesses with their rating, review count, phone, address and website (or lack of one).",
+    a: "Live Google Places data. You choose the country, city, business type, keyword and radius, and Leadlify imports up to 50 matching businesses with their rating, review count, phone, address and website (or lack of one).",
   },
   {
     q: "Can I only get businesses without a website?",
-    a: "Yes. There's a toggle on the search form. When it's on, LeadForge scans deeper through the results and keeps only businesses that have no website listed.",
+    a: "Yes. There's a toggle on the search form. When it's on, Leadlify scans deeper through the results and keeps only businesses that have no website listed.",
   },
   {
     q: "Whose email account sends the outreach?",
-    a: "Yours. You connect your own Gmail account, so every email is sent from your address and every reply comes back into your own inbox — and into your LeadForge pipeline.",
+    a: "Yours. You connect your own Gmail account, so every email is sent from your address and every reply comes back into your own inbox — and into your Leadlify pipeline.",
   },
   {
-    q: "Are there daily limits?",
-    a: "No caps inside LeadForge. Search, audit and send as much as you want; the only limits are Gmail's own sending policies.",
+    q: "Can I try Leadlify for free?",
+    a: "Yes. Every new account includes 10 lead imports and 2 email sends. Demo website generation unlocks on any paid plan.",
+  },
+];
+
+const PLANS = [
+  {
+    name: "Starter",
+    price: 32,
+    description: "For focused solo outreach",
+    features: ["500 leads / month", "100 email sends / month", "AI audits & drafts", "Demo website builder"],
+  },
+  {
+    name: "Growth",
+    price: 45,
+    description: "For consistent client acquisition",
+    features: ["1,500 leads / month", "500 email sends / month", "AI audits & drafts", "Demo website builder"],
+    featured: true,
+  },
+  {
+    name: "Agency",
+    price: 70,
+    description: "For high-volume prospecting",
+    features: ["5,000 leads / month", "2,000 email sends / month", "AI audits & drafts", "Demo website builder"],
   },
 ];
 
@@ -155,13 +179,16 @@ function Landing() {
           <span className="bg-gradient-brand shadow-glow grid size-9 place-items-center rounded-xl">
             <Sparkles className="text-primary-foreground size-4.5" />
           </span>
-          <p className="text-foreground text-sm font-semibold tracking-tight">LeadForge</p>
+          <p className="text-foreground text-sm font-semibold tracking-tight">Leadlify</p>
           <nav className="text-muted-foreground ml-6 hidden flex-1 items-center gap-6 text-sm md:flex">
             <a href="#features" className="hover:text-foreground transition-colors">
               Features
             </a>
             <a href="#how" className="hover:text-foreground transition-colors">
               How it works
+            </a>
+            <a href="#pricing" className="hover:text-foreground transition-colors">
+              Pricing
             </a>
             <a href="#faq" className="hover:text-foreground transition-colors">
               FAQ
@@ -198,9 +225,8 @@ function Landing() {
               them as clients
             </h1>
             <p className="text-muted-foreground mx-auto mt-5 max-w-xl text-base text-pretty sm:text-lg">
-              LeadForge pulls up to 50 local businesses per search, grades their web presence with
-              AI, writes the cold email for you, and sends it from your own Gmail. One workspace, no
-              daily limits.
+              Leadlify finds up to 50 local businesses per search, grades their web presence with AI,
+              writes the cold email, and sends it from your own Gmail.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Button asChild size="lg">
@@ -243,7 +269,7 @@ function Landing() {
             <Card className="shadow-card border-border/60">
               <CardContent className="space-y-3 p-6">
                 <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-                  Without LeadForge
+                  Without Leadlify
                 </p>
                 <ul className="text-muted-foreground space-y-2.5 text-sm">
                   <li>Hours scrolling Google Maps copying phone numbers into a spreadsheet</li>
@@ -256,7 +282,7 @@ function Landing() {
             <Card className="shadow-elevated border-primary/30 bg-primary/5">
               <CardContent className="space-y-3 p-6">
                 <p className="text-primary text-xs font-semibold tracking-widest uppercase">
-                  With LeadForge
+                  With Leadlify
                 </p>
                 <ul className="text-foreground space-y-2.5 text-sm">
                   <li className="flex gap-2">
@@ -278,6 +304,41 @@ function Landing() {
                 </ul>
               </CardContent>
             </Card>
+          </div>
+        </section>
+
+        <section id="pricing" className="border-border/60 bg-card/40 border-y">
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+            <div className="mx-auto max-w-2xl text-center">
+              <h2 className="text-foreground text-2xl font-semibold sm:text-3xl">Simple monthly plans</h2>
+              <p className="text-muted-foreground mt-3 text-sm sm:text-base">
+                Start free with 10 leads and 2 email sends. Upgrade when you are ready to scale.
+              </p>
+            </div>
+            <div className="mt-10 grid gap-4 lg:grid-cols-3">
+              {PLANS.map((plan) => (
+                <Card key={plan.name} className={plan.featured ? "border-primary shadow-elevated" : "border-border/60 shadow-card"}>
+                  <CardContent className="p-6">
+                    {plan.featured ? <p className="text-primary text-xs font-semibold uppercase">Most popular</p> : null}
+                    <h3 className="text-foreground mt-2 text-lg font-semibold">{plan.name}</h3>
+                    <p className="text-muted-foreground mt-1 text-sm">{plan.description}</p>
+                    <p className="text-foreground mt-6 text-4xl font-semibold tabular-nums">
+                      ${plan.price}<span className="text-muted-foreground text-sm font-normal"> / month</span>
+                    </p>
+                    <ul className="mt-6 space-y-3 text-sm">
+                      {plan.features.map((feature) => (
+                        <li key={feature} className="flex items-center gap-2">
+                          <CheckCircle2 className="text-accent size-4 shrink-0" /> {feature}
+                        </li>
+                      ))}
+                    </ul>
+                    <Button asChild className="mt-7 w-full" variant={plan.featured ? "default" : "outline"}>
+                      <Link to="/auth" search={{ mode: "signup" }}>Start with {plan.name}</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -384,12 +445,19 @@ function Landing() {
 
       <footer className="border-border/60 border-t">
         <div className="text-muted-foreground mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-6 text-xs sm:flex-row sm:px-6">
-          <p>© {new Date().getFullYear()} LeadForge. All rights reserved.</p>
-          <Link to="/auth" className="hover:text-foreground transition-colors">
-            Sign in
-          </Link>
+          <p>© {new Date().getFullYear()} Leadlify. All rights reserved.</p>
+          <div className="flex items-center gap-4">
+            <a href="https://www.instagram.com/leadlify.ai/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground inline-flex items-center gap-1.5 transition-colors"><Instagram className="size-3.5" /> Instagram</a>
+            <a href="https://wa.link/cuj4t2" target="_blank" rel="noopener noreferrer" className="hover:text-foreground inline-flex items-center gap-1.5 transition-colors"><MessageCircle className="size-3.5" /> Support</a>
+            <Link to="/auth" className="hover:text-foreground transition-colors">Sign in</Link>
+          </div>
         </div>
       </footer>
+      <Button asChild size="icon" className="fixed right-5 bottom-5 z-40 size-12 rounded-full shadow-elevated" title="WhatsApp support">
+        <a href="https://wa.link/cuj4t2" target="_blank" rel="noopener noreferrer" aria-label="Open WhatsApp support">
+          <MessageCircle className="size-5" />
+        </a>
+      </Button>
     </div>
   );
 }

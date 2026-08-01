@@ -13,6 +13,11 @@ export const generateDemoWebsite = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { buildDemoHtml, slugify } = await import("@/lib/website-builder.server");
+    const { readPlanEntitlements } = await import("@/server/plan.server");
+    const entitlements = await readPlanEntitlements(supabase, userId);
+    if (!entitlements.websiteBuilderEnabled) {
+      throw new UpstreamError(403, "Demo website generation is available on paid Leadlify plans.");
+    }
 
     const { data: lead, error } = await supabase
       .from("leads")
