@@ -21,6 +21,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -324,7 +331,7 @@ function AdminPage() {
                       <TableCell>
                         <Select
                           value={r.plan}
-                          onValueChange={(plan) =>
+                          onValueChange={(plan: string) =>
                             planMutation.mutate({
                               id: r.id,
                               plan: plan as keyof typeof PLAN_LIMITS,
