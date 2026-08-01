@@ -147,6 +147,21 @@ export const sendLeadEmail = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
+    const { monthStartISO, readPlanEntitlements } = await import("@/server/plan.server");
+    const entitlements = await readPlanEntitlements(supabase, userId);
+    const { count: emailsSent } = await supabase
+      .from("email_history")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("sent_status", "sent")
+      .gte("sent_at", monthStartISO());
+    if ((emailsSent ?? 0) >= entitlements.emailQuota) {
+      throw new UpstreamError(
+        429,
+        `You have used your ${entitlements.emailQuota}-email monthly allowance. Upgrade your Leadlify plan to send more.`,
+      );
+    }
+
     // Every outbound email carries the WhatsApp contact number.
     const bodyText = data.body.includes(WHATSAPP_NUMBER)
       ? data.body

@@ -35,8 +35,9 @@ function GmailOAuthReturn() {
       }
     };
 
-    if (params.get("success") !== "true") {
-      const error = params.get("error_description") ?? params.get("error") ?? "Gmail authorisation did not complete.";
+    const oauthError = params.get("error_description") ?? params.get("error");
+    if (oauthError) {
+      const error = oauthError;
       setMessage(error);
       notify("appUserConnectorOAuthFailed", error);
       return;
@@ -44,10 +45,6 @@ function GmailOAuthReturn() {
 
     const code = params.get("code");
     if (!code) {
-      if (params.get("offline_access_allowed") === "false") {
-        notify("appUserConnectorOAuthComplete");
-        return;
-      }
       setMessage("Gmail authorisation completed without an exchange code.");
       notify("appUserConnectorOAuthFailed", "Gmail authorisation completed without an exchange code.");
       return;

@@ -137,15 +137,15 @@ function AuthPage() {
 
   const heading =
     mode === "login"
-      ? "Sign in to LeadForge"
+      ? "Sign in to Leadlify"
       : mode === "signup"
-        ? "Create your LeadForge account"
+        ? "Create your Leadlify account"
         : "Reset your password";
   const sub =
     mode === "login"
       ? "Welcome back — pick up where you left off."
       : mode === "signup"
-        ? "Free to start. No daily sending limits."
+        ? "Start free with 10 leads and 2 email sends."
         : "We'll email you a secure link to choose a new password.";
 
   return (

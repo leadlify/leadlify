@@ -20,7 +20,8 @@ import {
 /** Starts the per-user Gmail OAuth consent and returns the provider URL for a popup. */
 export const startGmailConnect = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((input: { fresh?: boolean }) => ({ fresh: input?.fresh === true }))
+  .handler(async ({ data, context }) => {
     const clientAPIKey = process.env.GOOGLE_MAIL_APP_USER_CONNECTOR_CLIENT_API_KEY;
     if (!clientAPIKey) {
       throw new Error("Gmail connector client is not configured for this project.");
@@ -30,7 +31,12 @@ export const startGmailConnect = createServerFn({ method: "POST" })
     if (!request) throw new Error("OAuth must start from an app request.");
     const returnUrl = new URL("/oauth/gmail/return", request.url).toString();
 
-    const existing = await getConnectionKeyForUser(context.userId, GMAIL_CONNECTOR_ID);
+    if (data.fresh) {
+      await removeConnectionForUser(context.userId, GMAIL_CONNECTOR_ID);
+    }
+    const existing = data.fresh
+      ? null
+      : await getConnectionKeyForUser(context.userId, GMAIL_CONNECTOR_ID);
 
     let authorizationUrl: string;
     try {

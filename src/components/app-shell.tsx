@@ -69,7 +69,7 @@ function Brand() {
         <Sparkles className="text-primary-foreground size-4.5" />
       </span>
       <div className="leading-tight">
-        <p className="text-sidebar-foreground text-sm font-semibold">LeadForge</p>
+        <p className="text-sidebar-foreground text-sm font-semibold">Leadlify</p>
         <p className="text-muted-foreground text-[11px]">Cold outreach CRM</p>
       </div>
     </div>

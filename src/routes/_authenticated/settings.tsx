@@ -116,7 +116,7 @@ function SettingsPage() {
       setOauthError(null);
       const popup = openConnectorPopup();
       try {
-        const { authorizationUrl } = await startConnect({});
+        const { authorizationUrl } = await startConnect({ data: { fresh: true } });
         const completion = waitForOAuthCompletion(popup, "google_mail");
         popup.location.href = authorizationUrl;
         await completion;
@@ -201,9 +201,8 @@ function SettingsPage() {
                 <AlertDescription className="space-y-2">
                   <p className="break-words">{oauthError}</p>
                   <p>
-                    Retry below and approve every requested Gmail permission. If Google reports a
-                    redirect mismatch, add the connector gateway callback URL to your Google OAuth
-                    client.
+                    Retry below and approve every requested Gmail permission. Leadlify will remove
+                    any broken saved connection and start a completely fresh Google consent session.
                   </p>
                 </AlertDescription>
               </Alert>

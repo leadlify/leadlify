@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/integrations/supabase/types";
 
-export const DEFAULT_MONTHLY_LEAD_QUOTA = 500;
+export const DEFAULT_MONTHLY_LEAD_QUOTA = 10;
 
 export type LeadQuota = {
   used: number;

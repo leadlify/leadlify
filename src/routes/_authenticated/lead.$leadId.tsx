@@ -90,6 +90,17 @@ function LeadDetailPage() {
   const lead = useQuery(leadQuery(leadId));
   const emails = useQuery(leadEmailsQuery(leadId));
   const demoSite = useQuery(demoSiteQuery(leadId));
+  const plan = useQuery({
+    queryKey: ["my-plan"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("plan, website_builder_enabled")
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      return data;
+    },
+  });
 
   const analyze = useServerFn(analyzeLeadWebsite);
   const generate = useServerFn(generateLeadEmail);
@@ -401,18 +412,20 @@ function LeadDetailPage() {
                 <Button
                   variant="outline"
                   onClick={() => runWebsite.mutate()}
-                  disabled={runWebsite.isPending}
+                  disabled={runWebsite.isPending || plan.data?.website_builder_enabled === false}
                 >
                   {runWebsite.isPending ? (
                     <Loader2 className="size-4 animate-spin" />
                   ) : (
                     <LayoutTemplate className="size-4" />
                   )}
-                  {runWebsite.isPending
+                   {plan.data?.website_builder_enabled === false
+                     ? "Upgrade to generate websites"
+                     : runWebsite.isPending
                     ? "Building website…"
                     : demoSite.data
                       ? "Regenerate website"
-                      : "Generate website"}
+                       : "Generate website"}
                 </Button>
               </CardContent>
             </Card>
