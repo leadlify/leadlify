@@ -29,10 +29,10 @@ import { errorMessage, settingsQuery } from "@/lib/queries";
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
-      { title: "Settings — LeadForge" },
+      { title: "Settings — Leadlify" },
       { name: "description", content: "Sender identity, email tone and Gmail connection status." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Settings — LeadForge" },
+      { property: "og:title", content: "Settings — Leadlify" },
       {
         property: "og:description",
         content: "Sender identity, email tone and Gmail connection status.",

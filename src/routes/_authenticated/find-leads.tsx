@@ -20,13 +20,13 @@ import { errorMessage } from "@/lib/queries";
 export const Route = createFileRoute("/_authenticated/find-leads")({
   head: () => ({
     meta: [
-      { title: "Find Leads — LeadForge" },
+      { title: "Find Leads — Leadlify" },
       {
         name: "description",
         content: "Search Google Places for local businesses and import them as leads.",
       },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Find Leads — LeadForge" },
+      { property: "og:title", content: "Find Leads — Leadlify" },
       {
         property: "og:description",
         content: "Search Google Places for local businesses and import them as leads.",

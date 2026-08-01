@@ -18,15 +18,15 @@ export const Route = createFileRoute("/auth")({
   }),
   head: () => ({
     meta: [
-      { title: "Sign in or sign up — LeadForge" },
+      { title: "Sign in or sign up — Leadlify" },
       {
         name: "description",
-        content: "Create your LeadForge account or sign in to your outreach workspace.",
+        content: "Create your Leadlify account or sign in to your outreach workspace.",
       },
-      { property: "og:title", content: "Sign in or sign up — LeadForge" },
+      { property: "og:title", content: "Sign in or sign up — Leadlify" },
       {
         property: "og:description",
-        content: "Create your LeadForge account or sign in to your outreach workspace.",
+        content: "Create your Leadlify account or sign in to your outreach workspace.",
       },
     ],
   }),

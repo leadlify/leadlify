@@ -41,10 +41,10 @@ import {
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
-      { title: "Admin panel — LeadForge" },
+      { title: "Admin panel — Leadlify" },
       { name: "description", content: "Users, emails sent, earnings and platform analytics." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Admin panel — LeadForge" },
+      { property: "og:title", content: "Admin panel — Leadlify" },
       {
         property: "og:description",
         content: "Users, emails sent, earnings and platform analytics.",
@@ -63,6 +63,13 @@ const tooltipStyle = {
 };
 
 const dayKey = (value: string) => new Date(value).toISOString().slice(0, 10);
+
+const PLAN_LIMITS = {
+  free: { leads: 10, emails: 2, builder: false },
+  starter: { leads: 500, emails: 100, builder: true },
+  growth: { leads: 1500, emails: 500, builder: true },
+  agency: { leads: 5000, emails: 2000, builder: true },
+} as const;
 
 function AdminPage() {
   const navigate = useNavigate();
@@ -120,6 +127,27 @@ function AdminPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "profiles"] });
       toast.success("Quota updated");
+    },
+    onError: (error) => toast.error(error instanceof Error ? error.message : "Update failed"),
+  });
+
+  const planMutation = useMutation({
+    mutationFn: async ({ id, plan }: { id: string; plan: keyof typeof PLAN_LIMITS }) => {
+      const limits = PLAN_LIMITS[plan];
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          plan,
+          monthly_lead_quota: limits.leads,
+          monthly_email_quota: limits.emails,
+          website_builder_enabled: limits.builder,
+        })
+        .eq("id", id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "profiles"] });
+      toast.success("Plan and limits updated");
     },
     onError: (error) => toast.error(error instanceof Error ? error.message : "Update failed"),
   });
@@ -269,13 +297,15 @@ function AdminPage() {
                   <TableHead className="text-right">Sent</TableHead>
                   <TableHead className="text-right">Replies</TableHead>
                   <TableHead className="text-right">Revenue</TableHead>
+                  <TableHead>Plan</TableHead>
+                  <TableHead className="text-right">Email quota</TableHead>
                   <TableHead className="text-right">Monthly quota</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {rows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-muted-foreground py-10 text-center">
+                    <TableCell colSpan={10} className="text-muted-foreground py-10 text-center">
                       No users yet.
                     </TableCell>
                   </TableRow>
@@ -291,6 +321,25 @@ function AdminPage() {
                       <TableCell className="text-right tabular-nums">
                         ${r.revenue.toFixed(2)}
                       </TableCell>
+                      <TableCell>
+                        <Select
+                          value={r.plan}
+                          onValueChange={(plan) =>
+                            planMutation.mutate({
+                              id: r.id,
+                              plan: plan as keyof typeof PLAN_LIMITS,
+                            })
+                          }
+                        >
+                          <SelectTrigger className="h-8 w-28 capitalize"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {Object.keys(PLAN_LIMITS).map((plan) => (
+                              <SelectItem key={plan} value={plan} className="capitalize">{plan}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums">{r.monthly_email_quota}</TableCell>
                       <TableCell className="text-right">
                         <Input
                           type="number"

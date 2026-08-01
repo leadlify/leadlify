@@ -7,11 +7,11 @@ export const Route = createFileRoute("/oauth/gmail/return")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Connecting Gmail — LeadForge" },
-      { name: "description", content: "Finishing your Gmail connection for LeadForge." },
+      { title: "Connecting Gmail — Leadlify" },
+      { name: "description", content: "Finishing your Gmail connection for Leadlify." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Connecting Gmail — LeadForge" },
-      { property: "og:description", content: "Finishing your Gmail connection for LeadForge." },
+      { property: "og:title", content: "Connecting Gmail — Leadlify" },
+      { property: "og:description", content: "Finishing your Gmail connection for Leadlify." },
     ],
   }),
   component: GmailOAuthReturn,

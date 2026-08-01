@@ -51,10 +51,10 @@ import { generateDemoWebsite } from "@/lib/website-builder.functions";
 export const Route = createFileRoute("/_authenticated/lead/$leadId")({
   head: () => ({
     meta: [
-      { title: "Lead detail — LeadForge" },
+      { title: "Lead detail — Leadlify" },
       { name: "description", content: "Website audit, AI cold email draft and outreach history." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Lead detail — LeadForge" },
+      { property: "og:title", content: "Lead detail — Leadlify" },
       {
         property: "og:description",
         content: "Website audit, AI cold email draft and outreach history.",

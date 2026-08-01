@@ -25,10 +25,10 @@ import { emailsQuery, leadsQuery } from "@/lib/queries";
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — LeadForge" },
+      { title: "Dashboard — Leadlify" },
       { name: "description", content: "Pipeline overview, outreach volume and conversion rate." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Dashboard — LeadForge" },
+      { property: "og:title", content: "Dashboard — Leadlify" },
       {
         property: "og:description",
         content: "Pipeline overview, outreach volume and conversion rate.",
