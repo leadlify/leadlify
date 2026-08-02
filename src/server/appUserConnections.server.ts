@@ -16,6 +16,51 @@ export const GMAIL_SCOPES = [
   "https://www.googleapis.com/auth/gmail.modify",
 ];
 
+export type GmailOAuthDiagnostic = {
+  lastStep: string;
+  requestedScopes: string[];
+  lastError: string | null;
+  lastAttemptAt: string | null;
+};
+
+export async function recordGmailOAuthDiagnostic(
+  userId: string,
+  lastStep: string,
+  lastError: string | null = null,
+) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { error } = await supabaseAdmin.from("gmail_oauth_diagnostics").upsert(
+    {
+      user_id: userId,
+      connector_id: GMAIL_CONNECTOR_ID,
+      last_step: lastStep,
+      requested_scopes: GMAIL_SCOPES,
+      last_error: lastError,
+      last_attempt_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id" },
+  );
+  if (error) console.error("[gmail-oauth] could not save diagnostics", error.message);
+}
+
+export async function readGmailOAuthDiagnostic(userId: string): Promise<GmailOAuthDiagnostic> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin
+    .from("gmail_oauth_diagnostics")
+    .select("last_step, requested_scopes, last_error, last_attempt_at")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) throw error;
+  return {
+    lastStep: data?.last_step ?? "not_started",
+    requestedScopes: Array.isArray(data?.requested_scopes)
+      ? data.requested_scopes.filter((scope): scope is string => typeof scope === "string")
+      : GMAIL_SCOPES,
+    lastError: data?.last_error ?? null,
+    lastAttemptAt: data?.last_attempt_at ?? null,
+  };
+}
+
 export async function saveConnectionKeyForUser(
   userId: string,
   connectorId: string,

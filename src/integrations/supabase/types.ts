@@ -21,6 +21,10 @@ export type Database = {
           connector_id: string
           created_at: string
           id: string
+          oauth_last_attempt_at: string | null
+          oauth_last_error: string | null
+          oauth_last_step: string | null
+          oauth_requested_scopes: Json
           updated_at: string
           user_id: string
         }
@@ -30,6 +34,10 @@ export type Database = {
           connector_id: string
           created_at?: string
           id?: string
+          oauth_last_attempt_at?: string | null
+          oauth_last_error?: string | null
+          oauth_last_step?: string | null
+          oauth_requested_scopes?: Json
           updated_at?: string
           user_id: string
         }
@@ -39,6 +47,10 @@ export type Database = {
           connector_id?: string
           created_at?: string
           id?: string
+          oauth_last_attempt_at?: string | null
+          oauth_last_error?: string | null
+          oauth_last_step?: string | null
+          oauth_requested_scopes?: Json
           updated_at?: string
           user_id?: string
         }
@@ -143,6 +155,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      gmail_oauth_diagnostics: {
+        Row: {
+          connector_id: string
+          last_attempt_at: string
+          last_error: string | null
+          last_step: string
+          requested_scopes: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          connector_id?: string
+          last_attempt_at?: string
+          last_error?: string | null
+          last_step?: string
+          requested_scopes?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          connector_id?: string
+          last_attempt_at?: string
+          last_error?: string | null
+          last_step?: string
+          requested_scopes?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       leads: {
         Row: {

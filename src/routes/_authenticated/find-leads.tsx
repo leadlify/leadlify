@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { findLeads } from "@/lib/places.functions";
 import { getLeadQuota } from "@/lib/quota.functions";
 import { Progress } from "@/components/ui/progress";
+import { UpgradePrompt } from "@/components/upgrade-prompt";
 import { errorMessage } from "@/lib/queries";
 
 export const Route = createFileRoute("/_authenticated/find-leads")({
@@ -243,6 +244,14 @@ function FindLeadsPage() {
                   ? `${quota.data.remaining} left · resets ${new Date(quota.data.resetsOn).toLocaleDateString()}`
                   : ""}
               </p>
+              {quota.data?.remaining === 0 ? (
+                <div className="pt-2">
+                  <UpgradePrompt
+                    title="Free lead limit reached"
+                    message="Upgrade now to import more prospects this month."
+                  />
+                </div>
+              ) : null}
             </CardContent>
           </Card>
 

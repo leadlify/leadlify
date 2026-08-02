@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { completeGmailConnect } from "@/lib/gmail-connect.functions";
+import { completeGmailConnect, recordGmailOAuthError } from "@/lib/gmail-connect.functions";
 
 export const Route = createFileRoute("/oauth/gmail/return")({
   ssr: false,
@@ -19,8 +19,11 @@ export const Route = createFileRoute("/oauth/gmail/return")({
 
 function GmailOAuthReturn() {
   const [message, setMessage] = useState("Finishing your Gmail connection…");
+  const hasStarted = useRef(false);
 
   useEffect(() => {
+    if (hasStarted.current) return;
+    hasStarted.current = true;
     const params = new URLSearchParams(window.location.search);
     const notify = (
       type: "appUserConnectorOAuthComplete" | "appUserConnectorOAuthFailed",
@@ -44,14 +47,19 @@ function GmailOAuthReturn() {
     if (oauthError) {
       const error = oauthError;
       setMessage(error);
-      notify("appUserConnectorOAuthFailed", error);
+      void recordGmailOAuthError({ data: { error } }).finally(() =>
+        notify("appUserConnectorOAuthFailed", error),
+      );
       return;
     }
 
     const code = params.get("code");
     if (!code) {
       setMessage("Gmail authorisation completed without an exchange code.");
-      notify("appUserConnectorOAuthFailed", "Gmail authorisation completed without an exchange code.");
+      const error = "Gmail authorisation completed without an exchange code.";
+      void recordGmailOAuthError({ data: { error } }).finally(() =>
+        notify("appUserConnectorOAuthFailed", error),
+      );
       return;
     }
 
