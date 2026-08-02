@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SiteSlugRouteImport } from './routes/site.$slug'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
+import { Route as AuthenticatedGmailDiagnosticsRouteImport } from './routes/_authenticated/gmail-diagnostics'
 import { Route as AuthenticatedFindLeadsRouteImport } from './routes/_authenticated/find-leads'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
@@ -63,6 +64,12 @@ const AuthenticatedLeadsRoute = AuthenticatedLeadsRouteImport.update({
   path: '/leads',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGmailDiagnosticsRoute =
+  AuthenticatedGmailDiagnosticsRouteImport.update({
+    id: '/gmail-diagnostics',
+    path: '/gmail-diagnostics',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedFindLeadsRoute = AuthenticatedFindLeadsRouteImport.update({
   id: '/find-leads',
   path: '/find-leads',
@@ -103,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/find-leads': typeof AuthenticatedFindLeadsRoute
+  '/gmail-diagnostics': typeof AuthenticatedGmailDiagnosticsRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/site/$slug': typeof SiteSlugRoute
@@ -118,6 +126,7 @@ export interface FileRoutesByTo {
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/find-leads': typeof AuthenticatedFindLeadsRoute
+  '/gmail-diagnostics': typeof AuthenticatedGmailDiagnosticsRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/site/$slug': typeof SiteSlugRoute
@@ -135,6 +144,7 @@ export interface FileRoutesById {
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/find-leads': typeof AuthenticatedFindLeadsRoute
+  '/_authenticated/gmail-diagnostics': typeof AuthenticatedGmailDiagnosticsRoute
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/site/$slug': typeof SiteSlugRoute
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/dashboard'
     | '/find-leads'
+    | '/gmail-diagnostics'
     | '/leads'
     | '/settings'
     | '/site/$slug'
@@ -167,6 +178,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/dashboard'
     | '/find-leads'
+    | '/gmail-diagnostics'
     | '/leads'
     | '/settings'
     | '/site/$slug'
@@ -183,6 +195,7 @@ export interface FileRouteTypes {
     | '/_authenticated/analytics'
     | '/_authenticated/dashboard'
     | '/_authenticated/find-leads'
+    | '/_authenticated/gmail-diagnostics'
     | '/_authenticated/leads'
     | '/_authenticated/settings'
     | '/site/$slug'
@@ -258,6 +271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLeadsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/gmail-diagnostics': {
+      id: '/_authenticated/gmail-diagnostics'
+      path: '/gmail-diagnostics'
+      fullPath: '/gmail-diagnostics'
+      preLoaderRoute: typeof AuthenticatedGmailDiagnosticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/find-leads': {
       id: '/_authenticated/find-leads'
       path: '/find-leads'
@@ -308,6 +328,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedFindLeadsRoute: typeof AuthenticatedFindLeadsRoute
+  AuthenticatedGmailDiagnosticsRoute: typeof AuthenticatedGmailDiagnosticsRoute
   AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedLeadLeadIdRoute: typeof AuthenticatedLeadLeadIdRoute
@@ -318,6 +339,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedFindLeadsRoute: AuthenticatedFindLeadsRoute,
+  AuthenticatedGmailDiagnosticsRoute: AuthenticatedGmailDiagnosticsRoute,
   AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedLeadLeadIdRoute: AuthenticatedLeadLeadIdRoute,
