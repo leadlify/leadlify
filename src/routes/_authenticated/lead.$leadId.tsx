@@ -27,6 +27,7 @@ import {
   type LeadStatus,
 } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
+import { UpgradePrompt } from "@/components/upgrade-prompt";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -120,6 +121,7 @@ function LeadDetailPage() {
   const [body, setBody] = useState("");
   const [to, setTo] = useState("");
   const [instructions, setInstructions] = useState("");
+  const [emailLimitReached, setEmailLimitReached] = useState(false);
 
   useEffect(() => {
     if (lead.data?.email && !to) setTo(lead.data.email);
@@ -154,7 +156,11 @@ function LeadDetailPage() {
       queryClient.invalidateQueries();
       toast.success("Email sent from your Gmail account");
     },
-    onError: (error) => toast.error(errorMessage(error, "Gmail could not send that email.")),
+    onError: (error) => {
+      const message = errorMessage(error, "Gmail could not send that email.");
+      setEmailLimitReached(message.toLowerCase().includes("monthly allowance"));
+      toast.error(message);
+    },
   });
 
   const updateLead = useMutation({
@@ -390,6 +396,12 @@ function LeadDetailPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
+                {plan.data?.website_builder_enabled === false ? (
+                  <UpgradePrompt
+                    title="Website builder is locked"
+                    message="Demo websites are included with every paid Leadlify plan."
+                  />
+                ) : null}
                 {demoSite.data ? (
                   <div className="bg-muted/40 flex flex-wrap items-center justify-between gap-3 rounded-lg p-3">
                     <a
@@ -427,6 +439,12 @@ function LeadDetailPage() {
                       ? "Regenerate website"
                        : "Generate website"}
                 </Button>
+                {emailLimitReached ? (
+                  <UpgradePrompt
+                    title="Monthly email limit reached"
+                    message="Upgrade your plan to keep sending outreach from Gmail this month."
+                  />
+                ) : null}
               </CardContent>
             </Card>
 

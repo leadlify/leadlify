@@ -13,6 +13,8 @@ import {
   callUserGmail,
   getConnectionKeyForUser,
   removeConnectionForUser,
+  readGmailOAuthDiagnostic,
+  recordGmailOAuthDiagnostic,
   saveConnectionKeyForUser,
   setAccountLabel,
 } from "@/server/appUserConnections.server";
@@ -24,8 +26,14 @@ export const startGmailConnect = createServerFn({ method: "POST" })
     z.object({ fresh: z.boolean().optional(), returnUrl: z.string().url() }).parse(input),
   )
   .handler(async ({ data, context }) => {
+    await recordGmailOAuthDiagnostic(context.userId, "starting_authorization");
     const clientAPIKey = process.env.GOOGLE_MAIL_APP_USER_CONNECTOR_CLIENT_API_KEY;
     if (!clientAPIKey) {
+      await recordGmailOAuthDiagnostic(
+        context.userId,
+        "configuration_error",
+        "Gmail connector client is not configured for this project.",
+      );
       throw new Error("Gmail connector client is not configured for this project.");
     }
 
@@ -58,10 +66,12 @@ export const startGmailConnect = createServerFn({ method: "POST" })
       }));
     } catch (error) {
       const message = error instanceof Error ? error.message : "Gmail OAuth could not start.";
+      await recordGmailOAuthDiagnostic(context.userId, "authorization_start_failed", message);
       console.error("[gmail-connect] OAuth start failed", message);
       throw new Error(message);
     }
 
+    await recordGmailOAuthDiagnostic(context.userId, "waiting_for_google_consent");
     return { authorizationUrl };
   });
 
@@ -73,24 +83,28 @@ export const completeGmailConnect = createServerFn({ method: "POST" })
     return { code: input.code };
   })
   .handler(async ({ data, context }) => {
-    const { connectionAPIKey, connectorId } = await exchangeAppUserOAuthCode(
-      GATEWAY_BASE_URL,
-      data.code,
-    );
-    if (connectorId !== GMAIL_CONNECTOR_ID) {
-      throw new Error("OAuth completion returned the wrong connector.");
-    }
-    await saveConnectionKeyForUser(context.userId, connectorId, connectionAPIKey);
-
     try {
+      await recordGmailOAuthDiagnostic(context.userId, "exchanging_oauth_code");
+      const { connectionAPIKey, connectorId } = await exchangeAppUserOAuthCode(
+        GATEWAY_BASE_URL,
+        data.code,
+      );
+      if (connectorId !== GMAIL_CONNECTOR_ID) {
+        throw new Error("OAuth completion returned the wrong connector.");
+      }
+      await saveConnectionKeyForUser(context.userId, connectorId, connectionAPIKey);
+      await recordGmailOAuthDiagnostic(context.userId, "verifying_gmail_account");
       const profile = (await callUserGmail(context.userId, "/gmail/v1/users/me/profile")) as {
         emailAddress?: string;
       };
       if (profile.emailAddress) {
         await setAccountLabel(context.userId, connectorId, profile.emailAddress);
       }
+      await recordGmailOAuthDiagnostic(context.userId, "connected");
     } catch (error) {
-      console.warn("[gmail] profile lookup after connect failed", error);
+      const message = error instanceof Error ? error.message : "Could not complete Gmail OAuth.";
+      await recordGmailOAuthDiagnostic(context.userId, "oauth_completion_failed", message);
+      throw new Error(message);
     }
 
     return { ok: true as const };
@@ -103,3 +117,17 @@ export const disconnectGmail = createServerFn({ method: "POST" })
     await removeConnectionForUser(context.userId, GMAIL_CONNECTOR_ID);
     return { ok: true as const };
   });
+
+export const recordGmailOAuthError = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ error: z.string().trim().min(1).max(4000) }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await recordGmailOAuthDiagnostic(context.userId, "google_consent_failed", data.error);
+    return { ok: true as const };
+  });
+
+export const getGmailOAuthDiagnostics = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => readGmailOAuthDiagnostic(context.userId));

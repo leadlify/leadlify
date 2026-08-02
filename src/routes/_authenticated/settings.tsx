@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { AlertTriangle, CheckCircle2, Loader2, Mail, RefreshCw, Save, XCircle } from "lucide-react";
+import { Activity, AlertTriangle, CheckCircle2, Loader2, Mail, RefreshCw, Save, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -126,13 +126,15 @@ function SettingsPage() {
         const completion = waitForOAuthCompletion(popup, "google_mail");
         popup.location.href = authorizationUrl;
         await completion;
-        const result = await queryClient.fetchQuery({
-          queryKey: ["gmail-profile"],
-          queryFn: () => profileFn({}),
-        });
+        let result = await profileFn({});
+        for (let attempt = 0; !result.connected && attempt < 2; attempt += 1) {
+          await new Promise((resolve) => window.setTimeout(resolve, 900 * (attempt + 1)));
+          result = await profileFn({});
+        }
         if (!result.connected) {
           throw new Error(result.reason || "Google consent finished, but Gmail could not be verified.");
         }
+        queryClient.setQueryData(["gmail-profile"], result);
       } catch (error) {
         popup.close();
         throw error;
@@ -226,7 +228,7 @@ function SettingsPage() {
                 {connect.isPending
                   ? "Waiting for Google…"
                   : gmail.data?.connected
-                    ? "Re-authorise Gmail"
+                    ? "Force re-consent"
                     : oauthError
                       ? "Retry Gmail connection"
                       : "Connect Gmail"}
@@ -240,6 +242,12 @@ function SettingsPage() {
                   Disconnect
                 </Button>
               ) : null}
+              <Button asChild variant="ghost">
+                <Link to="/gmail-diagnostics">
+                  <Activity className="size-4" />
+                  View diagnostics
+                </Link>
+              </Button>
             </div>
           </CardContent>
         </Card>
