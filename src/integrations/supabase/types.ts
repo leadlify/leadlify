@@ -156,6 +156,36 @@ export type Database = {
           },
         ]
       }
+      gmail_oauth_diagnostics: {
+        Row: {
+          connector_id: string
+          last_attempt_at: string
+          last_error: string | null
+          last_step: string
+          requested_scopes: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          connector_id?: string
+          last_attempt_at?: string
+          last_error?: string | null
+          last_step?: string
+          requested_scopes?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          connector_id?: string
+          last_attempt_at?: string
+          last_error?: string | null
+          last_step?: string
+          requested_scopes?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           address: string | null
