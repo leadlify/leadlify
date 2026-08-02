@@ -21,6 +21,10 @@ export type Database = {
           connector_id: string
           created_at: string
           id: string
+          oauth_last_attempt_at: string | null
+          oauth_last_error: string | null
+          oauth_last_step: string | null
+          oauth_requested_scopes: Json
           updated_at: string
           user_id: string
         }
@@ -30,6 +34,10 @@ export type Database = {
           connector_id: string
           created_at?: string
           id?: string
+          oauth_last_attempt_at?: string | null
+          oauth_last_error?: string | null
+          oauth_last_step?: string | null
+          oauth_requested_scopes?: Json
           updated_at?: string
           user_id: string
         }
@@ -39,6 +47,10 @@ export type Database = {
           connector_id?: string
           created_at?: string
           id?: string
+          oauth_last_attempt_at?: string | null
+          oauth_last_error?: string | null
+          oauth_last_step?: string | null
+          oauth_requested_scopes?: Json
           updated_at?: string
           user_id?: string
         }
