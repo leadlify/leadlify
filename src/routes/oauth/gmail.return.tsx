@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { completeGmailConnect, recordGmailOAuthError } from "@/lib/gmail-connect.functions";
 
@@ -19,8 +19,11 @@ export const Route = createFileRoute("/oauth/gmail/return")({
 
 function GmailOAuthReturn() {
   const [message, setMessage] = useState("Finishing your Gmail connection…");
+  const hasStarted = useRef(false);
 
   useEffect(() => {
+    if (hasStarted.current) return;
+    hasStarted.current = true;
     const params = new URLSearchParams(window.location.search);
     const notify = (
       type: "appUserConnectorOAuthComplete" | "appUserConnectorOAuthFailed",

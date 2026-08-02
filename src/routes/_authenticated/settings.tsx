@@ -209,8 +209,8 @@ function SettingsPage() {
                 <AlertDescription className="space-y-2">
                   <p className="break-words">{oauthError}</p>
                   <p>
-                    Retry below and approve every requested Gmail permission. Leadlify will remove
-                    any broken saved connection and start a completely fresh Google consent session.
+                    Retry below and approve every requested Gmail permission. Your current connection
+                    stays available unless the new consent finishes successfully.
                   </p>
                 </AlertDescription>
               </Alert>

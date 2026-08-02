@@ -42,12 +42,7 @@ export const startGmailConnect = createServerFn({ method: "POST" })
       throw new Error("Invalid Gmail OAuth return URL.");
     }
 
-    if (data.fresh) {
-      await removeConnectionForUser(context.userId, GMAIL_CONNECTOR_ID);
-    }
-    const existing = data.fresh
-      ? null
-      : await getConnectionKeyForUser(context.userId, GMAIL_CONNECTOR_ID);
+    const existing = await getConnectionKeyForUser(context.userId, GMAIL_CONNECTOR_ID);
 
     let authorizationUrl: string;
     try {
@@ -57,7 +52,7 @@ export const startGmailConnect = createServerFn({ method: "POST" })
         appUserId: context.userId,
         clientAPIKey,
         returnUrl: returnUrl.toString(),
-        connectionAPIKey: existing ?? undefined,
+        connectionAPIKey: data.fresh ? undefined : (existing ?? undefined),
         credentialsConfiguration: {
           scopes: GMAIL_SCOPES,
           access_type: "offline",
