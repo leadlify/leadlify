@@ -439,12 +439,6 @@ function LeadDetailPage() {
                       ? "Regenerate website"
                        : "Generate website"}
                 </Button>
-                {emailLimitReached ? (
-                  <UpgradePrompt
-                    title="Monthly email limit reached"
-                    message="Upgrade your plan to keep sending outreach from Gmail this month."
-                  />
-                ) : null}
               </CardContent>
             </Card>
 
@@ -528,6 +522,12 @@ function LeadDetailPage() {
                   )}
                   {runSend.isPending ? "Sending…" : "Send via Gmail"}
                 </Button>
+                {emailLimitReached ? (
+                  <UpgradePrompt
+                    title="Monthly email limit reached"
+                    message="Upgrade your plan to keep sending outreach from Gmail this month."
+                  />
+                ) : null}
               </CardContent>
             </Card>
           </TabsContent>
