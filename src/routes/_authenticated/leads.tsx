@@ -300,7 +300,7 @@ function LeadsPage() {
                             rel="noopener noreferrer"
                             className="text-primary block truncate text-sm hover:underline"
                           >
-                            {lead.website.replace(/^https?:\\/\\//, "")}
+                            {lead.website.replace(/^https?:\/\//, "")}
                           </a>
                         ) : (
                           <span className="text-muted-foreground text-sm">None</span>

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CheckCircle2, Clock, Mail, MessageSquareReply, TrendingUp, Users } from "lucide-react";
+import { CheckCircle2, Clock, FileText, TrendingUp, Users } from "lucide-react";
 import {
   Area,
   AreaChart,
@@ -103,17 +103,17 @@ function DashboardPage() {
           delay={0}
         />
         <StatCard
-          label="Emails sent"
-          value={sent.length}
-          icon={Mail}
+          label="Drafts created"
+          value={rows.filter((lead) => Boolean(lead.generated_email)).length}
+          icon={FileText}
           tone="secondary"
           loading={loading}
           delay={60}
         />
         <StatCard
-          label="Replies"
+          label="Active follow-ups"
           value={replies}
-          icon={MessageSquareReply}
+          icon={TrendingUp}
           tone="accent"
           loading={loading}
           delay={120}

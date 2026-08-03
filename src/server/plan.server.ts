@@ -24,7 +24,7 @@ export async function readPlanEntitlements(
     plan: data?.plan ?? "free",
     leadQuota: data?.monthly_lead_quota ?? 10,
     emailQuota: data?.monthly_email_quota ?? 2,
-    websiteBuilderEnabled: data?.website_builder_enabled ?? false,
+    websiteBuilderEnabled: data?.plan !== "free" && data?.website_builder_enabled === true,
   };
 }
 

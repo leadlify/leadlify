@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Award, Gauge, Mail, Percent } from "lucide-react";
+import { Award, FileText, Gauge, Percent } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -97,9 +97,9 @@ function AnalyticsPage() {
           loading={loading}
         />
         <StatCard
-          label="Emails sent"
-          value={sent.length}
-          icon={Mail}
+          label="Drafted outreach"
+          value={rows.filter((lead) => Boolean(lead.generated_email)).length}
+          icon={FileText}
           tone="secondary"
           loading={loading}
           delay={60}
