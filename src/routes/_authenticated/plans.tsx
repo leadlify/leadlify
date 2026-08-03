@@ -23,9 +23,9 @@ export const Route = createFileRoute("/_authenticated/plans")({
 });
 
 const PLANS = [
-  { id: "starter", name: "Starter", price: 32, leads: "250 leads / month", description: "For focused solo outreach" },
+  { id: "starter", name: "Starter", price: 32, leads: "250 leads / month", description: "For focused solo outreach", featured: false },
   { id: "growth", name: "Growth", price: 45, leads: "1,000 leads / month", description: "For consistent client acquisition", featured: true },
-  { id: "agency", name: "Agency", price: 70, leads: "5,000 leads / month", description: "For high-volume prospecting" },
+  { id: "agency", name: "Agency", price: 70, leads: "5,000 leads / month", description: "For high-volume prospecting", featured: false },
 ] as const;
 
 function PlansPage() {

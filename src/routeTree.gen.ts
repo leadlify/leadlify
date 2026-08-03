@@ -16,6 +16,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SiteSlugRouteImport } from './routes/site.$slug'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedPlansRouteImport } from './routes/_authenticated/plans'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
 import { Route as AuthenticatedFindLeadsRouteImport } from './routes/_authenticated/find-leads'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -55,6 +56,11 @@ const SiteSlugRoute = SiteSlugRouteImport.update({
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPlansRoute = AuthenticatedPlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedLeadsRoute = AuthenticatedLeadsRouteImport.update({
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/find-leads': typeof AuthenticatedFindLeadsRoute
   '/leads': typeof AuthenticatedLeadsRoute
+  '/plans': typeof AuthenticatedPlansRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/site/$slug': typeof SiteSlugRoute
   '/lead/$leadId': typeof AuthenticatedLeadLeadIdRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/find-leads': typeof AuthenticatedFindLeadsRoute
   '/leads': typeof AuthenticatedLeadsRoute
+  '/plans': typeof AuthenticatedPlansRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/site/$slug': typeof SiteSlugRoute
   '/lead/$leadId': typeof AuthenticatedLeadLeadIdRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/find-leads': typeof AuthenticatedFindLeadsRoute
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
+  '/_authenticated/plans': typeof AuthenticatedPlansRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/site/$slug': typeof SiteSlugRoute
   '/_authenticated/lead/$leadId': typeof AuthenticatedLeadLeadIdRoute
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/find-leads'
     | '/leads'
+    | '/plans'
     | '/settings'
     | '/site/$slug'
     | '/lead/$leadId'
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/find-leads'
     | '/leads'
+    | '/plans'
     | '/settings'
     | '/site/$slug'
     | '/lead/$leadId'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/find-leads'
     | '/_authenticated/leads'
+    | '/_authenticated/plans'
     | '/_authenticated/settings'
     | '/site/$slug'
     | '/_authenticated/lead/$leadId'
@@ -238,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/plans': {
+      id: '/_authenticated/plans'
+      path: '/plans'
+      fullPath: '/plans'
+      preLoaderRoute: typeof AuthenticatedPlansRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/leads': {
       id: '/_authenticated/leads'
       path: '/leads'
@@ -289,6 +308,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedFindLeadsRoute: typeof AuthenticatedFindLeadsRoute
   AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
+  AuthenticatedPlansRoute: typeof AuthenticatedPlansRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedLeadLeadIdRoute: typeof AuthenticatedLeadLeadIdRoute
 }
@@ -299,6 +319,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedFindLeadsRoute: AuthenticatedFindLeadsRoute,
   AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
+  AuthenticatedPlansRoute: AuthenticatedPlansRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedLeadLeadIdRoute: AuthenticatedLeadLeadIdRoute,
 }
