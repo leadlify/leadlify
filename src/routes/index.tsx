@@ -29,13 +29,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Find local businesses with no website or a bad one, audit them with AI, and send personalised cold emails from your own Gmail — all inside one lightweight CRM.",
+          "Find local businesses with no website or a bad one, audit them with AI, and generate personalised AI cold email drafts — all inside one lightweight CRM.",
       },
       { property: "og:title", content: "Leadlify — Find Leads & Send AI Cold Emails" },
       {
         property: "og:description",
         content:
-          "Find local businesses with no website, audit them with AI, and send personalised cold emails from your own Gmail.",
+          "Find local businesses with no website, audit them with AI, and generate personalised AI cold email drafts.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -67,13 +67,13 @@ const FEATURES = [
   },
   {
     icon: Mail,
-    title: "Cold emails from your Gmail",
-    body: "AI writes an email around that specific business's problems, and it sends from your own inbox — so replies come straight back to you.",
+    title: "AI-powered cold email drafts",
+    body: "AI writes an email around that specific business's problems, giving you a high-converting draft ready to copy and send.",
   },
   {
     icon: Users,
     title: "A pipeline that stays clean",
-    body: "New, contacted, replied, interested, closed. Replies are synced from Gmail and update the lead status for you.",
+    body: "New, contacted, replied, interested, closed. Track status from new to closed and keep your pipeline organized.",
   },
   {
     icon: BarChart3,
@@ -86,7 +86,7 @@ const STEPS = [
   {
     n: "01",
     t: "Create your account",
-    d: "Sign up with your email and connect your Gmail inbox in a couple of clicks.",
+    d: "Sign up with your email and start finding leads in a couple of clicks.",
   },
   {
     n: "02",
@@ -101,7 +101,7 @@ const STEPS = [
   {
     n: "04",
     t: "Send and track",
-    d: "The email leaves your own Gmail, and replies land back in your pipeline.",
+    d: "Copy the AI draft to your email client and track the progress in your pipeline.",
   },
 ];
 
@@ -141,7 +141,7 @@ const FAQ = [
   },
   {
     q: "Whose email account sends the outreach?",
-    a: "Yours. You connect your own Gmail account, so every email is sent from your address and every reply comes back into your own inbox — and into your Leadlify pipeline.",
+    a: "Yours. You generate the draft in Leadlify and send it from your own email client. This keeps your deliverability high and replies in your control.",
   },
   {
     q: "Can I try Leadlify for free?",
@@ -226,7 +226,7 @@ function Landing() {
             </h1>
             <p className="text-muted-foreground mx-auto mt-5 max-w-xl text-base text-pretty sm:text-lg">
               Leadlify finds up to 50 local businesses per search, grades their web presence with AI,
-              writes the cold email, and sends it from your own Gmail.
+              writes the cold email, and gives you a ready-to-send draft.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Button asChild size="lg">
@@ -243,7 +243,7 @@ function Landing() {
                 <CheckCircle2 className="text-primary size-3.5" /> No credit card
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <Shield className="text-primary size-3.5" /> Your own Gmail account
+                <Shield className="text-primary size-3.5" /> Privacy focused
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Star className="text-primary size-3.5" /> Real Google Places data
@@ -312,7 +312,7 @@ function Landing() {
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-foreground text-2xl font-semibold sm:text-3xl">Simple monthly plans</h2>
               <p className="text-muted-foreground mt-3 text-sm sm:text-base">
-                Start free with 10 leads and 2 email sends. Upgrade when you are ready to scale.
+                Start free with 10 leads and AI drafts. Upgrade when you are ready to scale.
               </p>
             </div>
             <div className="mt-10 grid gap-4 lg:grid-cols-3">
