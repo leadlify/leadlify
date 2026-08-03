@@ -100,7 +100,7 @@ const STEPS = [
   },
   {
     n: "04",
-    t: "Send and track",
+    t: "Copy and follow up",
     d: "Copy the AI draft to your email client and track the progress in your pipeline.",
   },
 ];
@@ -108,7 +108,7 @@ const STEPS = [
 const STATS = [
   { value: "50", label: "leads per search" },
   { value: "6", label: "audit scores per site" },
-  { value: "0", label: "daily sending limits" },
+  { value: "10", label: "free lead imports" },
   { value: "1", label: "workspace for everything" },
 ];
 
@@ -145,7 +145,7 @@ const FAQ = [
   },
   {
     q: "Can I try Leadlify for free?",
-    a: "Yes. Every new account includes 10 lead imports and 2 email sends. Demo website generation unlocks on any paid plan.",
+    a: "Yes. Every new account includes 10 lead imports and AI email drafts. Demo website generation unlocks only after a paid plan is approved.",
   },
 ];
 
@@ -154,20 +154,20 @@ const PLANS = [
     name: "Starter",
     price: 32,
     description: "For focused solo outreach",
-    features: ["500 leads / month", "100 email sends / month", "AI audits & drafts", "Demo website builder"],
+    features: ["250 leads / month", "AI audits & drafts", "Admin-approved activation", "Demo website builder"],
   },
   {
     name: "Growth",
     price: 45,
     description: "For consistent client acquisition",
-    features: ["1,500 leads / month", "500 email sends / month", "AI audits & drafts", "Demo website builder"],
+    features: ["1,000 leads / month", "AI audits & drafts", "Admin-approved activation", "Demo website builder"],
     featured: true,
   },
   {
     name: "Agency",
     price: 70,
     description: "For high-volume prospecting",
-    features: ["5,000 leads / month", "2,000 email sends / month", "AI audits & drafts", "Demo website builder"],
+    features: ["5,000 leads / month", "AI audits & drafts", "Admin-approved activation", "Demo website builder"],
   },
 ];
 
@@ -299,7 +299,7 @@ function Landing() {
                   </li>
                   <li className="flex gap-2">
                     <CheckCircle2 className="text-primary mt-0.5 size-4 shrink-0" />
-                    Every send and reply tracked in one pipeline
+                    Every lead and follow-up stage tracked in one pipeline
                   </li>
                 </ul>
               </CardContent>
