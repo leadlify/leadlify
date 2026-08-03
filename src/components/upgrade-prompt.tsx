@@ -18,7 +18,7 @@ export function UpgradePrompt({
       <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-muted-foreground">{message}</p>
         <Button asChild size="sm" className="shrink-0">
-          <Link to="/" hash="pricing">
+          <Link to="/plans">
             View plans
             <ArrowUpRight className="size-4" />
           </Link>

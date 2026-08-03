@@ -11,7 +11,6 @@ import {
   Mail,
   MapPin,
   Phone,
-  Send,
   Sparkles,
   Star,
   Wand2,
@@ -45,8 +44,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import type { WebsiteAnalysis } from "@/lib/analysis.functions";
 import { analyzeLeadWebsite } from "@/lib/analysis.functions";
-import { generateLeadEmail, sendLeadEmail } from "@/lib/outreach.functions";
-import { demoSiteQuery, errorMessage, leadEmailsQuery, leadQuery } from "@/lib/queries";
+import { generateLeadEmail } from "@/lib/outreach.functions";
+import { demoSiteQuery, errorMessage, leadQuery } from "@/lib/queries";
 import { generateDemoWebsite } from "@/lib/website-builder.functions";
 
 export const Route = createFileRoute("/_authenticated/lead/$leadId")({
@@ -89,7 +88,6 @@ function LeadDetailPage() {
   const queryClient = useQueryClient();
 
   const lead = useQuery(leadQuery(leadId));
-  const emails = useQuery(leadEmailsQuery(leadId));
   const demoSite = useQuery(demoSiteQuery(leadId));
   const plan = useQuery({
     queryKey: ["my-plan"],
@@ -105,7 +103,6 @@ function LeadDetailPage() {
 
   const analyze = useServerFn(analyzeLeadWebsite);
   const generate = useServerFn(generateLeadEmail);
-  const send = useServerFn(sendLeadEmail);
   const buildWebsite = useServerFn(generateDemoWebsite);
 
   const runWebsite = useMutation({
@@ -121,7 +118,6 @@ function LeadDetailPage() {
   const [body, setBody] = useState("");
   const [to, setTo] = useState("");
   const [instructions, setInstructions] = useState("");
-  const [emailLimitReached, setEmailLimitReached] = useState(false);
 
   useEffect(() => {
     if (lead.data?.email && !to) setTo(lead.data.email);
@@ -148,19 +144,6 @@ function LeadDetailPage() {
       toast.success("Draft ready — review before sending");
     },
     onError: (error) => toast.error(errorMessage(error, "Could not generate the email.")),
-  });
-
-  const runSend = useMutation({
-    mutationFn: () => send({ data: { leadId, to, subject, body } }),
-    onSuccess: () => {
-      queryClient.invalidateQueries();
-      toast.success("Email sent from your Gmail account");
-    },
-    onError: (error) => {
-      const message = errorMessage(error, "Gmail could not send that email.");
-      setEmailLimitReached(message.toLowerCase().includes("monthly allowance"));
-      toast.error(message);
-    },
   });
 
   const updateLead = useMutation({
@@ -202,6 +185,7 @@ function LeadDetailPage() {
   }
 
   const record = lead.data;
+  const canBuildWebsite = plan.data?.website_builder_enabled === true;
 
   return (
     <AppShell
@@ -297,7 +281,6 @@ function LeadDetailPage() {
           <TabsList>
             <TabsTrigger value="audit">Website audit</TabsTrigger>
             <TabsTrigger value="email">Cold email</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
           </TabsList>
 
           <TabsContent value="audit" className="mt-4">
@@ -396,7 +379,7 @@ function LeadDetailPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {plan.data?.website_builder_enabled === false ? (
+                {!plan.isLoading && !canBuildWebsite ? (
                   <UpgradePrompt
                     title="Website builder is locked"
                     message="Demo websites are included with every paid Leadlify plan."
@@ -424,14 +407,14 @@ function LeadDetailPage() {
                 <Button
                   variant="outline"
                   onClick={() => runWebsite.mutate()}
-                  disabled={runWebsite.isPending || plan.data?.website_builder_enabled === false}
+                  disabled={runWebsite.isPending || !canBuildWebsite}
                 >
                   {runWebsite.isPending ? (
                     <Loader2 className="size-4 animate-spin" />
                   ) : (
                     <LayoutTemplate className="size-4" />
                   )}
-                   {plan.data?.website_builder_enabled === false
+                   {!canBuildWebsite
                      ? "Upgrade to generate websites"
                      : runWebsite.isPending
                     ? "Building website…"
@@ -449,7 +432,7 @@ function LeadDetailPage() {
                   AI cold email
                 </CardTitle>
                 <CardDescription>
-                  Generated from the audit above and your settings. Always review before sending.
+                   Generated from the audit above and your settings. Copy it into your preferred email app.
                   Every email includes your WhatsApp number 03701480852.
                 </CardDescription>
               </CardHeader>
@@ -511,79 +494,24 @@ function LeadDetailPage() {
                   />
                 </div>
 
-                <Button
-                  onClick={() => runSend.mutate()}
-                  disabled={runSend.isPending || !to || !subject || !body}
-                >
-                  {runSend.isPending ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Send className="size-4" />
-                  )}
-                  {runSend.isPending ? "Sending…" : "Send via Gmail"}
-                </Button>
-                {emailLimitReached ? (
-                  <UpgradePrompt
-                    title="Monthly email limit reached"
-                    message="Upgrade your plan to keep sending outreach from Gmail this month."
-                  />
-                ) : null}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="history" className="mt-4">
-            <Card className="shadow-card border-border/60">
-              <CardHeader>
-                <CardTitle className="text-base">Outreach history</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {emails.isLoading ? (
-                  Array.from({ length: 3 }).map((_, i) => (
-                    <Skeleton key={i} className="h-16 w-full" />
-                  ))
-                ) : (emails.data ?? []).length === 0 ? (
-                  <p className="text-muted-foreground py-10 text-center text-sm">
-                    No emails sent to this lead yet.
-                  </p>
-                ) : (
-                  (emails.data ?? []).map((email) => (
-                    <div key={email.id} className="border-border/60 rounded-lg border p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="text-foreground truncate text-sm font-medium">
-                            {email.subject}
-                          </p>
-                          <p className="text-muted-foreground text-xs">
-                            To {email.to_email} ·{" "}
-                            {new Date(email.sent_at ?? email.created_at).toLocaleString()}
-                          </p>
-                        </div>
-                        <span
-                          className={
-                            email.replied
-                              ? "text-accent text-xs font-medium"
-                              : email.sent_status === "sent"
-                                ? "text-secondary text-xs font-medium"
-                                : "text-destructive text-xs font-medium"
-                          }
-                        >
-                          {email.replied
-                            ? "Replied"
-                            : email.sent_status === "sent"
-                              ? "Sent"
-                              : "Failed"}
-                        </span>
-                      </div>
-                      <p className="text-muted-foreground mt-3 text-sm whitespace-pre-wrap">
-                        {email.body}
-                      </p>
-                      {email.error_message ? (
-                        <p className="text-destructive mt-2 text-xs">{email.error_message}</p>
-                      ) : null}
-                    </div>
-                  ))
-                )}
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`);
+                      toast.success("Draft copied to clipboard");
+                    }}
+                    disabled={!subject || !body}
+                  >
+                    Copy draft
+                  </Button>
+                  {to ? (
+                    <Button asChild variant="outline" disabled={!subject || !body}>
+                      <a href={`mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`}>
+                        Open email app
+                      </a>
+                    </Button>
+                  ) : null}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

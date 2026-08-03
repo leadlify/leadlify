@@ -7,6 +7,7 @@ import {
   LogOut,
   Menu,
   Radar,
+  ReceiptText,
   Settings,
   Sparkles,
   Users,
@@ -27,6 +28,7 @@ const NAV = [
   { to: "/find-leads", label: "Find Leads", icon: Radar },
   { to: "/leads", label: "Leads", icon: Users },
   { to: "/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/plans", label: "Plans", icon: ReceiptText },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
