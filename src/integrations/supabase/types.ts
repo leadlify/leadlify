@@ -306,6 +306,42 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_requests: {
+        Row: {
+          amount_usd: number
+          created_at: string
+          id: string
+          requested_plan: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_usd: number
+          created_at?: string
+          id?: string
+          requested_plan: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_usd?: number
+          created_at?: string
+          id?: string
+          requested_plan?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -410,6 +446,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      review_plan_request: {
+        Args: { _approve: boolean; _request_id: string }
+        Returns: undefined
       }
     }
     Enums: {
