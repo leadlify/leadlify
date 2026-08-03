@@ -17,12 +17,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SiteSlugRouteImport } from './routes/site.$slug'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
-import { Route as AuthenticatedGmailDiagnosticsRouteImport } from './routes/_authenticated/gmail-diagnostics'
 import { Route as AuthenticatedFindLeadsRouteImport } from './routes/_authenticated/find-leads'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
-import { Route as OauthGmailReturnRouteImport } from './routes/oauth/gmail.return'
 import { Route as AuthenticatedLeadLeadIdRouteImport } from './routes/_authenticated/lead.$leadId'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -64,12 +62,6 @@ const AuthenticatedLeadsRoute = AuthenticatedLeadsRouteImport.update({
   path: '/leads',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedGmailDiagnosticsRoute =
-  AuthenticatedGmailDiagnosticsRouteImport.update({
-    id: '/gmail-diagnostics',
-    path: '/gmail-diagnostics',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedFindLeadsRoute = AuthenticatedFindLeadsRouteImport.update({
   id: '/find-leads',
   path: '/find-leads',
@@ -90,11 +82,6 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const OauthGmailReturnRoute = OauthGmailReturnRouteImport.update({
-  id: '/oauth/gmail/return',
-  path: '/oauth/gmail/return',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedLeadLeadIdRoute = AuthenticatedLeadLeadIdRouteImport.update({
   id: '/lead/$leadId',
   path: '/lead/$leadId',
@@ -110,12 +97,10 @@ export interface FileRoutesByFullPath {
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/find-leads': typeof AuthenticatedFindLeadsRoute
-  '/gmail-diagnostics': typeof AuthenticatedGmailDiagnosticsRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/site/$slug': typeof SiteSlugRoute
   '/lead/$leadId': typeof AuthenticatedLeadLeadIdRoute
-  '/oauth/gmail/return': typeof OauthGmailReturnRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -126,12 +111,10 @@ export interface FileRoutesByTo {
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/find-leads': typeof AuthenticatedFindLeadsRoute
-  '/gmail-diagnostics': typeof AuthenticatedGmailDiagnosticsRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/site/$slug': typeof SiteSlugRoute
   '/lead/$leadId': typeof AuthenticatedLeadLeadIdRoute
-  '/oauth/gmail/return': typeof OauthGmailReturnRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -144,12 +127,10 @@ export interface FileRoutesById {
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/find-leads': typeof AuthenticatedFindLeadsRoute
-  '/_authenticated/gmail-diagnostics': typeof AuthenticatedGmailDiagnosticsRoute
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/site/$slug': typeof SiteSlugRoute
   '/_authenticated/lead/$leadId': typeof AuthenticatedLeadLeadIdRoute
-  '/oauth/gmail/return': typeof OauthGmailReturnRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -162,12 +143,10 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/dashboard'
     | '/find-leads'
-    | '/gmail-diagnostics'
     | '/leads'
     | '/settings'
     | '/site/$slug'
     | '/lead/$leadId'
-    | '/oauth/gmail/return'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -178,12 +157,10 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/dashboard'
     | '/find-leads'
-    | '/gmail-diagnostics'
     | '/leads'
     | '/settings'
     | '/site/$slug'
     | '/lead/$leadId'
-    | '/oauth/gmail/return'
   id:
     | '__root__'
     | '/'
@@ -195,12 +172,10 @@ export interface FileRouteTypes {
     | '/_authenticated/analytics'
     | '/_authenticated/dashboard'
     | '/_authenticated/find-leads'
-    | '/_authenticated/gmail-diagnostics'
     | '/_authenticated/leads'
     | '/_authenticated/settings'
     | '/site/$slug'
     | '/_authenticated/lead/$leadId'
-    | '/oauth/gmail/return'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -210,7 +185,6 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SiteSlugRoute: typeof SiteSlugRoute
-  OauthGmailReturnRoute: typeof OauthGmailReturnRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -271,13 +245,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLeadsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/gmail-diagnostics': {
-      id: '/_authenticated/gmail-diagnostics'
-      path: '/gmail-diagnostics'
-      fullPath: '/gmail-diagnostics'
-      preLoaderRoute: typeof AuthenticatedGmailDiagnosticsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/find-leads': {
       id: '/_authenticated/find-leads'
       path: '/find-leads'
@@ -306,13 +273,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/oauth/gmail/return': {
-      id: '/oauth/gmail/return'
-      path: '/oauth/gmail/return'
-      fullPath: '/oauth/gmail/return'
-      preLoaderRoute: typeof OauthGmailReturnRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/lead/$leadId': {
       id: '/_authenticated/lead/$leadId'
       path: '/lead/$leadId'
@@ -328,7 +288,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedFindLeadsRoute: typeof AuthenticatedFindLeadsRoute
-  AuthenticatedGmailDiagnosticsRoute: typeof AuthenticatedGmailDiagnosticsRoute
   AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedLeadLeadIdRoute: typeof AuthenticatedLeadLeadIdRoute
@@ -339,7 +298,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedFindLeadsRoute: AuthenticatedFindLeadsRoute,
-  AuthenticatedGmailDiagnosticsRoute: AuthenticatedGmailDiagnosticsRoute,
   AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedLeadLeadIdRoute: AuthenticatedLeadLeadIdRoute,
@@ -355,7 +313,6 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SiteSlugRoute: SiteSlugRoute,
-  OauthGmailReturnRoute: OauthGmailReturnRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
