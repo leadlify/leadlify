@@ -158,8 +158,8 @@ function LeadsPage() {
       description={`${rows.length} of ${leads.data?.length ?? 0} leads`}
       actions={
         <Button variant="outline" size="sm" onClick={exportCsv}>
-            <Download className="size-4" />
-            <span className="hidden sm:inline">Export CSV</span>
+          <Download className="size-4" />
+          <span className="hidden sm:inline">Export CSV</span>
         </Button>
       }
     >
@@ -300,7 +300,7 @@ function LeadsPage() {
                             rel="noopener noreferrer"
                             className="text-primary block truncate text-sm hover:underline"
                           >
-                            {lead.website.replace(/^https?:\/\//, "")}
+                            {lead.website.replace(/^https?:\\/\\//, "")}
                           </a>
                         ) : (
                           <span className="text-muted-foreground text-sm">None</span>
