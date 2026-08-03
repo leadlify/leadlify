@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { DollarSign, Loader2, Mail, MessageSquareReply, Users } from "lucide-react";
+import { Check, DollarSign, FileClock, Loader2, Users, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Area,
@@ -40,6 +40,7 @@ import {
   allEmailsQuery,
   allLeadsQuery,
   allPaymentsQuery,
+  allPlanRequestsQuery,
   allProfilesQuery,
   errorMessage,
   isAdminQuery,
@@ -95,6 +96,7 @@ function AdminPage() {
   const emails = useQuery({ ...allEmailsQuery, enabled });
   const leads = useQuery({ ...allLeadsQuery, enabled });
   const payments = useQuery({ ...allPaymentsQuery, enabled });
+  const planRequests = useQuery({ ...allPlanRequestsQuery, enabled });
 
   const [payEmail, setPayEmail] = useState("");
   const [payAmount, setPayAmount] = useState("");
@@ -159,6 +161,18 @@ function AdminPage() {
     onError: (error) => toast.error(error instanceof Error ? error.message : "Update failed"),
   });
 
+  const reviewPlan = useMutation({
+    mutationFn: async ({ id, approve }: { id: string; approve: boolean }) => {
+      const { error } = await supabase.rpc("review_plan_request", { _request_id: id, _approve: approve });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["admin"] });
+      toast.success(variables.approve ? "Plan approved and activated" : "Plan request rejected");
+    },
+    onError: (error) => toast.error(errorMessage(error)),
+  });
+
   if (admin.isLoading || !enabled) {
     return (
       <AppShell title="Admin panel" description="Checking access…">
@@ -174,7 +188,8 @@ function AdminPage() {
   const sent = allEmails.filter((e) => e.sent_status === "sent");
   const replies = sent.filter((e) => e.replied);
   const earnings = (payments.data ?? []).reduce((sum, p) => sum + Number(p.amount ?? 0), 0);
-  const loading = profiles.isLoading || emails.isLoading || leads.isLoading || payments.isLoading;
+  const loading = profiles.isLoading || emails.isLoading || leads.isLoading || payments.isLoading || planRequests.isLoading;
+  const pendingRequests = (planRequests.data ?? []).filter((request) => request.status === "pending");
 
   const days = Array.from({ length: 14 }, (_, i) => {
     const d = new Date();
@@ -207,22 +222,8 @@ function AdminPage() {
       <div className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Total users" value={users.length} icon={Users} loading={loading} />
-          <StatCard
-            label="Emails sent"
-            value={sent.length}
-            icon={Mail}
-            tone="secondary"
-            loading={loading}
-            delay={60}
-          />
-          <StatCard
-            label="Replies"
-            value={replies.length}
-            icon={MessageSquareReply}
-            tone="accent"
-            loading={loading}
-            delay={120}
-          />
+          <StatCard label="Pending plans" value={pendingRequests.length} icon={FileClock} tone="secondary" loading={loading} delay={60} />
+          <StatCard label="Approved plans" value={(planRequests.data ?? []).filter((request) => request.status === "approved").length} icon={Check} tone="accent" loading={loading} delay={120} />
           <StatCard
             label="Total earnings"
             value={earnings}
@@ -234,6 +235,24 @@ function AdminPage() {
             delay={180}
           />
         </div>
+
+        <Card className="shadow-card border-border/60">
+          <CardHeader>
+            <CardTitle className="text-base">Plan approvals</CardTitle>
+            <CardDescription>Paid-plan access remains locked until you approve the request.</CardDescription>
+          </CardHeader>
+          <CardContent className="overflow-x-auto">
+            <Table>
+              <TableHeader><TableRow><TableHead>User</TableHead><TableHead>Plan</TableHead><TableHead>Price</TableHead><TableHead>Requested</TableHead><TableHead className="text-right">Decision</TableHead></TableRow></TableHeader>
+              <TableBody>
+                {pendingRequests.length === 0 ? <TableRow><TableCell colSpan={5} className="text-muted-foreground py-10 text-center">No plan requests waiting.</TableCell></TableRow> : pendingRequests.map((request) => {
+                  const user = users.find((profile) => profile.id === request.user_id);
+                  return <TableRow key={request.id}><TableCell className="font-medium">{user?.email ?? request.user_id}</TableCell><TableCell className="capitalize">{request.requested_plan}</TableCell><TableCell>${Number(request.amount_usd).toFixed(2)}</TableCell><TableCell>{new Date(request.created_at).toLocaleString()}</TableCell><TableCell><div className="flex justify-end gap-2"><Button size="sm" variant="outline" disabled={reviewPlan.isPending} onClick={() => reviewPlan.mutate({ id: request.id, approve: false })}><X className="size-4" />Reject</Button><Button size="sm" disabled={reviewPlan.isPending} onClick={() => reviewPlan.mutate({ id: request.id, approve: true })}><Check className="size-4" />Approve</Button></div></TableCell></TableRow>;
+                })}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
 
         <Card className="shadow-card border-border/60">
           <CardHeader>

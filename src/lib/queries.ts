@@ -77,6 +77,7 @@ export function errorMessage(error: unknown, fallback = "Something went wrong.")
 
 export type Profile = Tables<"profiles">;
 export type Payment = Tables<"payments">;
+export type PlanRequest = Tables<"plan_requests">;
 
 export const isAdminQuery = queryOptions({
   queryKey: ["is-admin"],
@@ -108,6 +109,15 @@ export const allPaymentsQuery = queryOptions({
       .select("*")
       .order("paid_at", { ascending: false })
       .limit(1000);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  },
+});
+
+export const allPlanRequestsQuery = queryOptions({
+  queryKey: ["admin", "plan-requests"],
+  queryFn: async (): Promise<PlanRequest[]> => {
+    const { data, error } = await supabase.from("plan_requests").select("*").order("created_at", { ascending: false }).limit(1000);
     if (error) throw new Error(error.message);
     return data ?? [];
   },

@@ -7,6 +7,7 @@ import {
   LogOut,
   Menu,
   Radar,
+  ReceiptText,
   Settings,
   Sparkles,
   Users,
@@ -14,7 +15,7 @@ import {
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
-import { GmailStatus } from "@/components/gmail-status";
+
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -27,6 +28,7 @@ const NAV = [
   { to: "/find-leads", label: "Find Leads", icon: Radar },
   { to: "/leads", label: "Leads", icon: Users },
   { to: "/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/plans", label: "Plans", icon: ReceiptText },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
@@ -144,7 +146,7 @@ export function AppShell({
             </div>
 
             <div className="flex items-center gap-2">
-              <GmailStatus className="hidden md:flex" />
+              
               {actions}
               <ThemeToggle />
             </div>

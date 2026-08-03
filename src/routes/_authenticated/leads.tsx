@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
-import { Download, Loader2, RefreshCw, Search, Trash2 } from "lucide-react";
+import { Download, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -45,7 +44,6 @@ import {
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { errorMessage, leadsQuery, type Lead } from "@/lib/queries";
-import { syncReplies } from "@/lib/outreach.functions";
 
 export const Route = createFileRoute("/_authenticated/leads")({
   head: () => ({
@@ -90,7 +88,6 @@ function toCsv(rows: Lead[]): string {
 function LeadsPage() {
   const queryClient = useQueryClient();
   const leads = useQuery(leadsQuery);
-  const sync = useServerFn(syncReplies);
 
   const [term, setTerm] = useState("");
   const [status, setStatus] = useState<"all" | LeadStatus>("all");
@@ -138,19 +135,6 @@ function LeadsPage() {
     onError: (error) => toast.error(errorMessage(error)),
   });
 
-  const checkReplies = useMutation({
-    mutationFn: () => sync(),
-    onSuccess: (result) => {
-      queryClient.invalidateQueries();
-      toast.success(
-        result.replies > 0
-          ? `${result.replies} new repl${result.replies === 1 ? "y" : "ies"} found`
-          : "No new replies yet",
-      );
-    },
-    onError: (error) => toast.error(errorMessage(error, "Could not reach Gmail.")),
-  });
-
   const exportCsv = () => {
     if (rows.length === 0) {
       toast.warning("Nothing to export with the current filters.");
@@ -173,25 +157,10 @@ function LeadsPage() {
       title="Leads"
       description={`${rows.length} of ${leads.data?.length ?? 0} leads`}
       actions={
-        <>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => checkReplies.mutate()}
-            disabled={checkReplies.isPending}
-          >
-            {checkReplies.isPending ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <RefreshCw className="size-4" />
-            )}
-            <span className="hidden sm:inline">Check replies</span>
-          </Button>
-          <Button variant="outline" size="sm" onClick={exportCsv}>
-            <Download className="size-4" />
-            <span className="hidden sm:inline">Export CSV</span>
-          </Button>
-        </>
+        <Button variant="outline" size="sm" onClick={exportCsv}>
+          <Download className="size-4" />
+          <span className="hidden sm:inline">Export CSV</span>
+        </Button>
       }
     >
       <Card className="shadow-card border-border/60">

@@ -145,7 +145,7 @@ function AuthPage() {
     mode === "login"
       ? "Welcome back — pick up where you left off."
       : mode === "signup"
-        ? "Start free with 10 leads and 2 email sends."
+        ? "Start free with 10 leads and AI drafts."
         : "We'll email you a secure link to choose a new password.";
 
   return (
