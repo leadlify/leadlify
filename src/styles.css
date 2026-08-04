@@ -59,6 +59,14 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-public: var(--public);
+  --color-public-soft: var(--public-soft);
+  --color-public-raised: var(--public-raised);
+  --color-public-foreground: var(--public-foreground);
+  --color-public-muted: var(--public-muted);
+  --color-public-border: var(--public-border);
+  --font-heading: "Sora", sans-serif;
+  --font-body: "Manrope", sans-serif;
 }
 
 :root {
@@ -98,6 +106,13 @@
   --sidebar-accent-foreground: oklch(0.546 0.215 262.9);
   --sidebar-border: oklch(0.92 0.012 255);
   --sidebar-ring: oklch(0.546 0.215 262.9);
+
+  --public: oklch(0.115 0 0);
+  --public-soft: oklch(0.155 0 0);
+  --public-raised: oklch(0.19 0 0);
+  --public-foreground: oklch(0.965 0 0);
+  --public-muted: oklch(0.64 0 0);
+  --public-border: oklch(0.3 0 0);
 
   --gradient-brand: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   --gradient-surface: linear-gradient(160deg, oklch(0.99 0.008 250) 0%, oklch(0.965 0.02 240) 100%);
@@ -206,5 +221,28 @@
 
 @utility animate-fade-up {
   animation: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility public-hero-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in oklab, var(--public-border) 35%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--public-border) 35%, transparent) 1px, transparent 1px),
+    radial-gradient(circle at 50% 10%, color-mix(in oklab, var(--public-foreground) 7%, transparent), transparent 42%);
+  background-size: 56px 56px, 56px 56px, 100% 100%;
+}
+
+@utility shadow-public {
+  box-shadow: 0 40px 100px -45px color-mix(in oklab, var(--public-foreground) 18%, transparent);
+}
+
+.public-theme {
+  color-scheme: dark;
+  letter-spacing: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up {
+    animation: none;
+  }
 }
 

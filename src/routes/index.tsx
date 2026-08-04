@@ -1,463 +1,113 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  BarChart3,
-  Bot,
-  CheckCircle2,
-  Clock,
-  Globe2,
-  Instagram,
-  Mail,
-  MapPin,
-  Radar,
-  Shield,
-  Sparkles,
-  Star,
-  Users,
-  MessageCircle,
-  Zap,
-} from "lucide-react";
+import { ArrowRight, BarChart3, Bot, Check, CheckCircle2, Globe2, Mail, MapPin, Search, ShieldCheck, Sparkles, X } from "lucide-react";
 
-import { ThemeToggle } from "@/components/theme-toggle";
+import { PublicFooter, PublicHeader } from "@/components/public-site";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Leadlify — Find Businesses With No Website" },
-      {
-        name: "description",
-        content:
-          "Find local businesses with no website or a bad one, audit them with AI, and generate personalised AI cold email drafts — all inside one lightweight CRM.",
-      },
-      { property: "og:title", content: "Leadlify — Find Leads & Send AI Cold Emails" },
-      {
-        property: "og:description",
-        content:
-          "Find local businesses with no website, audit them with AI, and generate personalised AI cold email drafts.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Leadlify — Find Leads & Send AI Cold Emails" },
-      {
-        name: "twitter:description",
-        content: "AI lead generation and cold email CRM for web designers and agencies.",
-      },
-    ],
-  }),
+  head: () => ({ meta: [
+    { title: "Leadlify — AI Lead Generation for Web Designers" },
+    { name: "description", content: "Find businesses with no website, audit their online presence, and create personalized AI cold email drafts with Leadlify." },
+    { property: "og:title", content: "Leadlify — Turn Local Businesses Into Clients" },
+    { property: "og:description", content: "Find high-intent leads, uncover website opportunities, and write personalized outreach." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: Landing,
 });
 
-const FEATURES = [
-  {
-    icon: MapPin,
-    title: "Businesses with no website",
-    body: "Flip one switch and Leadlify only imports businesses that have no website at all — the easiest web design pitch there is.",
-  },
-  {
-    icon: Radar,
-    title: "Up to 50 leads per search",
-    body: "Pick a city, a niche and a radius. Real Google Places data with ratings, reviews, phone numbers and addresses, deduplicated automatically.",
-  },
-  {
-    icon: Bot,
-    title: "AI website audits",
-    body: "Each lead with a site gets graded on design, UX, SEO, speed and mobile, with concrete opportunities written in plain language.",
-  },
-  {
-    icon: Mail,
-    title: "AI-powered cold email drafts",
-    body: "AI writes an email around that specific business's problems, giving you a high-converting draft ready to copy and send.",
-  },
-  {
-    icon: Users,
-    title: "A pipeline that stays clean",
-    body: "New, contacted, replied, interested, closed. Track status from new to closed and keep your pipeline organized.",
-  },
-  {
-    icon: BarChart3,
-    title: "Analytics that matter",
-    body: "Reply rate, close rate, best-performing niches and audit score spread — see exactly which outreach is working.",
-  },
+const features = [
+  { icon: MapPin, title: "No-website discovery", text: "Search live business listings worldwide and isolate companies with no website listed." },
+  { icon: Bot, title: "AI opportunity audits", text: "Turn a business profile or existing website into a clear, practical design opportunity." },
+  { icon: Mail, title: "Personalized drafts", text: "Generate thoughtful cold email drafts grounded in the details of each business." },
+  { icon: BarChart3, title: "Focused pipeline", text: "Track every lead from discovery to contact, reply, interest, and close in one place." },
 ];
 
-const STEPS = [
-  {
-    n: "01",
-    t: "Create your account",
-    d: "Sign up with your email and start finding leads in a couple of clicks.",
-  },
-  {
-    n: "02",
-    t: "Search a niche and city",
-    d: "Choose the business type, location and radius — optionally only ones with no website.",
-  },
-  {
-    n: "03",
-    t: "Audit and generate",
-    d: "AI grades the site and drafts a personalised pitch referencing real problems.",
-  },
-  {
-    n: "04",
-    t: "Copy and follow up",
-    d: "Copy the AI draft to your email client and track the progress in your pipeline.",
-  },
+const plans = [
+  { name: "Starter", price: 32, note: "For focused solo outreach", items: ["250 leads per month", "AI audits and drafts", "Demo website builder"] },
+  { name: "Growth", price: 45, note: "For consistent acquisition", items: ["1,000 leads per month", "AI audits and drafts", "Demo website builder"], featured: true },
+  { name: "Agency", price: 70, note: "For high-volume prospecting", items: ["5,000 leads per month", "AI audits and drafts", "Demo website builder"] },
 ];
 
-const STATS = [
-  { value: "50", label: "leads per search" },
-  { value: "6", label: "audit scores per site" },
-  { value: "10", label: "free lead imports" },
-  { value: "1", label: "workspace for everything" },
+const faqs = [
+  ["Where does Leadlify find businesses?", "Leadlify uses live Google Places data. Choose a country, city, niche, keyword, and radius to find relevant businesses with useful public listing details."],
+  ["Can I find only businesses without a website?", "Yes. Turn on the no-website filter and Leadlify keeps businesses whose listing does not include a website."],
+  ["Does Leadlify send emails for me?", "No. Leadlify creates a personalized draft that you copy into your preferred email client, so sending and replies stay under your control."],
+  ["What is included in the free account?", "New accounts include 10 lead imports and 2 email drafts. The demo website builder is available on approved paid plans."],
+  ["How are paid plans activated?", "After choosing a plan, your request is submitted for review. Once approved, the matching limits and website builder are activated in your workspace."],
 ];
 
-const AUDIENCE = [
-  {
-    icon: Globe2,
-    title: "Freelance web designers",
-    body: "Fill your week with local businesses that genuinely need a site, not cold lists bought from a broker.",
-  },
-  {
-    icon: Zap,
-    title: "Small agencies",
-    body: "Give your team one shared, repeatable outreach motion with tracking on every single email.",
-  },
-  {
-    icon: Clock,
-    title: "Side-hustlers",
-    body: "Run one search, send ten emails, and get back to building. The whole loop takes minutes.",
-  },
-];
-
-const FAQ = [
-  {
-    q: "Where do the leads come from?",
-    a: "Live Google Places data. You choose the country, city, business type, keyword and radius, and Leadlify imports up to 50 matching businesses with their rating, review count, phone, address and website (or lack of one).",
-  },
-  {
-    q: "Can I only get businesses without a website?",
-    a: "Yes. There's a toggle on the search form. When it's on, Leadlify scans deeper through the results and keeps only businesses that have no website listed.",
-  },
-  {
-    q: "Whose email account sends the outreach?",
-    a: "Yours. You generate the draft in Leadlify and send it from your own email client. This keeps your deliverability high and replies in your control.",
-  },
-  {
-    q: "Can I try Leadlify for free?",
-    a: "Yes. Every new account includes 10 lead imports and AI email drafts. Demo website generation unlocks only after a paid plan is approved.",
-  },
-];
-
-const PLANS = [
-  {
-    name: "Starter",
-    price: 32,
-    description: "For focused solo outreach",
-    features: ["250 leads / month", "AI audits & drafts", "Admin-approved activation", "Demo website builder"],
-  },
-  {
-    name: "Growth",
-    price: 45,
-    description: "For consistent client acquisition",
-    features: ["1,000 leads / month", "AI audits & drafts", "Admin-approved activation", "Demo website builder"],
-    featured: true,
-  },
-  {
-    name: "Agency",
-    price: 70,
-    description: "For high-volume prospecting",
-    features: ["5,000 leads / month", "AI audits & drafts", "Admin-approved activation", "Demo website builder"],
-  },
-];
+function ProductPreview() {
+  return (
+    <div className="border-public-border bg-public-raised animate-fade-up relative mx-auto mt-14 max-w-6xl overflow-hidden rounded-lg border p-2 shadow-public">
+      <div className="border-public-border bg-public-soft rounded-md border">
+        <div className="border-public-border flex h-11 items-center gap-2 border-b px-4">
+          <span className="bg-public-border size-2 rounded-full" /><span className="bg-public-border size-2 rounded-full" /><span className="bg-public-border size-2 rounded-full" />
+          <span className="text-public-muted ml-3 text-xs">Lead discovery / Karachi / Web design opportunity</span>
+        </div>
+        <div className="grid min-h-72 md:grid-cols-[190px_1fr]">
+          <aside className="border-public-border hidden border-r p-4 md:block">
+            {["Overview", "Find leads", "Pipeline", "Analytics"].map((item, index) => <div key={item} className={`mb-2 rounded px-3 py-2 text-xs ${index === 1 ? "bg-public-foreground text-public" : "text-public-muted"}`}>{item}</div>)}
+          </aside>
+          <div className="p-4 sm:p-6">
+            <div className="mb-5 flex items-end justify-between gap-4"><div><p className="text-public-muted text-xs">LIVE SEARCH RESULTS</p><p className="text-public-foreground mt-1 font-heading text-lg font-semibold">Businesses ready to discover</p></div><span className="text-public-muted text-xs">50 results</span></div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {["Atlas Dental Studio", "Northline Café", "Horizon Fitness"].map((name, index) => <div key={name} className="border-public-border bg-public rounded-md border p-4"><div className="mb-5 flex items-center justify-between"><span className="bg-public-raised grid size-8 place-items-center rounded border border-public-border"><Globe2 className="text-public-muted size-4" /></span><span className="text-public-muted text-[10px]">{index === 1 ? "WEAK SITE" : "NO WEBSITE"}</span></div><p className="text-public-foreground text-sm font-medium">{name}</p><p className="text-public-muted mt-1 text-xs">High-fit opportunity</p><div className="bg-public-border mt-4 h-px" /><p className="text-public-foreground mt-3 text-xs">Generate outreach →</p></div>)}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function Landing() {
   return (
-    <div className="bg-background min-h-screen">
-      <header className="border-border/60 bg-background/80 sticky top-0 z-30 border-b backdrop-blur-lg">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3.5 sm:px-6">
-          <span className="bg-gradient-brand shadow-glow grid size-9 place-items-center rounded-xl">
-            <Sparkles className="text-primary-foreground size-4.5" />
-          </span>
-          <p className="text-foreground text-sm font-semibold tracking-tight">Leadlify</p>
-          <nav className="text-muted-foreground ml-6 hidden flex-1 items-center gap-6 text-sm md:flex">
-            <a href="#features" className="hover:text-foreground transition-colors">
-              Features
-            </a>
-            <a href="#how" className="hover:text-foreground transition-colors">
-              How it works
-            </a>
-            <a href="#pricing" className="hover:text-foreground transition-colors">
-              Pricing
-            </a>
-            <a href="#faq" className="hover:text-foreground transition-colors">
-              FAQ
-            </a>
-          </nav>
-          <div className="flex flex-1 items-center justify-end gap-2 md:flex-none">
-            <ThemeToggle />
-            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-              <Link to="/auth">Sign in</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link to="/auth" search={{ mode: "signup" }}>
-                Get started
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </header>
-
+    <div className="public-theme bg-public text-public-foreground min-h-screen font-body">
+      <PublicHeader />
       <main>
-        {/* Hero */}
-        <section className="bg-gradient-surface relative overflow-hidden">
-          <div
-            aria-hidden
-            className="bg-primary/20 pointer-events-none absolute -top-40 left-1/2 size-[38rem] -translate-x-1/2 rounded-full blur-3xl"
-          />
-          <div className="animate-fade-up relative mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 sm:py-28">
-            <span className="border-border/60 bg-card/70 text-muted-foreground inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium">
-              <Sparkles className="text-primary size-3.5" />
-              AI lead generation + cold email CRM
-            </span>
-            <h1 className="text-foreground mt-6 text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
-              Find the businesses with <span className="text-primary">no website</span> — and win
-              them as clients
-            </h1>
-            <p className="text-muted-foreground mx-auto mt-5 max-w-xl text-base text-pretty sm:text-lg">
-              Leadlify finds up to 50 local businesses per search, grades their web presence with AI,
-              writes the cold email, and gives you a ready-to-send draft.
-            </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Button asChild size="lg">
-                <Link to="/auth" search={{ mode: "signup" }}>
-                  Create free account <ArrowRight className="size-4" />
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link to="/auth">I already have an account</Link>
-              </Button>
+        <section className="public-hero-grid relative overflow-hidden px-5 pt-20 pb-10 text-center sm:px-8 sm:pt-28">
+          <div className="animate-fade-up mx-auto max-w-5xl">
+            <p className="text-public-muted mb-7 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest"><Sparkles className="size-3.5" /> Lead generation, refined</p>
+            <h1 className="text-public-foreground font-heading text-5xl font-semibold leading-[1.04] sm:text-7xl lg:text-8xl">Leadlify</h1>
+            <p className="text-public-muted mx-auto mt-7 max-w-2xl text-base leading-7 sm:text-xl">Find businesses that genuinely need a better web presence. Turn live local data into focused leads, clear opportunities, and personalized outreach.</p>
+            <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+              <Button asChild size="lg" className="bg-public-foreground text-public hover:bg-public-foreground/90 h-12 px-7"><Link to="/auth" search={{ mode: "signup" }}>Start with 10 free leads <ArrowRight /></Link></Button>
+              <Button asChild size="lg" variant="outline" className="border-public-border bg-public-raised text-public-foreground hover:bg-public-soft h-12 px-7"><a href="#how">See how it works</a></Button>
             </div>
-            <div className="text-muted-foreground mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs">
-              <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="text-primary size-3.5" /> No credit card
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Shield className="text-primary size-3.5" /> Privacy focused
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Star className="text-primary size-3.5" /> Real Google Places data
-              </span>
-            </div>
+            <div className="text-public-muted mt-6 flex flex-wrap justify-center gap-5 text-xs"><span className="flex items-center gap-1.5"><CheckCircle2 className="size-3.5" /> No credit card</span><span className="flex items-center gap-1.5"><ShieldCheck className="size-3.5" /> Draft-only outreach</span><span className="flex items-center gap-1.5"><Globe2 className="size-3.5" /> International search</span></div>
           </div>
+          <ProductPreview />
+        </section>
 
-          <div className="border-border/60 relative mx-auto grid max-w-5xl grid-cols-2 gap-px border-t sm:grid-cols-4">
-            {STATS.map((s) => (
-              <div key={s.label} className="bg-card/30 px-4 py-6 text-center">
-                <p className="text-foreground text-3xl font-semibold tracking-tight tabular-nums">
-                  {s.value}
-                </p>
-                <p className="text-muted-foreground mt-1 text-xs">{s.label}</p>
-              </div>
-            ))}
+        <section className="border-public-border border-y">
+          <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-public-border sm:grid-cols-4">
+            {[["50", "leads per search"], ["10", "free lead imports"], ["6", "audit dimensions"], ["1", "focused pipeline"]].map(([value, label]) => <div key={label} className="border-public-border px-5 py-8 text-center max-sm:even:border-l max-sm:nth-[n+3]:border-t"><p className="font-heading text-3xl font-semibold">{value}</p><p className="text-public-muted mt-1 text-xs">{label}</p></div>)}
           </div>
         </section>
 
-        {/* Problem / solution */}
-        <section className="mx-auto max-w-5xl px-4 py-16 sm:px-6 sm:py-20">
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card className="shadow-card border-border/60">
-              <CardContent className="space-y-3 p-6">
-                <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-                  Without Leadlify
-                </p>
-                <ul className="text-muted-foreground space-y-2.5 text-sm">
-                  <li>Hours scrolling Google Maps copying phone numbers into a spreadsheet</li>
-                  <li>Guessing which businesses actually need a new website</li>
-                  <li>Writing the same generic email over and over again</li>
-                  <li>Losing track of who you contacted and who replied</li>
-                </ul>
-              </CardContent>
-            </Card>
-            <Card className="shadow-elevated border-primary/30 bg-primary/5">
-              <CardContent className="space-y-3 p-6">
-                <p className="text-primary text-xs font-semibold tracking-widest uppercase">
-                  With Leadlify
-                </p>
-                <ul className="text-foreground space-y-2.5 text-sm">
-                  <li className="flex gap-2">
-                    <CheckCircle2 className="text-primary mt-0.5 size-4 shrink-0" />
-                    One search imports 50 verified businesses in seconds
-                  </li>
-                  <li className="flex gap-2">
-                    <CheckCircle2 className="text-primary mt-0.5 size-4 shrink-0" />
-                    Filter to only the ones with no website at all
-                  </li>
-                  <li className="flex gap-2">
-                    <CheckCircle2 className="text-primary mt-0.5 size-4 shrink-0" />
-                    AI writes a pitch based on their real weaknesses
-                  </li>
-                  <li className="flex gap-2">
-                    <CheckCircle2 className="text-primary mt-0.5 size-4 shrink-0" />
-                    Every lead and follow-up stage tracked in one pipeline
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        <section id="pricing" className="border-border/60 bg-card/40 border-y">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-            <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-foreground text-2xl font-semibold sm:text-3xl">Simple monthly plans</h2>
-              <p className="text-muted-foreground mt-3 text-sm sm:text-base">
-                Start free with 10 leads and AI drafts. Upgrade when you are ready to scale.
-              </p>
-            </div>
-            <div className="mt-10 grid gap-4 lg:grid-cols-3">
-              {PLANS.map((plan) => (
-                <Card key={plan.name} className={plan.featured ? "border-primary shadow-elevated" : "border-border/60 shadow-card"}>
-                  <CardContent className="p-6">
-                    {plan.featured ? <p className="text-primary text-xs font-semibold uppercase">Most popular</p> : null}
-                    <h3 className="text-foreground mt-2 text-lg font-semibold">{plan.name}</h3>
-                    <p className="text-muted-foreground mt-1 text-sm">{plan.description}</p>
-                    <p className="text-foreground mt-6 text-4xl font-semibold tabular-nums">
-                      ${plan.price}<span className="text-muted-foreground text-sm font-normal"> / month</span>
-                    </p>
-                    <ul className="mt-6 space-y-3 text-sm">
-                      {plan.features.map((feature) => (
-                        <li key={feature} className="flex items-center gap-2">
-                          <CheckCircle2 className="text-accent size-4 shrink-0" /> {feature}
-                        </li>
-                      ))}
-                    </ul>
-                    <Button asChild className="mt-7 w-full" variant={plan.featured ? "default" : "outline"}>
-                      <Link to="/auth" search={{ mode: "signup" }}>Start with {plan.name}</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
+        <section id="features" className="px-5 py-24 sm:px-8 sm:py-32">
+          <div className="mx-auto max-w-7xl">
+            <div className="max-w-3xl"><p className="text-public-muted text-xs font-semibold uppercase tracking-widest">A better prospecting rhythm</p><h2 className="mt-5 font-heading text-3xl font-semibold sm:text-5xl">Less list-building.<br />More reasons to reach out.</h2></div>
+            <div className="border-public-border mt-14 grid border-t md:grid-cols-2">
+              {features.map(({ icon: Icon, title, text }, index) => <article key={title} className={`border-public-border py-9 md:p-9 ${index % 2 === 0 ? "md:border-r" : ""} ${index < 2 ? "border-b" : index === 2 ? "max-md:border-b" : ""}`}><Icon className="text-public-muted size-5" /><h3 className="mt-7 font-heading text-xl font-semibold">{title}</h3><p className="text-public-muted mt-3 max-w-md text-sm leading-6">{text}</p></article>)}
             </div>
           </div>
         </section>
 
-        {/* Features */}
-        <section id="features" className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 sm:pb-24">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-foreground text-2xl font-semibold tracking-tight sm:text-3xl">
-              Everything the outreach needs, in one place
-            </h2>
-            <p className="text-muted-foreground mt-3 text-sm sm:text-base">
-              From finding the business to closing the reply — no spreadsheets, no scraping tools,
-              no separate mail merge.
-            </p>
-          </div>
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((f, i) => (
-              <Card
-                key={f.title}
-                className="animate-fade-up shadow-card border-border/60 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-elevated"
-                style={{ animationDelay: `${i * 60}ms` }}
-              >
-                <CardContent className="space-y-3 p-6">
-                  <span className="bg-primary/10 text-primary grid size-10 place-items-center rounded-xl">
-                    <f.icon className="size-5" />
-                  </span>
-                  <h3 className="text-foreground font-semibold">{f.title}</h3>
-                  <p className="text-muted-foreground text-sm">{f.body}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+        <section id="how" className="border-public-border bg-public-soft border-y px-5 py-24 sm:px-8 sm:py-32">
+          <div className="mx-auto max-w-7xl"><div className="grid gap-14 lg:grid-cols-[.8fr_1.2fr]"><div><p className="text-public-muted text-xs font-semibold uppercase tracking-widest">From search to conversation</p><h2 className="mt-5 font-heading text-3xl font-semibold sm:text-5xl">One precise workflow.</h2><p className="text-public-muted mt-5 max-w-md leading-7">Choose the market. Find the opportunity. Build a pitch around what the business actually needs.</p></div><ol className="border-public-border border-t">{[[Search, "Search the market", "Choose a country, city, niche, and radius."], [ShieldCheck, "Qualify the opportunity", "Filter for no website or audit an existing one."], [Mail, "Create a relevant draft", "Use business details and real weaknesses—not generic filler."], [BarChart3, "Move the lead forward", "Copy the draft and track each outcome in your pipeline."]].map(([Icon, title, text], index) => { const StepIcon = Icon as typeof Search; return <li key={title as string} className="border-public-border grid grid-cols-[38px_1fr] gap-4 border-b py-6"><span className="text-public-muted text-xs">0{index + 1}</span><div><StepIcon className="mb-3 size-4" /><h3 className="font-heading font-semibold">{title as string}</h3><p className="text-public-muted mt-1 text-sm">{text as string}</p></div></li>; })}</ol></div></div>
         </section>
 
-        {/* How it works */}
-        <section id="how" className="border-border/60 bg-card/40 border-y">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-            <h2 className="text-foreground text-center text-2xl font-semibold tracking-tight sm:text-3xl">
-              How it works
-            </h2>
-            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {STEPS.map((s) => (
-                <div key={s.n} className="border-border/60 space-y-2 rounded-xl border p-5">
-                  <p className="text-primary text-sm font-semibold tracking-widest">{s.n}</p>
-                  <h3 className="text-foreground font-medium">{s.t}</h3>
-                  <p className="text-muted-foreground text-sm">{s.d}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <section className="px-5 py-24 sm:px-8 sm:py-32"><div className="mx-auto max-w-7xl"><div className="mb-12 text-center"><p className="text-public-muted text-xs font-semibold uppercase tracking-widest">The Leadlify difference</p><h2 className="mt-5 font-heading text-3xl font-semibold sm:text-5xl">Prospecting without the guesswork.</h2></div><div className="border-public-border grid overflow-hidden rounded-lg border md:grid-cols-2"><div className="bg-public p-7 sm:p-10"><p className="text-public-muted text-xs font-semibold uppercase tracking-widest">Traditional outreach</p><ul className="text-public-muted mt-8 space-y-5 text-sm">{["Manual searching and spreadsheet cleanup", "Guessing which business needs a new website", "Generic drafts with no useful context"].map(x => <li key={x} className="flex gap-3"><X className="size-4 shrink-0" />{x}</li>)}</ul></div><div className="border-public-border bg-public-raised border-t p-7 sm:p-10 md:border-t-0 md:border-l"><p className="text-public-foreground text-xs font-semibold uppercase tracking-widest">The Leadlify way</p><ul className="mt-8 space-y-5 text-sm">{["Live business discovery in the market you choose", "Clear no-website and weak-site opportunities", "Personalized AI drafts based on real details"].map(x => <li key={x} className="flex gap-3"><Check className="size-4 shrink-0" />{x}</li>)}</ul></div></div></div></section>
 
-        {/* Who it's for */}
-        <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-          <h2 className="text-foreground text-center text-2xl font-semibold tracking-tight sm:text-3xl">
-            Built for people who sell websites
-          </h2>
-          <div className="mt-10 grid gap-4 sm:grid-cols-3">
-            {AUDIENCE.map((a) => (
-              <Card key={a.title} className="shadow-card border-border/60">
-                <CardContent className="space-y-3 p-6">
-                  <span className="bg-secondary/15 text-secondary grid size-10 place-items-center rounded-xl">
-                    <a.icon className="size-5" />
-                  </span>
-                  <h3 className="text-foreground font-semibold">{a.title}</h3>
-                  <p className="text-muted-foreground text-sm">{a.body}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
+        <section id="pricing" className="border-public-border bg-public-soft border-y px-5 py-24 sm:px-8 sm:py-32"><div className="mx-auto max-w-7xl"><div className="text-center"><p className="text-public-muted text-xs font-semibold uppercase tracking-widest">Simple monthly pricing</p><h2 className="mt-5 font-heading text-3xl font-semibold sm:text-5xl">Choose your outreach pace.</h2><p className="text-public-muted mt-4">Start free with 10 leads and 2 drafts. Paid plans activate after approval.</p></div><div className="mt-14 grid gap-4 lg:grid-cols-3">{plans.map(plan => <article key={plan.name} className={`relative flex min-h-96 flex-col rounded-lg border p-7 ${plan.featured ? "border-public-foreground bg-public-raised" : "border-public-border bg-public"}`}>{plan.featured ? <span className="bg-public-foreground text-public absolute top-0 right-6 px-3 py-1 text-[10px] font-bold uppercase">Most popular</span> : null}<p className="text-public-muted text-sm">{plan.name}</p><p className="mt-4 font-heading text-4xl font-semibold">${plan.price}<span className="text-public-muted text-sm font-normal"> / month</span></p><p className="text-public-muted mt-2 text-sm">{plan.note}</p><ul className="mt-8 flex-1 space-y-4 text-sm">{plan.items.map(item => <li key={item} className="flex gap-3"><Check className="size-4" />{item}</li>)}</ul><Button asChild className={`mt-8 w-full ${plan.featured ? "bg-public-foreground text-public hover:bg-public-foreground/90" : "border-public-border bg-public-raised text-public-foreground hover:bg-public-soft"}`} variant={plan.featured ? "default" : "outline"}><Link to="/auth" search={{ mode: "signup" }}>Choose {plan.name}</Link></Button></article>)}</div></div></section>
 
-        {/* FAQ */}
-        <section id="faq" className="border-border/60 bg-card/40 border-y">
-          <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-20">
-            <h2 className="text-foreground text-center text-2xl font-semibold tracking-tight sm:text-3xl">
-              Frequently asked questions
-            </h2>
-            <div className="mt-8 space-y-4">
-              {FAQ.map((item) => (
-                <div key={item.q} className="border-border/60 bg-card rounded-xl border p-5">
-                  <h3 className="text-foreground font-medium">{item.q}</h3>
-                  <p className="text-muted-foreground mt-2 text-sm">{item.a}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <section id="faq" className="px-5 py-24 sm:px-8 sm:py-32"><div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[.7fr_1.3fr]"><div><p className="text-public-muted text-xs font-semibold uppercase tracking-widest">FAQ</p><h2 className="mt-5 font-heading text-3xl font-semibold sm:text-5xl">Good questions.<br />Clear answers.</h2></div><div className="border-public-border border-t">{faqs.map(([question, answer]) => <details key={question} className="group border-public-border border-b"><summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 font-heading font-semibold"><span>{question}</span><span className="text-public-muted text-xl transition-transform group-open:rotate-45">+</span></summary><p className="text-public-muted max-w-2xl pb-6 text-sm leading-6">{answer}</p></details>)}</div></div></section>
 
-        {/* CTA */}
-        <section className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6">
-          <h2 className="text-foreground text-2xl font-semibold tracking-tight sm:text-3xl">
-            Start sending better cold emails today
-          </h2>
-          <p className="text-muted-foreground mx-auto mt-3 max-w-lg text-sm sm:text-base">
-            Sign up, connect your inbox and run your first search in under five minutes.
-          </p>
-          <Button asChild size="lg" className="mt-7">
-            <Link to="/auth" search={{ mode: "signup" }}>
-              Get started free <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        </section>
+        <section className="border-public-border public-hero-grid border-t px-5 py-24 text-center sm:px-8 sm:py-32"><div className="mx-auto max-w-3xl"><h2 className="font-heading text-4xl font-semibold sm:text-6xl">Your next client may not have a website yet.</h2><p className="text-public-muted mx-auto mt-5 max-w-xl leading-7">Find the opportunity before someone else does. Your first 10 lead imports are free.</p><Button asChild size="lg" className="bg-public-foreground text-public hover:bg-public-foreground/90 mt-8 h-12 px-7"><Link to="/auth" search={{ mode: "signup" }}>Start finding leads <ArrowRight /></Link></Button></div></section>
       </main>
-
-      <footer className="border-border/60 border-t">
-        <div className="text-muted-foreground mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-6 text-xs sm:flex-row sm:px-6">
-          <p>© {new Date().getFullYear()} Leadlify. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <a href="https://www.instagram.com/leadlify.ai/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground inline-flex items-center gap-1.5 transition-colors"><Instagram className="size-3.5" /> Instagram</a>
-            <a href="https://wa.link/cuj4t2" target="_blank" rel="noopener noreferrer" className="hover:text-foreground inline-flex items-center gap-1.5 transition-colors"><MessageCircle className="size-3.5" /> Support</a>
-            <Link to="/auth" className="hover:text-foreground transition-colors">Sign in</Link>
-          </div>
-        </div>
-      </footer>
-      <Button asChild size="icon" className="fixed right-5 bottom-5 z-40 size-12 rounded-full shadow-elevated" title="WhatsApp support">
-        <a href="https://wa.link/cuj4t2" target="_blank" rel="noopener noreferrer" aria-label="Open WhatsApp support">
-          <MessageCircle className="size-5" />
-        </a>
-      </Button>
+      <PublicFooter />
     </div>
   );
 }
