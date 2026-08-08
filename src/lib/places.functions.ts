@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { callGoogle, UpstreamError } from "@/lib/ai.server";
+import { countryName } from "@/lib/countries";
 
 const SearchInput = z.object({
   country: z.string().trim().max(80).optional().default(""),
@@ -190,7 +191,7 @@ export const findLeads = createServerFn({ method: "POST" })
       phone: place.nationalPhoneNumber ?? place.internationalPhoneNumber ?? null,
       address: place.formattedAddress ?? null,
       city: data.city || null,
-      country: data.country || null,
+      country: countryLabel || null,
       google_rating: place.rating ?? null,
       review_count: place.userRatingCount ?? 0,
       website_status: place.websiteUri ? "unchecked" : "missing",
