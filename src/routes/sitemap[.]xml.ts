@@ -13,8 +13,13 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
-        // This CRM is private: only the public sign-in surface is listed.
-        const entries: SitemapEntry[] = [{ path: "/auth", changefreq: "monthly", priority: "1.0" }];
+        // Only public marketing surfaces are indexable; the workspace is private.
+        const entries: SitemapEntry[] = [
+          { path: "/", changefreq: "weekly", priority: "1.0" },
+          { path: "/about", changefreq: "monthly", priority: "0.7" },
+          { path: "/privacy", changefreq: "yearly", priority: "0.3" },
+          { path: "/auth", changefreq: "monthly", priority: "0.5" },
+        ];
 
         const urls = entries.map((e) =>
           [
