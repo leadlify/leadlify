@@ -5,6 +5,13 @@ import { callGoogle, UpstreamError } from "@/lib/ai.server";
 
 const SearchInput = z.object({
   country: z.string().trim().max(80).optional().default(""),
+  countryCode: z
+    .string()
+    .trim()
+    .regex(/^[A-Za-z]{2}$/, "Select a country")
+    .optional()
+    .or(z.literal(""))
+    .default(""),
   city: z.string().trim().max(80).optional().default(""),
   businessType: z.string().trim().min(1, "Business type is required").max(80),
   keyword: z.string().trim().max(80).optional().default(""),
