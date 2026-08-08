@@ -66,7 +66,9 @@ export const findLeads = createServerFn({ method: "POST" })
     }
     const maxLeads = Math.min(data.maxLeads, quota.remaining);
 
-    const locationParts = [data.city, data.country].filter(Boolean).join(", ");
+    const selectedCode = data.countryCode ? data.countryCode.toUpperCase() : "";
+    const countryLabel = data.country || (selectedCode ? countryName(selectedCode) : "");
+    const locationParts = [data.city, countryLabel].filter(Boolean).join(", ");
     const textQuery = [data.businessType, data.keyword, locationParts ? `in ${locationParts}` : ""]
       .filter(Boolean)
       .join(" ")
@@ -78,13 +80,18 @@ export const findLeads = createServerFn({ method: "POST" })
       includePureServiceAreaBusinesses: true,
     };
 
+    // The selected country drives the region so results are never anchored to
+    // the caller's own location.
+    if (selectedCode.length === 2) body.regionCode = selectedCode;
+
     // Apply a radius only around a specific city. A country-only radius would
     // incorrectly restrict international searches to the country's centroid.
     if (data.city) {
       try {
+        const componentFilter = selectedCode ? `&components=country:${selectedCode}` : "";
         const geo = (await callGoogle({
           connector: "google_maps",
-          path: `/maps/api/geocode/json?address=${encodeURIComponent(locationParts)}`,
+          path: `/maps/api/geocode/json?address=${encodeURIComponent(locationParts)}${componentFilter}`,
         })) as {
           results?: Array<{
             geometry?: { location?: { lat: number; lng: number } };
@@ -101,14 +108,17 @@ export const findLeads = createServerFn({ method: "POST" })
             },
           };
         }
-        const countryCode = firstResult?.address_components?.find((part) =>
+        const resolvedCode = firstResult?.address_components?.find((part) =>
           part.types?.includes("country"),
         )?.short_name;
-        if (countryCode?.length === 2) body.regionCode = countryCode.toUpperCase();
+        if (!body.regionCode && resolvedCode?.length === 2) {
+          body.regionCode = resolvedCode.toUpperCase();
+        }
       } catch (error) {
         console.warn("[find-leads] geocode fallback", error);
       }
     }
+
 
     const collected: NonNullable<PlacesResponse["places"]> = [];
     let pageToken: string | undefined;
