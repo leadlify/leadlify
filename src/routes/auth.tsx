@@ -13,8 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 type Mode = "login" | "signup" | "forgot";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    mode: search.mode === "signup" ? ("signup" as const) : undefined,
+  validateSearch: z.object({
+    mode: z.literal("signup").optional(),
   }),
   head: () => ({
     meta: [
