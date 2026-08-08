@@ -1,2 +1,13 @@
 User-agent: *
-Disallow: /
+Allow: /
+Disallow: /dashboard
+Disallow: /leads
+Disallow: /lead
+Disallow: /find-leads
+Disallow: /analytics
+Disallow: /settings
+Disallow: /admin
+Disallow: /plans
+Disallow: /reset-password
+
+Sitemap: https://leadlify.lovable.app/sitemap.xml
