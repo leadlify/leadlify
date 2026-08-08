@@ -9,6 +9,14 @@ import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { COUNTRIES } from "@/lib/countries";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -55,7 +63,7 @@ function FindLeadsPage() {
   const quotaFn = useServerFn(getLeadQuota);
   const quota = useQuery({ queryKey: ["lead-quota"], queryFn: () => quotaFn({}) });
 
-  const [country, setCountry] = useState("");
+  const [countryCode, setCountryCode] = useState("");
   const [city, setCity] = useState("");
   const [businessType, setBusinessType] = useState("");
   const [keyword, setKeyword] = useState("");
@@ -66,7 +74,7 @@ function FindLeadsPage() {
   const mutation = useMutation({
     mutationFn: () =>
       search({
-        data: { country, city, businessType, keyword, maxLeads, radiusKm, onlyWithoutWebsite },
+        data: { countryCode, city, businessType, keyword, maxLeads, radiusKm, onlyWithoutWebsite },
       }),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["leads"] });
@@ -91,6 +99,10 @@ function FindLeadsPage() {
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
+    if (!countryCode) {
+      toast.error("Choose the country you want to search in.");
+      return;
+    }
     if (!businessType.trim()) {
       toast.error("Tell me what kind of business to look for.");
       return;
@@ -115,14 +127,19 @@ function FindLeadsPage() {
             <form onSubmit={submit} className="space-y-5">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="country">Country</Label>
-                  <Input
-                    id="country"
-                    placeholder="United Kingdom"
-                    value={country}
-                    maxLength={80}
-                    onChange={(e) => setCountry(e.target.value)}
-                  />
+                  <Label htmlFor="country">Country *</Label>
+                  <Select value={countryCode} onValueChange={setCountryCode}>
+                    <SelectTrigger id="country" className="w-full">
+                      <SelectValue placeholder="Select a country" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-72">
+                      {COUNTRIES.map((item) => (
+                        <SelectItem key={item.code} value={item.code}>
+                          {item.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="city">City</Label>
