@@ -29,6 +29,7 @@ export const Route = createFileRoute("/auth")({
         content: "Create your Leadlify account or sign in to your outreach workspace.",
       },
     ],
+    links: [{ rel: "canonical", href: "https://leadlify.lovable.app/auth" }],
   }),
   component: AuthPage,
 });

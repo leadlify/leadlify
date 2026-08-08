@@ -11,8 +11,9 @@ export const Route = createFileRoute("/about")({
     { property: "og:title", content: "About Leadlify" },
     { property: "og:description", content: "A focused lead generation workspace built around real business opportunities." },
     { property: "og:type", content: "website" },
+    { property: "og:url", content: "https://leadlify.lovable.app/about" },
     { name: "twitter:card", content: "summary_large_image" },
-  ] }), component: AboutPage,
+  ], links: [{ rel: "canonical", href: "https://leadlify.lovable.app/about" }] }), component: AboutPage,
 });
 
 function AboutPage() {

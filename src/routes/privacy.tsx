@@ -10,8 +10,9 @@ export const Route = createFileRoute("/privacy")({
     { property: "og:title", content: "Privacy Policy — Leadlify" },
     { property: "og:description", content: "Leadlify privacy information for users and visitors." },
     { property: "og:type", content: "website" },
+    { property: "og:url", content: "https://leadlify.lovable.app/privacy" },
     { name: "twitter:card", content: "summary" },
-  ] }), component: PrivacyPage,
+  ], links: [{ rel: "canonical", href: "https://leadlify.lovable.app/privacy" }] }), component: PrivacyPage,
 });
 
 const sections = [
