@@ -56,6 +56,28 @@ const SUGGESTIONS = [
   "Car dealership",
 ];
 
+/** Industry groups shown in the filter; each one suggests matching business types. */
+const INDUSTRIES: { label: string; types: string[] }[] = [
+  { label: "Health & medical", types: ["Dentist", "Clinic", "Physiotherapist", "Veterinarian"] },
+  { label: "Food & hospitality", types: ["Restaurant", "Café", "Bakery", "Hotel"] },
+  { label: "Legal & finance", types: ["Law firm", "Accountant", "Insurance broker"] },
+  { label: "Beauty & wellness", types: ["Hair salon", "Spa", "Barber shop", "Gym"] },
+  { label: "Home services", types: ["Plumber", "Electrician", "Roofer", "Cleaning service"] },
+  { label: "Real estate & construction", types: ["Real estate agency", "Builder", "Architect"] },
+  { label: "Automotive", types: ["Car dealership", "Car repair shop", "Car wash"] },
+  { label: "Retail & shops", types: ["Boutique", "Furniture store", "Pet shop"] },
+  { label: "Education & training", types: ["Driving school", "Tuition centre", "Language school"] },
+  { label: "Professional services", types: ["Marketing agency", "Photographer", "Event planner"] },
+];
+
+const WEBSITE_QUALITY = [
+  { value: "any", label: "Any website quality" },
+  { value: "none", label: "No website at all" },
+  { value: "poor", label: "Poor website (score ≤ 40)" },
+  { value: "needs-work", label: "Needs work (score ≤ 70)" },
+  { value: "good", label: "Good website (score > 70)" },
+] as const;
+
 function FindLeadsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -65,11 +87,16 @@ function FindLeadsPage() {
 
   const [countryCode, setCountryCode] = useState("");
   const [city, setCity] = useState("");
+  const [industry, setIndustry] = useState("");
   const [businessType, setBusinessType] = useState("");
   const [keyword, setKeyword] = useState("");
   const [maxLeads, setMaxLeads] = useState(20);
   const [radiusKm, setRadiusKm] = useState(10);
-  const [onlyWithoutWebsite, setOnlyWithoutWebsite] = useState(false);
+  const [websiteQuality, setWebsiteQuality] =
+    useState<(typeof WEBSITE_QUALITY)[number]["value"]>("any");
+  const onlyWithoutWebsite = websiteQuality === "none";
+  const typeOptions = INDUSTRIES.find((item) => item.label === industry)?.types ?? SUGGESTIONS;
+
 
   const mutation = useMutation({
     mutationFn: () =>
