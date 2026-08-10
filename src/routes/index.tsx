@@ -662,7 +662,39 @@ function Landing() {
           </div>
         </section>
 
+        {/* Country landing pages */}
+        <section className="defer-section px-5 py-20 sm:px-8">
+          <div className="mx-auto max-w-7xl">
+            <h2 className="font-heading text-2xl font-semibold sm:text-3xl">
+              Lead generation by country
+            </h2>
+            <p className="text-public-muted mt-3 max-w-2xl text-sm leading-6">
+              Leadlify prospects {COUNTRIES.length}+ markets. Start with one of the most popular
+              ones, or browse the full list.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-2">
+              {FEATURED_COUNTRIES.map((name) => (
+                <Link
+                  key={name}
+                  to="/lead-generation/$country"
+                  params={{ country: countrySlug(name) }}
+                  className="border-public-border bg-public-soft text-public-muted hover:text-public-foreground rounded-full border px-3.5 py-2 text-xs transition-colors"
+                >
+                  Lead generation in {name}
+                </Link>
+              ))}
+              <Link
+                to="/lead-generation"
+                className="border-public-border bg-public-raised text-public-foreground rounded-full border px-3.5 py-2 text-xs"
+              >
+                All countries <ArrowRight className="inline size-3" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* CTA */}
+
         <section className="defer-section public-hero-grid relative overflow-hidden px-5 py-24 text-center sm:px-8 sm:py-32">
           <div className="public-glow pointer-events-none absolute inset-0" />
           <div className="relative mx-auto max-w-3xl">
