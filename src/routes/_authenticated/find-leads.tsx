@@ -19,7 +19,6 @@ import {
 import { COUNTRIES } from "@/lib/countries";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
 import { findLeads } from "@/lib/places.functions";
 import { getLeadQuota } from "@/lib/quota.functions";
 import { Progress } from "@/components/ui/progress";
@@ -101,7 +100,17 @@ function FindLeadsPage() {
   const mutation = useMutation({
     mutationFn: () =>
       search({
-        data: { countryCode, city, businessType, keyword, maxLeads, radiusKm, onlyWithoutWebsite },
+        data: {
+          countryCode,
+          city,
+          industry,
+          businessType,
+          keyword,
+          maxLeads,
+          radiusKm,
+          onlyWithoutWebsite,
+          websiteQuality,
+        },
       }),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["leads"] });
@@ -349,7 +358,7 @@ function FindLeadsPage() {
               <CardDescription>Common niches that usually have dated websites.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
-              {SUGGESTIONS.map((item) => (
+              {typeOptions.map((item) => (
                 <button
                   key={item}
                   type="button"
