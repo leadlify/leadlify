@@ -179,6 +179,28 @@ function FindLeadsPage() {
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="industry">Industry</Label>
+                  <Select
+                    value={industry}
+                    onValueChange={(value) => {
+                      setIndustry(value);
+                      const preset = INDUSTRIES.find((item) => item.label === value);
+                      if (preset && !businessType) setBusinessType(preset.types[0]);
+                    }}
+                  >
+                    <SelectTrigger id="industry" className="w-full">
+                      <SelectValue placeholder="Any industry" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-72">
+                      {INDUSTRIES.map((item) => (
+                        <SelectItem key={item.label} value={item.label}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="type">Business type *</Label>
                   <Input
                     id="type"
@@ -186,9 +208,16 @@ function FindLeadsPage() {
                     value={businessType}
                     maxLength={80}
                     onChange={(e) => setBusinessType(e.target.value)}
+                    list="business-types"
                     required
                   />
+                  <datalist id="business-types">
+                    {typeOptions.map((item) => (
+                      <option key={item} value={item} />
+                    ))}
+                  </datalist>
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="keyword">Extra keyword</Label>
                   <Input
