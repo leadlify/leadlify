@@ -138,7 +138,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <script
           // Applies the saved theme before paint so there is no light/dark flash.
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem("leadlify-theme")||localStorage.getItem("leadforge-theme");if(t==="dark"||(!t&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}`,
+            __html: `try{var t=localStorage.getItem("leadlify-theme")||localStorage.getItem("leadforge-theme");if(t!=="light")document.documentElement.classList.add("dark")}catch(e){}`,
           }}
         />
       </head>
