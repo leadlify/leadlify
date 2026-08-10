@@ -21,8 +21,23 @@ import {
 
 import { PublicFooter, PublicHeader } from "@/components/public-site";
 import { Button } from "@/components/ui/button";
+import { COUNTRIES, countrySlug } from "@/lib/countries";
 
 const SITE = "https://leadlify.lovable.app";
+
+const FEATURED_COUNTRIES = [
+  "Pakistan",
+  "United States",
+  "United Kingdom",
+  "Canada",
+  "Australia",
+  "United Arab Emirates",
+  "India",
+  "Germany",
+  "Netherlands",
+  "South Africa",
+];
+
 
 const faqs: [string, string][] = [
   [
