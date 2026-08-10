@@ -279,7 +279,15 @@ export const findLeads = createServerFn({ method: "POST" })
       country: countryLabel || null,
       google_rating: place.rating ?? null,
       review_count: place.userRatingCount ?? 0,
-      website_status: place.websiteUri ? "unchecked" : "missing",
+      website_status: place.websiteUri
+        ? place.id && scores.has(place.id)
+          ? (scores.get(place.id) as number) <= 40
+            ? "poor"
+            : (scores.get(place.id) as number) <= 70
+              ? "needs-work"
+              : "good"
+          : "unchecked"
+        : "missing",
     }));
 
     if (rows.length === 0) {
