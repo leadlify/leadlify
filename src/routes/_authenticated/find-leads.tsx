@@ -234,21 +234,33 @@ function FindLeadsPage() {
                 </div>
               </div>
 
-              <div className="border-border/60 bg-muted/40 flex items-start justify-between gap-4 rounded-xl border p-4">
-                <div className="space-y-1">
-                  <Label htmlFor="no-website" className="text-sm font-medium">
-                    Only businesses without a website
-                  </Label>
-                  <p className="text-muted-foreground text-xs">
-                    Best prospects for a web design pitch. Searching may take a little longer.
-                  </p>
-                </div>
-                <Switch
-                  id="no-website"
-                  checked={onlyWithoutWebsite}
-                  onCheckedChange={setOnlyWithoutWebsite}
-                />
+              <div className="border-border/60 bg-muted/40 space-y-2 rounded-xl border p-4">
+                <Label htmlFor="quality" className="text-sm font-medium">
+                  Minimum website quality
+                </Label>
+                <Select
+                  value={websiteQuality}
+                  onValueChange={(value) =>
+                    setWebsiteQuality(value as (typeof WEBSITE_QUALITY)[number]["value"])
+                  }
+                >
+                  <SelectTrigger id="quality" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {WEBSITE_QUALITY.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-muted-foreground text-xs">
+                  Weaker sites are the best prospects for a web design pitch. Quality filters check
+                  each site live, so searching takes a little longer.
+                </p>
               </div>
+
 
               <Button type="submit" className="w-full sm:w-auto" disabled={mutation.isPending}>
                 {mutation.isPending ? (
