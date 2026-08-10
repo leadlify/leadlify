@@ -17,6 +17,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SiteSlugRouteImport } from './routes/site.$slug'
+import { Route as LeadGenerationCountryRouteImport } from './routes/lead-generation.$country'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedPlansRouteImport } from './routes/_authenticated/plans'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
@@ -63,6 +64,11 @@ const IndexRoute = IndexRouteImport.update({
 const SiteSlugRoute = SiteSlugRouteImport.update({
   id: '/site/$slug',
   path: '/site/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeadGenerationCountryRoute = LeadGenerationCountryRouteImport.update({
+  id: '/lead-generation/$country',
+  path: '/lead-generation/$country',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/leads': typeof AuthenticatedLeadsRoute
   '/plans': typeof AuthenticatedPlansRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/lead-generation/$country': typeof LeadGenerationCountryRoute
   '/site/$slug': typeof SiteSlugRoute
   '/lead/$leadId': typeof AuthenticatedLeadLeadIdRoute
 }
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/leads': typeof AuthenticatedLeadsRoute
   '/plans': typeof AuthenticatedPlansRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/lead-generation/$country': typeof LeadGenerationCountryRoute
   '/site/$slug': typeof SiteSlugRoute
   '/lead/$leadId': typeof AuthenticatedLeadLeadIdRoute
 }
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
   '/_authenticated/plans': typeof AuthenticatedPlansRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/lead-generation/$country': typeof LeadGenerationCountryRoute
   '/site/$slug': typeof SiteSlugRoute
   '/_authenticated/lead/$leadId': typeof AuthenticatedLeadLeadIdRoute
 }
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
     | '/leads'
     | '/plans'
     | '/settings'
+    | '/lead-generation/$country'
     | '/site/$slug'
     | '/lead/$leadId'
   fileRoutesByTo: FileRoutesByTo
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/leads'
     | '/plans'
     | '/settings'
+    | '/lead-generation/$country'
     | '/site/$slug'
     | '/lead/$leadId'
   id:
@@ -210,6 +221,7 @@ export interface FileRouteTypes {
     | '/_authenticated/leads'
     | '/_authenticated/plans'
     | '/_authenticated/settings'
+    | '/lead-generation/$country'
     | '/site/$slug'
     | '/_authenticated/lead/$leadId'
   fileRoutesById: FileRoutesById
@@ -222,6 +234,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  LeadGenerationCountryRoute: typeof LeadGenerationCountryRoute
   SiteSlugRoute: typeof SiteSlugRoute
 }
 
@@ -281,6 +294,13 @@ declare module '@tanstack/react-router' {
       path: '/site/$slug'
       fullPath: '/site/$slug'
       preLoaderRoute: typeof SiteSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lead-generation/$country': {
+      id: '/lead-generation/$country'
+      path: '/lead-generation/$country'
+      fullPath: '/lead-generation/$country'
+      preLoaderRoute: typeof LeadGenerationCountryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/settings': {
@@ -375,6 +395,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  LeadGenerationCountryRoute: LeadGenerationCountryRoute,
   SiteSlugRoute: SiteSlugRoute,
 }
 export const routeTree = rootRouteImport
