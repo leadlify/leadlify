@@ -85,7 +85,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Find local businesses, audit their websites with AI.",
       },
-      { name: "robots", content: "noindex" },
+      { name: "robots", content: "index, follow" },
       { property: "og:title", content: "Leadlify — AI Lead Generation & Email Drafts" },
       {
         property: "og:description",
