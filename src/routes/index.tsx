@@ -416,7 +416,7 @@ function Landing() {
         </section>
 
         {/* Features */}
-        <section id="features" className="px-5 py-24 sm:px-8 sm:py-32">
+        <section id="features" className="defer-section px-5 py-24 sm:px-8 sm:py-32">
           <div className="mx-auto max-w-7xl">
             <div className="max-w-3xl">
               <p className="text-public-muted text-xs font-semibold tracking-widest uppercase">
@@ -498,7 +498,7 @@ function Landing() {
         </section>
 
         {/* Who it's for */}
-        <section className="px-5 py-24 sm:px-8 sm:py-32">
+        <section className="defer-section px-5 py-24 sm:px-8 sm:py-32">
           <div className="mx-auto max-w-7xl">
             <div className="mb-14 max-w-2xl">
               <p className="text-public-muted text-xs font-semibold tracking-widest uppercase">Built for</p>
@@ -519,7 +519,7 @@ function Landing() {
         </section>
 
         {/* Comparison */}
-        <section className="border-public-border bg-public-soft border-y px-5 py-24 sm:px-8 sm:py-32">
+        <section className="defer-section border-public-border bg-public-soft border-y px-5 py-24 sm:px-8 sm:py-32">
           <div className="mx-auto max-w-7xl">
             <div className="mb-12 text-center">
               <p className="text-public-muted text-xs font-semibold tracking-widest uppercase">
@@ -571,7 +571,7 @@ function Landing() {
         </section>
 
         {/* Pricing */}
-        <section id="pricing" className="px-5 py-24 sm:px-8 sm:py-32">
+        <section id="pricing" className="defer-section px-5 py-24 sm:px-8 sm:py-32">
           <div className="mx-auto max-w-7xl">
             <div className="text-center">
               <p className="text-public-muted text-xs font-semibold tracking-widest uppercase">
@@ -663,7 +663,7 @@ function Landing() {
         </section>
 
         {/* CTA */}
-        <section className="public-hero-grid relative overflow-hidden px-5 py-24 text-center sm:px-8 sm:py-32">
+        <section className="defer-section public-hero-grid relative overflow-hidden px-5 py-24 text-center sm:px-8 sm:py-32">
           <div className="public-glow pointer-events-none absolute inset-0" />
           <div className="relative mx-auto max-w-3xl">
             <span className="border-public-border bg-public-raised animate-float mx-auto mb-8 grid size-12 place-items-center rounded-xl border">
