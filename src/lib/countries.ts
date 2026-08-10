@@ -76,3 +76,15 @@ export const COUNTRIES: Country[] = [
 export function countryName(code: string): string {
   return COUNTRIES.find((c) => c.code === code)?.name ?? "";
 }
+
+/** URL slug used by the public "Lead generation in <country>" landing pages. */
+export function countrySlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+export function countryBySlug(slug: string): Country | undefined {
+  return COUNTRIES.find((c) => countrySlug(c.name) === slug.toLowerCase());
+}
