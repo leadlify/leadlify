@@ -85,7 +85,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Find local businesses, audit their websites with AI.",
       },
-      { name: "robots", content: "noindex" },
+      { name: "robots", content: "index, follow" },
       { property: "og:title", content: "Leadlify — AI Lead Generation & Email Drafts" },
       {
         property: "og:description",
@@ -138,7 +138,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <script
           // Applies the saved theme before paint so there is no light/dark flash.
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem("leadlify-theme")||localStorage.getItem("leadforge-theme");if(t==="dark"||(!t&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}`,
+            __html: `try{var t=localStorage.getItem("leadlify-theme")||localStorage.getItem("leadforge-theme");if(t!=="light")document.documentElement.classList.add("dark")}catch(e){}`,
           }}
         />
       </head>

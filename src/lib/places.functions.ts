@@ -14,12 +14,46 @@ const SearchInput = z.object({
     .or(z.literal(""))
     .default(""),
   city: z.string().trim().max(80).optional().default(""),
+  industry: z.string().trim().max(80).optional().default(""),
   businessType: z.string().trim().min(1, "Business type is required").max(80),
   keyword: z.string().trim().max(80).optional().default(""),
   maxLeads: z.number().int().min(1).max(50).default(20),
   radiusKm: z.number().min(1).max(50).default(10),
   onlyWithoutWebsite: z.boolean().optional().default(false),
+  /**
+   * Website quality of the businesses to keep:
+   * any | none (no website at all) | poor (score <= 40) | needs-work (score <= 70) | good (> 70).
+   */
+  websiteQuality: z.enum(["any", "none", "poor", "needs-work", "good"]).optional().default("any"),
 });
+
+/** Cheap 0-100 quality score derived from real signals on the business website. */
+function qualityScore(probe: {
+  reachable: boolean;
+  ssl: boolean;
+  responseMs: number;
+  hasViewport: boolean;
+  hasTitle: boolean;
+  hasMetaDescription: boolean;
+  h1Count: number;
+  imageCount: number;
+  imagesMissingAlt: number;
+  hasForm: boolean;
+}): number {
+  if (!probe.reachable) return 0;
+  let score = 20;
+  if (probe.ssl) score += 12;
+  if (probe.responseMs < 1200) score += 14;
+  else if (probe.responseMs < 2500) score += 7;
+  if (probe.hasViewport) score += 14;
+  if (probe.hasTitle) score += 8;
+  if (probe.hasMetaDescription) score += 8;
+  if (probe.h1Count > 0) score += 8;
+  if (probe.hasForm) score += 8;
+  if (probe.imageCount > 0 && probe.imagesMissingAlt / probe.imageCount < 0.4) score += 8;
+  return Math.min(score, 100);
+}
+
 
 type PlacesResponse = {
   places?: Array<{
@@ -70,10 +104,18 @@ export const findLeads = createServerFn({ method: "POST" })
     const selectedCode = data.countryCode ? data.countryCode.toUpperCase() : "";
     const countryLabel = data.country || (selectedCode ? countryName(selectedCode) : "");
     const locationParts = [data.city, countryLabel].filter(Boolean).join(", ");
-    const textQuery = [data.businessType, data.keyword, locationParts ? `in ${locationParts}` : ""]
+    const textQuery = [
+      data.businessType,
+      data.industry && data.industry.toLowerCase() !== data.businessType.toLowerCase()
+        ? data.industry
+        : "",
+      data.keyword,
+      locationParts ? `in ${locationParts}` : "",
+    ]
       .filter(Boolean)
       .join(" ")
       .trim();
+
 
     const body: Record<string, unknown> = {
       textQuery,
@@ -121,12 +163,15 @@ export const findLeads = createServerFn({ method: "POST" })
     }
 
 
+    const wantsNoWebsite = data.onlyWithoutWebsite || data.websiteQuality === "none";
+    const scoresWebsites = data.websiteQuality === "poor" || data.websiteQuality === "needs-work" || data.websiteQuality === "good";
+
     const collected: NonNullable<PlacesResponse["places"]> = [];
     let pageToken: string | undefined;
     let pages = 0;
-    // Fetch extra pages when filtering to websiteless businesses, since most results have sites.
-    const targetRaw = data.onlyWithoutWebsite ? maxLeads * 6 : maxLeads;
-    const maxPages = data.onlyWithoutWebsite ? 10 : 5;
+    // Fetch extra pages when filtering, since most results are discarded by the filter.
+    const targetRaw = wantsNoWebsite || scoresWebsites ? maxLeads * 6 : maxLeads;
+    const maxPages = wantsNoWebsite || scoresWebsites ? 10 : 5;
 
     while (collected.length < targetRaw && pages < maxPages) {
       const payload = (await callGoogle({
@@ -149,16 +194,56 @@ export const findLeads = createServerFn({ method: "POST" })
     }
 
     const seen = new Set<string>();
-    const selected = collected
-      .filter((place) => (data.onlyWithoutWebsite ? !place.websiteUri : true))
+    const candidates = collected
+      .filter((place) => {
+        if (wantsNoWebsite) return !place.websiteUri;
+        if (scoresWebsites) return Boolean(place.websiteUri);
+        return true;
+      })
       .filter((place) => {
         const key = place.id ?? "";
         if (!key) return true;
         if (seen.has(key)) return false;
         seen.add(key);
         return true;
-      })
-      .slice(0, maxLeads);
+      });
+
+    // Score the live website of each candidate when a quality tier is requested.
+    const scores = new Map<string, number>();
+    let selected = candidates;
+    if (scoresWebsites) {
+      const { probeWebsite } = await import("@/lib/website-probe.server");
+      const pool = candidates.slice(0, 40);
+      const keep: typeof candidates = [];
+      for (let i = 0; i < pool.length && keep.length < maxLeads; i += 6) {
+        const batch = pool.slice(i, i + 6);
+        const results = await Promise.all(
+          batch.map(async (place) => {
+            try {
+              return [place, qualityScore(await probeWebsite(place.websiteUri!))] as const;
+            } catch {
+              return [place, 0] as const;
+            }
+          }),
+        );
+        for (const [place, score] of results) {
+          const matches =
+            data.websiteQuality === "poor"
+              ? score <= 40
+              : data.websiteQuality === "needs-work"
+                ? score <= 70
+                : score > 70;
+          if (matches && keep.length < maxLeads) {
+            if (place.id) scores.set(place.id, score);
+            keep.push(place);
+          }
+        }
+      }
+      selected = keep;
+    } else {
+      selected = candidates.slice(0, maxLeads);
+    }
+
 
     // Best-effort: scrape a public contact email from each business website (batched).
     const { discoverEmail } = await import("@/lib/website-probe.server");
@@ -194,7 +279,15 @@ export const findLeads = createServerFn({ method: "POST" })
       country: countryLabel || null,
       google_rating: place.rating ?? null,
       review_count: place.userRatingCount ?? 0,
-      website_status: place.websiteUri ? "unchecked" : "missing",
+      website_status: place.websiteUri
+        ? place.id && scores.has(place.id)
+          ? (scores.get(place.id) as number) <= 40
+            ? "poor"
+            : (scores.get(place.id) as number) <= 70
+              ? "needs-work"
+              : "good"
+          : "unchecked"
+        : "missing",
     }));
 
     if (rows.length === 0) {

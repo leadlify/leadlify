@@ -21,8 +21,23 @@ import {
 
 import { PublicFooter, PublicHeader } from "@/components/public-site";
 import { Button } from "@/components/ui/button";
+import { COUNTRIES, countrySlug } from "@/lib/countries";
 
 const SITE = "https://leadlify.lovable.app";
+
+const FEATURED_COUNTRIES = [
+  "Pakistan",
+  "United States",
+  "United Kingdom",
+  "Canada",
+  "Australia",
+  "United Arab Emirates",
+  "India",
+  "Germany",
+  "Netherlands",
+  "South Africa",
+];
+
 
 const faqs: [string, string][] = [
   [
@@ -416,7 +431,7 @@ function Landing() {
         </section>
 
         {/* Features */}
-        <section id="features" className="px-5 py-24 sm:px-8 sm:py-32">
+        <section id="features" className="defer-section px-5 py-24 sm:px-8 sm:py-32">
           <div className="mx-auto max-w-7xl">
             <div className="max-w-3xl">
               <p className="text-public-muted text-xs font-semibold tracking-widest uppercase">
@@ -454,7 +469,7 @@ function Landing() {
         {/* How it works */}
         <section
           id="how"
-          className="border-public-border bg-public-soft border-y px-5 py-24 sm:px-8 sm:py-32"
+          className="defer-section border-public-border bg-public-soft border-y px-5 py-24 sm:px-8 sm:py-32"
         >
           <div className="mx-auto max-w-7xl">
             <div className="grid gap-14 lg:grid-cols-[.8fr_1.2fr]">
@@ -498,7 +513,7 @@ function Landing() {
         </section>
 
         {/* Who it's for */}
-        <section className="px-5 py-24 sm:px-8 sm:py-32">
+        <section className="defer-section px-5 py-24 sm:px-8 sm:py-32">
           <div className="mx-auto max-w-7xl">
             <div className="mb-14 max-w-2xl">
               <p className="text-public-muted text-xs font-semibold tracking-widest uppercase">Built for</p>
@@ -519,7 +534,7 @@ function Landing() {
         </section>
 
         {/* Comparison */}
-        <section className="border-public-border bg-public-soft border-y px-5 py-24 sm:px-8 sm:py-32">
+        <section className="defer-section border-public-border bg-public-soft border-y px-5 py-24 sm:px-8 sm:py-32">
           <div className="mx-auto max-w-7xl">
             <div className="mb-12 text-center">
               <p className="text-public-muted text-xs font-semibold tracking-widest uppercase">
@@ -571,7 +586,7 @@ function Landing() {
         </section>
 
         {/* Pricing */}
-        <section id="pricing" className="px-5 py-24 sm:px-8 sm:py-32">
+        <section id="pricing" className="defer-section px-5 py-24 sm:px-8 sm:py-32">
           <div className="mx-auto max-w-7xl">
             <div className="text-center">
               <p className="text-public-muted text-xs font-semibold tracking-widest uppercase">
@@ -635,7 +650,7 @@ function Landing() {
         {/* FAQ */}
         <section
           id="faq"
-          className="border-public-border bg-public-soft border-y px-5 py-24 sm:px-8 sm:py-32"
+          className="defer-section border-public-border bg-public-soft border-y px-5 py-24 sm:px-8 sm:py-32"
         >
           <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[.7fr_1.3fr]">
             <div>
@@ -662,8 +677,40 @@ function Landing() {
           </div>
         </section>
 
+        {/* Country landing pages */}
+        <section className="defer-section px-5 py-20 sm:px-8">
+          <div className="mx-auto max-w-7xl">
+            <h2 className="font-heading text-2xl font-semibold sm:text-3xl">
+              Lead generation by country
+            </h2>
+            <p className="text-public-muted mt-3 max-w-2xl text-sm leading-6">
+              Leadlify prospects {COUNTRIES.length}+ markets. Start with one of the most popular
+              ones, or browse the full list.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-2">
+              {FEATURED_COUNTRIES.map((name) => (
+                <Link
+                  key={name}
+                  to="/lead-generation/$country"
+                  params={{ country: countrySlug(name) }}
+                  className="border-public-border bg-public-soft text-public-muted hover:text-public-foreground rounded-full border px-3.5 py-2 text-xs transition-colors"
+                >
+                  Lead generation in {name}
+                </Link>
+              ))}
+              <Link
+                to="/lead-generation"
+                className="border-public-border bg-public-raised text-public-foreground rounded-full border px-3.5 py-2 text-xs"
+              >
+                All countries <ArrowRight className="inline size-3" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* CTA */}
-        <section className="public-hero-grid relative overflow-hidden px-5 py-24 text-center sm:px-8 sm:py-32">
+
+        <section className="defer-section public-hero-grid relative overflow-hidden px-5 py-24 text-center sm:px-8 sm:py-32">
           <div className="public-glow pointer-events-none absolute inset-0" />
           <div className="relative mx-auto max-w-3xl">
             <span className="border-public-border bg-public-raised animate-float mx-auto mb-8 grid size-12 place-items-center rounded-xl border">

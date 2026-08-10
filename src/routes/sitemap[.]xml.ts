@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 
+import { COUNTRIES, countrySlug } from "@/lib/countries";
+
 const BASE_URL = "https://leadlify.lovable.app";
 
 interface SitemapEntry {
@@ -16,10 +18,17 @@ export const Route = createFileRoute("/sitemap.xml")({
         // Only public marketing surfaces are indexable; the workspace is private.
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "weekly", priority: "1.0" },
+          { path: "/lead-generation", changefreq: "weekly", priority: "0.8" },
+          ...COUNTRIES.map((country) => ({
+            path: `/lead-generation/${countrySlug(country.name)}`,
+            changefreq: "monthly" as const,
+            priority: "0.6",
+          })),
           { path: "/about", changefreq: "monthly", priority: "0.7" },
           { path: "/privacy", changefreq: "yearly", priority: "0.3" },
           { path: "/auth", changefreq: "monthly", priority: "0.5" },
         ];
+
 
         const urls = entries.map((e) =>
           [

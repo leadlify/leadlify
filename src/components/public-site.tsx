@@ -47,7 +47,9 @@ export function PublicFooter() {
         </div>
         <div className="grid grid-cols-2 gap-x-10 gap-y-3">
           <Link to="/about" className="hover:text-public-foreground transition-colors">About us</Link>
+          <Link to="/lead-generation" className="hover:text-public-foreground transition-colors">Lead generation by country</Link>
           <Link to="/privacy" className="hover:text-public-foreground transition-colors">Privacy</Link>
+
           <a href="https://www.instagram.com/leadlify.ai/" target="_blank" rel="noopener noreferrer" className="hover:text-public-foreground inline-flex items-center gap-2 transition-colors"><Instagram className="size-4" /> Instagram</a>
           <a href="https://wa.link/cuj4t2" target="_blank" rel="noopener noreferrer" className="hover:text-public-foreground inline-flex items-center gap-2 transition-colors"><MessageCircle className="size-4" /> Support</a>
         </div>

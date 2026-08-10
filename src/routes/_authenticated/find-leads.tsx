@@ -19,7 +19,6 @@ import {
 import { COUNTRIES } from "@/lib/countries";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
 import { findLeads } from "@/lib/places.functions";
 import { getLeadQuota } from "@/lib/quota.functions";
 import { Progress } from "@/components/ui/progress";
@@ -56,6 +55,28 @@ const SUGGESTIONS = [
   "Car dealership",
 ];
 
+/** Industry groups shown in the filter; each one suggests matching business types. */
+const INDUSTRIES: { label: string; types: string[] }[] = [
+  { label: "Health & medical", types: ["Dentist", "Clinic", "Physiotherapist", "Veterinarian"] },
+  { label: "Food & hospitality", types: ["Restaurant", "Café", "Bakery", "Hotel"] },
+  { label: "Legal & finance", types: ["Law firm", "Accountant", "Insurance broker"] },
+  { label: "Beauty & wellness", types: ["Hair salon", "Spa", "Barber shop", "Gym"] },
+  { label: "Home services", types: ["Plumber", "Electrician", "Roofer", "Cleaning service"] },
+  { label: "Real estate & construction", types: ["Real estate agency", "Builder", "Architect"] },
+  { label: "Automotive", types: ["Car dealership", "Car repair shop", "Car wash"] },
+  { label: "Retail & shops", types: ["Boutique", "Furniture store", "Pet shop"] },
+  { label: "Education & training", types: ["Driving school", "Tuition centre", "Language school"] },
+  { label: "Professional services", types: ["Marketing agency", "Photographer", "Event planner"] },
+];
+
+const WEBSITE_QUALITY = [
+  { value: "any", label: "Any website quality" },
+  { value: "none", label: "No website at all" },
+  { value: "poor", label: "Poor website (score ≤ 40)" },
+  { value: "needs-work", label: "Needs work (score ≤ 70)" },
+  { value: "good", label: "Good website (score > 70)" },
+] as const;
+
 function FindLeadsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -65,16 +86,31 @@ function FindLeadsPage() {
 
   const [countryCode, setCountryCode] = useState("");
   const [city, setCity] = useState("");
+  const [industry, setIndustry] = useState("");
   const [businessType, setBusinessType] = useState("");
   const [keyword, setKeyword] = useState("");
   const [maxLeads, setMaxLeads] = useState(20);
   const [radiusKm, setRadiusKm] = useState(10);
-  const [onlyWithoutWebsite, setOnlyWithoutWebsite] = useState(false);
+  const [websiteQuality, setWebsiteQuality] =
+    useState<(typeof WEBSITE_QUALITY)[number]["value"]>("any");
+  const onlyWithoutWebsite = websiteQuality === "none";
+  const typeOptions = INDUSTRIES.find((item) => item.label === industry)?.types ?? SUGGESTIONS;
+
 
   const mutation = useMutation({
     mutationFn: () =>
       search({
-        data: { countryCode, city, businessType, keyword, maxLeads, radiusKm, onlyWithoutWebsite },
+        data: {
+          countryCode,
+          city,
+          industry,
+          businessType,
+          keyword,
+          maxLeads,
+          radiusKm,
+          onlyWithoutWebsite,
+          websiteQuality,
+        },
       }),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["leads"] });
@@ -152,6 +188,28 @@ function FindLeadsPage() {
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="industry">Industry</Label>
+                  <Select
+                    value={industry}
+                    onValueChange={(value) => {
+                      setIndustry(value);
+                      const preset = INDUSTRIES.find((item) => item.label === value);
+                      if (preset && !businessType) setBusinessType(preset.types[0]);
+                    }}
+                  >
+                    <SelectTrigger id="industry" className="w-full">
+                      <SelectValue placeholder="Any industry" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-72">
+                      {INDUSTRIES.map((item) => (
+                        <SelectItem key={item.label} value={item.label}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="type">Business type *</Label>
                   <Input
                     id="type"
@@ -159,9 +217,16 @@ function FindLeadsPage() {
                     value={businessType}
                     maxLength={80}
                     onChange={(e) => setBusinessType(e.target.value)}
+                    list="business-types"
                     required
                   />
+                  <datalist id="business-types">
+                    {typeOptions.map((item) => (
+                      <option key={item} value={item} />
+                    ))}
+                  </datalist>
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="keyword">Extra keyword</Label>
                   <Input
@@ -207,21 +272,33 @@ function FindLeadsPage() {
                 </div>
               </div>
 
-              <div className="border-border/60 bg-muted/40 flex items-start justify-between gap-4 rounded-xl border p-4">
-                <div className="space-y-1">
-                  <Label htmlFor="no-website" className="text-sm font-medium">
-                    Only businesses without a website
-                  </Label>
-                  <p className="text-muted-foreground text-xs">
-                    Best prospects for a web design pitch. Searching may take a little longer.
-                  </p>
-                </div>
-                <Switch
-                  id="no-website"
-                  checked={onlyWithoutWebsite}
-                  onCheckedChange={setOnlyWithoutWebsite}
-                />
+              <div className="border-border/60 bg-muted/40 space-y-2 rounded-xl border p-4">
+                <Label htmlFor="quality" className="text-sm font-medium">
+                  Minimum website quality
+                </Label>
+                <Select
+                  value={websiteQuality}
+                  onValueChange={(value) =>
+                    setWebsiteQuality(value as (typeof WEBSITE_QUALITY)[number]["value"])
+                  }
+                >
+                  <SelectTrigger id="quality" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {WEBSITE_QUALITY.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-muted-foreground text-xs">
+                  Weaker sites are the best prospects for a web design pitch. Quality filters check
+                  each site live, so searching takes a little longer.
+                </p>
               </div>
+
 
               <Button type="submit" className="w-full sm:w-auto" disabled={mutation.isPending}>
                 {mutation.isPending ? (
@@ -281,7 +358,7 @@ function FindLeadsPage() {
               <CardDescription>Common niches that usually have dated websites.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
-              {SUGGESTIONS.map((item) => (
+              {typeOptions.map((item) => (
                 <button
                   key={item}
                   type="button"

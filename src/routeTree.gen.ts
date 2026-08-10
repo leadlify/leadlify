@@ -16,7 +16,9 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LeadGenerationIndexRouteImport } from './routes/lead-generation.index'
 import { Route as SiteSlugRouteImport } from './routes/site.$slug'
+import { Route as LeadGenerationCountryRouteImport } from './routes/lead-generation.$country'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedPlansRouteImport } from './routes/_authenticated/plans'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
@@ -60,9 +62,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LeadGenerationIndexRoute = LeadGenerationIndexRouteImport.update({
+  id: '/lead-generation/',
+  path: '/lead-generation/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SiteSlugRoute = SiteSlugRouteImport.update({
   id: '/site/$slug',
   path: '/site/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeadGenerationCountryRoute = LeadGenerationCountryRouteImport.update({
+  id: '/lead-generation/$country',
+  path: '/lead-generation/$country',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
@@ -120,7 +132,9 @@ export interface FileRoutesByFullPath {
   '/leads': typeof AuthenticatedLeadsRoute
   '/plans': typeof AuthenticatedPlansRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/lead-generation/$country': typeof LeadGenerationCountryRoute
   '/site/$slug': typeof SiteSlugRoute
+  '/lead-generation/': typeof LeadGenerationIndexRoute
   '/lead/$leadId': typeof AuthenticatedLeadLeadIdRoute
 }
 export interface FileRoutesByTo {
@@ -137,7 +151,9 @@ export interface FileRoutesByTo {
   '/leads': typeof AuthenticatedLeadsRoute
   '/plans': typeof AuthenticatedPlansRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/lead-generation/$country': typeof LeadGenerationCountryRoute
   '/site/$slug': typeof SiteSlugRoute
+  '/lead-generation': typeof LeadGenerationIndexRoute
   '/lead/$leadId': typeof AuthenticatedLeadLeadIdRoute
 }
 export interface FileRoutesById {
@@ -156,7 +172,9 @@ export interface FileRoutesById {
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
   '/_authenticated/plans': typeof AuthenticatedPlansRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/lead-generation/$country': typeof LeadGenerationCountryRoute
   '/site/$slug': typeof SiteSlugRoute
+  '/lead-generation/': typeof LeadGenerationIndexRoute
   '/_authenticated/lead/$leadId': typeof AuthenticatedLeadLeadIdRoute
 }
 export interface FileRouteTypes {
@@ -175,7 +193,9 @@ export interface FileRouteTypes {
     | '/leads'
     | '/plans'
     | '/settings'
+    | '/lead-generation/$country'
     | '/site/$slug'
+    | '/lead-generation/'
     | '/lead/$leadId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -192,7 +212,9 @@ export interface FileRouteTypes {
     | '/leads'
     | '/plans'
     | '/settings'
+    | '/lead-generation/$country'
     | '/site/$slug'
+    | '/lead-generation'
     | '/lead/$leadId'
   id:
     | '__root__'
@@ -210,7 +232,9 @@ export interface FileRouteTypes {
     | '/_authenticated/leads'
     | '/_authenticated/plans'
     | '/_authenticated/settings'
+    | '/lead-generation/$country'
     | '/site/$slug'
+    | '/lead-generation/'
     | '/_authenticated/lead/$leadId'
   fileRoutesById: FileRoutesById
 }
@@ -222,7 +246,9 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  LeadGenerationCountryRoute: typeof LeadGenerationCountryRoute
   SiteSlugRoute: typeof SiteSlugRoute
+  LeadGenerationIndexRoute: typeof LeadGenerationIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -276,11 +302,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lead-generation/': {
+      id: '/lead-generation/'
+      path: '/lead-generation'
+      fullPath: '/lead-generation/'
+      preLoaderRoute: typeof LeadGenerationIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/site/$slug': {
       id: '/site/$slug'
       path: '/site/$slug'
       fullPath: '/site/$slug'
       preLoaderRoute: typeof SiteSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lead-generation/$country': {
+      id: '/lead-generation/$country'
+      path: '/lead-generation/$country'
+      fullPath: '/lead-generation/$country'
+      preLoaderRoute: typeof LeadGenerationCountryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/settings': {
@@ -375,7 +415,9 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  LeadGenerationCountryRoute: LeadGenerationCountryRoute,
   SiteSlugRoute: SiteSlugRoute,
+  LeadGenerationIndexRoute: LeadGenerationIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
