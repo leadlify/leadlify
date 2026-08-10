@@ -454,7 +454,7 @@ function Landing() {
         {/* How it works */}
         <section
           id="how"
-          className="border-public-border bg-public-soft border-y px-5 py-24 sm:px-8 sm:py-32"
+          className="defer-section border-public-border bg-public-soft border-y px-5 py-24 sm:px-8 sm:py-32"
         >
           <div className="mx-auto max-w-7xl">
             <div className="grid gap-14 lg:grid-cols-[.8fr_1.2fr]">
@@ -635,7 +635,7 @@ function Landing() {
         {/* FAQ */}
         <section
           id="faq"
-          className="border-public-border bg-public-soft border-y px-5 py-24 sm:px-8 sm:py-32"
+          className="defer-section border-public-border bg-public-soft border-y px-5 py-24 sm:px-8 sm:py-32"
         >
           <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[.7fr_1.3fr]">
             <div>
