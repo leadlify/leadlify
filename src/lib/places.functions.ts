@@ -163,12 +163,15 @@ export const findLeads = createServerFn({ method: "POST" })
     }
 
 
+    const wantsNoWebsite = data.onlyWithoutWebsite || data.websiteQuality === "none";
+    const scoresWebsites = data.websiteQuality === "poor" || data.websiteQuality === "needs-work" || data.websiteQuality === "good";
+
     const collected: NonNullable<PlacesResponse["places"]> = [];
     let pageToken: string | undefined;
     let pages = 0;
-    // Fetch extra pages when filtering to websiteless businesses, since most results have sites.
-    const targetRaw = data.onlyWithoutWebsite ? maxLeads * 6 : maxLeads;
-    const maxPages = data.onlyWithoutWebsite ? 10 : 5;
+    // Fetch extra pages when filtering, since most results are discarded by the filter.
+    const targetRaw = wantsNoWebsite || scoresWebsites ? maxLeads * 6 : maxLeads;
+    const maxPages = wantsNoWebsite || scoresWebsites ? 10 : 5;
 
     while (collected.length < targetRaw && pages < maxPages) {
       const payload = (await callGoogle({
@@ -191,16 +194,56 @@ export const findLeads = createServerFn({ method: "POST" })
     }
 
     const seen = new Set<string>();
-    const selected = collected
-      .filter((place) => (data.onlyWithoutWebsite ? !place.websiteUri : true))
+    const candidates = collected
+      .filter((place) => {
+        if (wantsNoWebsite) return !place.websiteUri;
+        if (scoresWebsites) return Boolean(place.websiteUri);
+        return true;
+      })
       .filter((place) => {
         const key = place.id ?? "";
         if (!key) return true;
         if (seen.has(key)) return false;
         seen.add(key);
         return true;
-      })
-      .slice(0, maxLeads);
+      });
+
+    // Score the live website of each candidate when a quality tier is requested.
+    const scores = new Map<string, number>();
+    let selected = candidates;
+    if (scoresWebsites) {
+      const { probeWebsite } = await import("@/lib/website-probe.server");
+      const pool = candidates.slice(0, 40);
+      const keep: typeof candidates = [];
+      for (let i = 0; i < pool.length && keep.length < maxLeads; i += 6) {
+        const batch = pool.slice(i, i + 6);
+        const results = await Promise.all(
+          batch.map(async (place) => {
+            try {
+              return [place, qualityScore(await probeWebsite(place.websiteUri!))] as const;
+            } catch {
+              return [place, 0] as const;
+            }
+          }),
+        );
+        for (const [place, score] of results) {
+          const matches =
+            data.websiteQuality === "poor"
+              ? score <= 40
+              : data.websiteQuality === "needs-work"
+                ? score <= 70
+                : score > 70;
+          if (matches && keep.length < maxLeads) {
+            if (place.id) scores.set(place.id, score);
+            keep.push(place);
+          }
+        }
+      }
+      selected = keep;
+    } else {
+      selected = candidates.slice(0, maxLeads);
+    }
+
 
     // Best-effort: scrape a public contact email from each business website (batched).
     const { discoverEmail } = await import("@/lib/website-probe.server");
