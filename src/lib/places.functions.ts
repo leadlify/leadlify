@@ -14,12 +14,46 @@ const SearchInput = z.object({
     .or(z.literal(""))
     .default(""),
   city: z.string().trim().max(80).optional().default(""),
+  industry: z.string().trim().max(80).optional().default(""),
   businessType: z.string().trim().min(1, "Business type is required").max(80),
   keyword: z.string().trim().max(80).optional().default(""),
   maxLeads: z.number().int().min(1).max(50).default(20),
   radiusKm: z.number().min(1).max(50).default(10),
   onlyWithoutWebsite: z.boolean().optional().default(false),
+  /**
+   * Website quality of the businesses to keep:
+   * any | none (no website at all) | poor (score <= 40) | needs-work (score <= 70) | good (> 70).
+   */
+  websiteQuality: z.enum(["any", "none", "poor", "needs-work", "good"]).optional().default("any"),
 });
+
+/** Cheap 0-100 quality score derived from real signals on the business website. */
+function qualityScore(probe: {
+  reachable: boolean;
+  ssl: boolean;
+  responseMs: number;
+  hasViewport: boolean;
+  hasTitle: boolean;
+  hasMetaDescription: boolean;
+  h1Count: number;
+  imageCount: number;
+  imagesMissingAlt: number;
+  hasForm: boolean;
+}): number {
+  if (!probe.reachable) return 0;
+  let score = 20;
+  if (probe.ssl) score += 12;
+  if (probe.responseMs < 1200) score += 14;
+  else if (probe.responseMs < 2500) score += 7;
+  if (probe.hasViewport) score += 14;
+  if (probe.hasTitle) score += 8;
+  if (probe.hasMetaDescription) score += 8;
+  if (probe.h1Count > 0) score += 8;
+  if (probe.hasForm) score += 8;
+  if (probe.imageCount > 0 && probe.imagesMissingAlt / probe.imageCount < 0.4) score += 8;
+  return Math.min(score, 100);
+}
+
 
 type PlacesResponse = {
   places?: Array<{
