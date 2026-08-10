@@ -104,10 +104,18 @@ export const findLeads = createServerFn({ method: "POST" })
     const selectedCode = data.countryCode ? data.countryCode.toUpperCase() : "";
     const countryLabel = data.country || (selectedCode ? countryName(selectedCode) : "");
     const locationParts = [data.city, countryLabel].filter(Boolean).join(", ");
-    const textQuery = [data.businessType, data.keyword, locationParts ? `in ${locationParts}` : ""]
+    const textQuery = [
+      data.businessType,
+      data.industry && data.industry.toLowerCase() !== data.businessType.toLowerCase()
+        ? data.industry
+        : "",
+      data.keyword,
+      locationParts ? `in ${locationParts}` : "",
+    ]
       .filter(Boolean)
       .join(" ")
       .trim();
+
 
     const body: Record<string, unknown> = {
       textQuery,
