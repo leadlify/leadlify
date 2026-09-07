@@ -20,12 +20,30 @@ const SearchInput = z.object({
   maxLeads: z.number().int().min(1).max(50).default(20),
   radiusKm: z.number().min(1).max(50).default(10),
   onlyWithoutWebsite: z.boolean().optional().default(false),
+  /** Only keep businesses whose only online presence is an Instagram page. */
+  instagramOnly: z.boolean().optional().default(false),
   /**
    * Website quality of the businesses to keep:
    * any | none (no website at all) | poor (score <= 40) | needs-work (score <= 70) | good (> 70).
    */
   websiteQuality: z.enum(["any", "none", "poor", "needs-work", "good"]).optional().default("any"),
 });
+
+const IG_HOSTS = /(^|\.)(instagram\.com|instagr\.am)$/i;
+
+/** Returns the Instagram handle when a URL points at an Instagram profile. */
+function instagramHandle(rawUrl?: string): string | null {
+  if (!rawUrl) return null;
+  try {
+    const url = new URL(rawUrl);
+    if (!IG_HOSTS.test(url.hostname)) return null;
+    const handle = url.pathname.split("/").filter(Boolean)[0];
+    if (!handle || ["p", "reel", "explore", "reels"].includes(handle.toLowerCase())) return null;
+    return `@${handle}`;
+  } catch {
+    return null;
+  }
+}
 
 /** Cheap 0-100 quality score derived from real signals on the business website. */
 function qualityScore(probe: {
@@ -163,15 +181,21 @@ export const findLeads = createServerFn({ method: "POST" })
     }
 
 
-    const wantsNoWebsite = data.onlyWithoutWebsite || data.websiteQuality === "none";
-    const scoresWebsites = data.websiteQuality === "poor" || data.websiteQuality === "needs-work" || data.websiteQuality === "good";
+    const wantsInstagram = data.instagramOnly;
+    const wantsNoWebsite = !wantsInstagram && (data.onlyWithoutWebsite || data.websiteQuality === "none");
+    const scoresWebsites =
+      !wantsInstagram &&
+      (data.websiteQuality === "poor" ||
+        data.websiteQuality === "needs-work" ||
+        data.websiteQuality === "good");
 
     const collected: NonNullable<PlacesResponse["places"]> = [];
     let pageToken: string | undefined;
     let pages = 0;
     // Fetch extra pages when filtering, since most results are discarded by the filter.
-    const targetRaw = wantsNoWebsite || scoresWebsites ? maxLeads * 6 : maxLeads;
-    const maxPages = wantsNoWebsite || scoresWebsites ? 10 : 5;
+    const filtering = wantsNoWebsite || scoresWebsites || wantsInstagram;
+    const targetRaw = filtering ? maxLeads * 6 : maxLeads;
+    const maxPages = filtering ? 10 : 5;
 
     while (collected.length < targetRaw && pages < maxPages) {
       const payload = (await callGoogle({
@@ -196,6 +220,8 @@ export const findLeads = createServerFn({ method: "POST" })
     const seen = new Set<string>();
     const candidates = collected
       .filter((place) => {
+        // Instagram mode: the business links an Instagram page instead of a real website.
+        if (wantsInstagram) return Boolean(instagramHandle(place.websiteUri));
         if (wantsNoWebsite) return !place.websiteUri;
         if (scoresWebsites) return Boolean(place.websiteUri);
         return true;
@@ -248,7 +274,9 @@ export const findLeads = createServerFn({ method: "POST" })
     // Best-effort: scrape a public contact email from each business website (batched).
     const { discoverEmail } = await import("@/lib/website-probe.server");
     const emails = new Map<string, string>();
-    const withSites = selected.filter((p) => p.websiteUri).slice(0, 30);
+    const withSites = selected
+      .filter((p) => p.websiteUri && !instagramHandle(p.websiteUri))
+      .slice(0, 30);
     for (let i = 0; i < withSites.length; i += 6) {
       const batch = withSites.slice(i, i + 6);
       const results = await Promise.all(
@@ -271,7 +299,8 @@ export const findLeads = createServerFn({ method: "POST" })
       place_id: place.id ?? null,
       business_name: place.displayName?.text ?? "Unknown business",
       business_category: place.primaryTypeDisplayName?.text ?? data.businessType,
-      website: place.websiteUri ?? null,
+      website: instagramHandle(place.websiteUri) ? null : (place.websiteUri ?? null),
+      instagram_handle: instagramHandle(place.websiteUri),
       email: (place.id ? emails.get(place.id) : null) ?? null,
       phone: place.nationalPhoneNumber ?? place.internationalPhoneNumber ?? null,
       address: place.formattedAddress ?? null,
@@ -279,7 +308,9 @@ export const findLeads = createServerFn({ method: "POST" })
       country: countryLabel || null,
       google_rating: place.rating ?? null,
       review_count: place.userRatingCount ?? 0,
-      website_status: place.websiteUri
+      website_status: instagramHandle(place.websiteUri)
+        ? "missing"
+        : place.websiteUri
         ? place.id && scores.has(place.id)
           ? (scores.get(place.id) as number) <= 40
             ? "poor"
