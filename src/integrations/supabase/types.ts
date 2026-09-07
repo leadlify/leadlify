@@ -199,6 +199,8 @@ export type Database = {
           generated_email: string | null
           google_rating: number | null
           id: string
+          instagram_handle: string | null
+          instagram_message: string | null
           mobile_friendly: boolean | null
           notes: string | null
           owner_name: string | null
@@ -226,6 +228,8 @@ export type Database = {
           generated_email?: string | null
           google_rating?: number | null
           id?: string
+          instagram_handle?: string | null
+          instagram_message?: string | null
           mobile_friendly?: boolean | null
           notes?: string | null
           owner_name?: string | null
@@ -253,6 +257,8 @@ export type Database = {
           generated_email?: string | null
           google_rating?: number | null
           id?: string
+          instagram_handle?: string | null
+          instagram_message?: string | null
           mobile_friendly?: boolean | null
           notes?: string | null
           owner_name?: string | null
