@@ -281,6 +281,7 @@ function FindLeadsPage() {
                 </Label>
                 <Select
                   value={websiteQuality}
+                  disabled={instagramOnly}
                   onValueChange={(value) =>
                     setWebsiteQuality(value as (typeof WEBSITE_QUALITY)[number]["value"])
                   }
@@ -301,6 +302,26 @@ function FindLeadsPage() {
                   each site live, so searching takes a little longer.
                 </p>
               </div>
+
+              <div className="border-border/60 bg-muted/40 flex items-start justify-between gap-4 rounded-xl border p-4">
+                <div className="space-y-1">
+                  <Label htmlFor="instagram-only" className="flex items-center gap-2 text-sm font-medium">
+                    <Instagram className="text-primary size-4" />
+                    Instagram businesses only
+                  </Label>
+                  <p className="text-muted-foreground text-xs">
+                    Only shows businesses whose only online presence is an Instagram page — no
+                    website at all. Perfect for a &ldquo;I built you a free demo site&rdquo; pitch.
+                  </p>
+                </div>
+                <Switch
+                  id="instagram-only"
+                  checked={instagramOnly}
+                  onCheckedChange={setInstagramOnly}
+                />
+              </div>
+
+
 
 
               <Button type="submit" className="w-full sm:w-auto" disabled={mutation.isPending}>
