@@ -2,7 +2,9 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BarChart3,
+  Gift,
   ShieldCheck,
+
   LayoutDashboard,
   LogOut,
   Menu,
@@ -29,8 +31,10 @@ const NAV = [
   { to: "/leads", label: "Leads", icon: Users },
   { to: "/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/plans", label: "Plans", icon: ReceiptText },
+  { to: "/referrals", label: "Referrals", icon: Gift },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
+
 
 const ADMIN_ITEM = { to: "/admin", label: "Admin", icon: ShieldCheck } as const;
 

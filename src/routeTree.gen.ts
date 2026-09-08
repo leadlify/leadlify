@@ -20,6 +20,7 @@ import { Route as LeadGenerationIndexRouteImport } from './routes/lead-generatio
 import { Route as SiteSlugRouteImport } from './routes/site.$slug'
 import { Route as LeadGenerationCountryRouteImport } from './routes/lead-generation.$country'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedReferralsRouteImport } from './routes/_authenticated/referrals'
 import { Route as AuthenticatedPlansRouteImport } from './routes/_authenticated/plans'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
 import { Route as AuthenticatedFindLeadsRouteImport } from './routes/_authenticated/find-leads'
@@ -82,6 +83,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedReferralsRoute = AuthenticatedReferralsRouteImport.update({
+  id: '/referrals',
+  path: '/referrals',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPlansRoute = AuthenticatedPlansRouteImport.update({
   id: '/plans',
   path: '/plans',
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/find-leads': typeof AuthenticatedFindLeadsRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/plans': typeof AuthenticatedPlansRoute
+  '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/lead-generation/$country': typeof LeadGenerationCountryRoute
   '/site/$slug': typeof SiteSlugRoute
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   '/find-leads': typeof AuthenticatedFindLeadsRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/plans': typeof AuthenticatedPlansRoute
+  '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/lead-generation/$country': typeof LeadGenerationCountryRoute
   '/site/$slug': typeof SiteSlugRoute
@@ -171,6 +179,7 @@ export interface FileRoutesById {
   '/_authenticated/find-leads': typeof AuthenticatedFindLeadsRoute
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
   '/_authenticated/plans': typeof AuthenticatedPlansRoute
+  '/_authenticated/referrals': typeof AuthenticatedReferralsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/lead-generation/$country': typeof LeadGenerationCountryRoute
   '/site/$slug': typeof SiteSlugRoute
@@ -192,6 +201,7 @@ export interface FileRouteTypes {
     | '/find-leads'
     | '/leads'
     | '/plans'
+    | '/referrals'
     | '/settings'
     | '/lead-generation/$country'
     | '/site/$slug'
@@ -211,6 +221,7 @@ export interface FileRouteTypes {
     | '/find-leads'
     | '/leads'
     | '/plans'
+    | '/referrals'
     | '/settings'
     | '/lead-generation/$country'
     | '/site/$slug'
@@ -231,6 +242,7 @@ export interface FileRouteTypes {
     | '/_authenticated/find-leads'
     | '/_authenticated/leads'
     | '/_authenticated/plans'
+    | '/_authenticated/referrals'
     | '/_authenticated/settings'
     | '/lead-generation/$country'
     | '/site/$slug'
@@ -330,6 +342,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/referrals': {
+      id: '/_authenticated/referrals'
+      path: '/referrals'
+      fullPath: '/referrals'
+      preLoaderRoute: typeof AuthenticatedReferralsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/plans': {
       id: '/_authenticated/plans'
       path: '/plans'
@@ -389,6 +408,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFindLeadsRoute: typeof AuthenticatedFindLeadsRoute
   AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
   AuthenticatedPlansRoute: typeof AuthenticatedPlansRoute
+  AuthenticatedReferralsRoute: typeof AuthenticatedReferralsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedLeadLeadIdRoute: typeof AuthenticatedLeadLeadIdRoute
 }
@@ -400,6 +420,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFindLeadsRoute: AuthenticatedFindLeadsRoute,
   AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
   AuthenticatedPlansRoute: AuthenticatedPlansRoute,
+  AuthenticatedReferralsRoute: AuthenticatedReferralsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedLeadLeadIdRoute: AuthenticatedLeadLeadIdRoute,
 }

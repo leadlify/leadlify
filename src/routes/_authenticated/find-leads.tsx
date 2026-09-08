@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Gauge, Loader2, Radar, Sparkles } from "lucide-react";
+import { Gauge, Instagram, Loader2, Radar, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -19,6 +19,8 @@ import {
 import { COUNTRIES } from "@/lib/countries";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+
 import { findLeads } from "@/lib/places.functions";
 import { getLeadQuota } from "@/lib/quota.functions";
 import { Progress } from "@/components/ui/progress";
@@ -93,6 +95,7 @@ function FindLeadsPage() {
   const [radiusKm, setRadiusKm] = useState(10);
   const [websiteQuality, setWebsiteQuality] =
     useState<(typeof WEBSITE_QUALITY)[number]["value"]>("any");
+  const [instagramOnly, setInstagramOnly] = useState(false);
   const onlyWithoutWebsite = websiteQuality === "none";
   const typeOptions = INDUSTRIES.find((item) => item.label === industry)?.types ?? SUGGESTIONS;
 
@@ -110,8 +113,10 @@ function FindLeadsPage() {
           radiusKm,
           onlyWithoutWebsite,
           websiteQuality,
+          instagramOnly,
         },
       }),
+
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["leads"] });
       queryClient.invalidateQueries({ queryKey: ["lead-quota"] });
@@ -278,6 +283,7 @@ function FindLeadsPage() {
                 </Label>
                 <Select
                   value={websiteQuality}
+                  disabled={instagramOnly}
                   onValueChange={(value) =>
                     setWebsiteQuality(value as (typeof WEBSITE_QUALITY)[number]["value"])
                   }
@@ -298,6 +304,26 @@ function FindLeadsPage() {
                   each site live, so searching takes a little longer.
                 </p>
               </div>
+
+              <div className="border-border/60 bg-muted/40 flex items-start justify-between gap-4 rounded-xl border p-4">
+                <div className="space-y-1">
+                  <Label htmlFor="instagram-only" className="flex items-center gap-2 text-sm font-medium">
+                    <Instagram className="text-primary size-4" />
+                    Instagram businesses only
+                  </Label>
+                  <p className="text-muted-foreground text-xs">
+                    Only shows businesses whose only online presence is an Instagram page — no
+                    website at all. Perfect for a &ldquo;I built you a free demo site&rdquo; pitch.
+                  </p>
+                </div>
+                <Switch
+                  id="instagram-only"
+                  checked={instagramOnly}
+                  onCheckedChange={setInstagramOnly}
+                />
+              </div>
+
+
 
 
               <Button type="submit" className="w-full sm:w-auto" disabled={mutation.isPending}>

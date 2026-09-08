@@ -16,7 +16,6 @@ export function PublicHeader() {
         <nav className="text-public-muted ml-10 hidden items-center gap-7 text-sm md:flex" aria-label="Main navigation">
           <a href="/#features" className="hover:text-public-foreground transition-colors">Features</a>
           <a href="/#how" className="hover:text-public-foreground transition-colors">How it works</a>
-          <a href="/#pricing" className="hover:text-public-foreground transition-colors">Pricing</a>
           <a href="/#faq" className="hover:text-public-foreground transition-colors">FAQ</a>
           <Link to="/about" className="hover:text-public-foreground transition-colors">About</Link>
         </nav>
