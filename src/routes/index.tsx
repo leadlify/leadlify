@@ -61,13 +61,14 @@ const faqs: [string, string][] = [
     "No. Leadlify creates a personalized cold email draft that you copy into your own email client, so sending and replies stay fully under your control.",
   ],
   [
-    "What is included in the free account?",
-    "New accounts include 10 lead imports and 2 email drafts. The demo website builder unlocks on approved paid plans.",
+    "What does it cost right now?",
+    "Nothing. Every Leadlify feature — lead discovery, AI audits, cold email drafts, Instagram messages and the demo website builder — is free while we are in early access.",
   ],
   [
-    "How are paid plans activated?",
-    "Pick a plan inside the app and your request is submitted for review. Once approved, the matching lead limits, draft limits, and website builder are activated in your workspace.",
+    "Do I need to set anything up?",
+    "Just create an account. Your workspace is ready immediately with every tool unlocked.",
   ],
+
 ];
 
 const features = [
