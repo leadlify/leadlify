@@ -6,6 +6,7 @@ import {
   Building2,
   Gauge,
   Globe,
+  Instagram,
   LayoutTemplate,
   Loader2,
   Mail,
@@ -44,7 +45,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import type { WebsiteAnalysis } from "@/lib/analysis.functions";
 import { analyzeLeadWebsite } from "@/lib/analysis.functions";
-import { generateLeadEmail } from "@/lib/outreach.functions";
+import { generateInstagramDm, generateLeadEmail } from "@/lib/outreach.functions";
 import { demoSiteQuery, errorMessage, leadQuery } from "@/lib/queries";
 import { generateDemoWebsite } from "@/lib/website-builder.functions";
 
@@ -103,6 +104,7 @@ function LeadDetailPage() {
 
   const analyze = useServerFn(analyzeLeadWebsite);
   const generate = useServerFn(generateLeadEmail);
+  const generateDm = useServerFn(generateInstagramDm);
   const buildWebsite = useServerFn(generateDemoWebsite);
 
   const runWebsite = useMutation({
@@ -118,10 +120,15 @@ function LeadDetailPage() {
   const [body, setBody] = useState("");
   const [to, setTo] = useState("");
   const [instructions, setInstructions] = useState("");
+  const [dm, setDm] = useState("");
 
   useEffect(() => {
     if (lead.data?.email && !to) setTo(lead.data.email);
   }, [lead.data?.email, to]);
+
+  useEffect(() => {
+    if (lead.data?.instagram_message && !dm) setDm(lead.data.instagram_message);
+  }, [lead.data?.instagram_message, dm]);
 
   const analysis = (lead.data?.analysis as WebsiteAnalysis | null) ?? null;
 
@@ -144,6 +151,16 @@ function LeadDetailPage() {
       toast.success("Draft ready — review before sending");
     },
     onError: (error) => toast.error(errorMessage(error, "Could not generate the email.")),
+  });
+
+  const runDm = useMutation({
+    mutationFn: () => generateDm({ data: { leadId, instructions } }),
+    onSuccess: (result) => {
+      setDm(result.message);
+      queryClient.invalidateQueries({ queryKey: ["lead", leadId] });
+      toast.success("Instagram message ready");
+    },
+    onError: (error) => toast.error(errorMessage(error, "Could not write the Instagram message.")),
   });
 
   const updateLead = useMutation({
@@ -185,7 +202,7 @@ function LeadDetailPage() {
   }
 
   const record = lead.data;
-  const canBuildWebsite = plan.data?.website_builder_enabled === true;
+  const canBuildWebsite = plan.data?.website_builder_enabled !== false;
 
   return (
     <AppShell
@@ -229,6 +246,13 @@ function LeadDetailPage() {
                 value={record.website?.replace(/^https?:\/\//, "")}
                 href={record.website ?? undefined}
               />
+              {record.instagram_handle ? (
+                <Detail
+                  icon={Instagram}
+                  value={record.instagram_handle}
+                  href={`https://instagram.com/${record.instagram_handle.replace(/^@/, "")}`}
+                />
+              ) : null}
               {record.google_rating ? (
                 <Detail
                   icon={Star}
@@ -281,6 +305,7 @@ function LeadDetailPage() {
           <TabsList>
             <TabsTrigger value="audit">Website audit</TabsTrigger>
             <TabsTrigger value="email">Cold email</TabsTrigger>
+            <TabsTrigger value="instagram">Instagram DM</TabsTrigger>
           </TabsList>
 
           <TabsContent value="audit" className="mt-4">
@@ -508,6 +533,67 @@ function LeadDetailPage() {
                     <Button asChild variant="outline" disabled={!subject || !body}>
                       <a href={`mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`}>
                         Open email app
+                      </a>
+                    </Button>
+                  ) : null}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="instagram" className="mt-4">
+            <Card className="shadow-card border-border/60">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Instagram className="text-secondary size-4" />
+                  Instagram message
+                </CardTitle>
+                <CardDescription>
+                  {record.instagram_handle
+                    ? `Written for ${record.instagram_handle} — includes your demo site link and WhatsApp number 03701480852.`
+                    : "This lead has no Instagram handle saved, but you can still write a short DM to send manually."}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button
+                  variant="secondary"
+                  onClick={() => runDm.mutate()}
+                  disabled={runDm.isPending}
+                >
+                  {runDm.isPending ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="size-4" />
+                  )}
+                  {runDm.isPending ? "Writing…" : dm ? "Rewrite message" : "Generate message"}
+                </Button>
+
+                <Textarea
+                  rows={10}
+                  className="font-mono text-[13px] leading-relaxed"
+                  value={dm}
+                  onChange={(e) => setDm(e.target.value)}
+                  placeholder="Generate a message, or write your own here."
+                />
+
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(dm);
+                      toast.success("Message copied to clipboard");
+                    }}
+                    disabled={!dm}
+                  >
+                    Copy message
+                  </Button>
+                  {record.instagram_handle ? (
+                    <Button asChild variant="outline">
+                      <a
+                        href={`https://instagram.com/${record.instagram_handle.replace(/^@/, "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Open Instagram
                       </a>
                     </Button>
                   ) : null}
