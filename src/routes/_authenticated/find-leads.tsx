@@ -93,6 +93,7 @@ function FindLeadsPage() {
   const [radiusKm, setRadiusKm] = useState(10);
   const [websiteQuality, setWebsiteQuality] =
     useState<(typeof WEBSITE_QUALITY)[number]["value"]>("any");
+  const [instagramOnly, setInstagramOnly] = useState(false);
   const onlyWithoutWebsite = websiteQuality === "none";
   const typeOptions = INDUSTRIES.find((item) => item.label === industry)?.types ?? SUGGESTIONS;
 
@@ -110,8 +111,10 @@ function FindLeadsPage() {
           radiusKm,
           onlyWithoutWebsite,
           websiteQuality,
+          instagramOnly,
         },
       }),
+
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["leads"] });
       queryClient.invalidateQueries({ queryKey: ["lead-quota"] });
