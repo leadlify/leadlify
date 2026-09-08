@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Gauge, Loader2, Radar, Sparkles } from "lucide-react";
+import { Gauge, Instagram, Loader2, Radar, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -19,6 +19,8 @@ import {
 import { COUNTRIES } from "@/lib/countries";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+
 import { findLeads } from "@/lib/places.functions";
 import { getLeadQuota } from "@/lib/quota.functions";
 import { Progress } from "@/components/ui/progress";
