@@ -149,28 +149,6 @@ const steps: [typeof Search, string, string][] = [
   [BarChart3, "Move the lead forward", "Copy the draft, send it your way, and track each outcome."],
 ];
 
-const plans = [
-  {
-    name: "Starter",
-    price: 32,
-    note: "For focused solo outreach",
-    items: ["250 leads per month", "AI audits and drafts", "Demo website builder", "Full pipeline & CSV export"],
-  },
-  {
-    name: "Growth",
-    price: 45,
-    note: "For consistent acquisition",
-    items: ["1,000 leads per month", "AI audits and drafts", "Demo website builder", "Priority support"],
-    featured: true,
-  },
-  {
-    name: "Agency",
-    price: 70,
-    note: "For high-volume prospecting",
-    items: ["5,000 leads per month", "AI audits and drafts", "Demo website builder", "Multi-market prospecting"],
-  },
-];
-
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -227,12 +205,7 @@ export const Route = createFileRoute("/")({
               url: SITE,
               description:
                 "Find local businesses without a website, audit their web presence, and generate personalized cold email drafts.",
-              offers: plans.map((plan) => ({
-                "@type": "Offer",
-                name: `${plan.name} plan`,
-                price: plan.price,
-                priceCurrency: "USD",
-              })),
+              offers: { "@type": "Offer", price: 0, priceCurrency: "USD" },
             },
             {
               "@type": "FAQPage",
@@ -581,68 +554,6 @@ function Landing() {
                   ))}
                 </ul>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Pricing */}
-        <section id="pricing" className="defer-section px-5 py-24 sm:px-8 sm:py-32">
-          <div className="mx-auto max-w-7xl">
-            <div className="text-center">
-              <p className="text-public-muted text-xs font-semibold tracking-widest uppercase">
-                Simple monthly pricing
-              </p>
-              <h2 className="font-heading mt-5 text-3xl font-semibold sm:text-5xl">
-                Choose your outreach pace.
-              </h2>
-              <p className="text-public-muted mt-4">
-                Start free with 10 leads and 2 drafts. Paid plans activate after approval.
-              </p>
-            </div>
-            <div className="mt-14 grid gap-4 lg:grid-cols-3">
-              {plans.map((plan) => (
-                <article
-                  key={plan.name}
-                  className={`relative flex min-h-96 flex-col overflow-hidden rounded-xl border p-7 transition-transform duration-300 ${
-                    plan.featured
-                      ? "border-public-foreground bg-public-raised public-card-sheen lg:-translate-y-3"
-                      : "border-public-border bg-public hover:border-public-foreground/35"
-                  }`}
-                >
-                  {plan.featured ? (
-                    <span className="bg-public-foreground text-public absolute top-0 right-6 px-3 py-1 text-[10px] font-bold uppercase">
-                      Most popular
-                    </span>
-                  ) : null}
-                  <p className="text-public-muted text-sm">{plan.name}</p>
-                  <p className="font-heading mt-4 text-4xl font-semibold">
-                    ${plan.price}
-                    <span className="text-public-muted text-sm font-normal"> / month</span>
-                  </p>
-                  <p className="text-public-muted mt-2 text-sm">{plan.note}</p>
-                  <ul className="mt-8 flex-1 space-y-4 text-sm">
-                    {plan.items.map((item) => (
-                      <li key={item} className="flex gap-3">
-                        <Check className="size-4 shrink-0" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                  <Button
-                    asChild
-                    className={`mt-8 w-full ${
-                      plan.featured
-                        ? "bg-public-foreground text-public hover:bg-public-foreground/90"
-                        : "border-public-border bg-public-raised text-public-foreground hover:bg-public-soft"
-                    }`}
-                    variant={plan.featured ? "default" : "outline"}
-                  >
-                    <Link to="/auth" search={{ mode: "signup" }}>
-                      Choose {plan.name}
-                    </Link>
-                  </Button>
-                </article>
-              ))}
             </div>
           </div>
         </section>
