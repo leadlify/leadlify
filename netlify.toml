@@ -1,6 +1,8 @@
 [build]
-  command = "vite build"
-  publish = "dist"
+  publish = "public"
 
-[build.environment]
-  NITRO_PRESET = "netlify"
+[[redirects]]
+  from = "/*"
+  to = "https://leadlify.lovable.app/:splat"
+  status = 200
+  force = true
