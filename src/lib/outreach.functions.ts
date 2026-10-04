@@ -177,3 +177,57 @@ export const generateLeadEmail = createServerFn({ method: "POST" })
 
     return email;
   });
+
+const OPT_OUT_LINE = "If you're not interested, just reply and I won't contact you again.";
+
+const QUEUE_SYSTEM = `You write outreach for a web designer contacting small businesses that have NO website.
+Return ONLY JSON: {"whatsapp": "...", "subject": "...", "body": "..."}.
+whatsapp: friendly, under 60 words, no emojis, mention the business by name and its category, offer a website.
+subject: under 8 words, specific to the business.
+body: plain text email under 120 words, first person, clear sender identity (name and what they do), mention that the
+business has no website and what that costs them, one simple call to action, and end with the sender sign-off.
+Vary wording naturally; never sound like a template.`;
+
+/** Generates a WhatsApp message and short email for the outreach queue. Never sends anything. */
+export const generateQueueMessages = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ leadId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    await enforceRateLimit(context.supabase, context.userId, "ai_outreach", 15);
+    const { supabase, userId } = context;
+    const [{ data: lead }, { data: settings }] = await Promise.all([
+      supabase
+        .from("leads")
+        .select("business_name, owner_name, business_category, city, country")
+        .eq("id", data.leadId)
+        .maybeSingle(),
+      supabase
+        .from("settings")
+        .select("sender_name, sender_email, signature, service_description")
+        .eq("user_id", userId)
+        .maybeSingle(),
+    ]);
+    if (!lead) throw new UpstreamError(404, "Lead not found.");
+
+    const raw = await callAI({
+      system: QUEUE_SYSTEM,
+      json: true,
+      temperature: 0.9,
+      user: JSON.stringify({
+        business: lead,
+        sender: {
+          name: settings?.sender_name || "Leadlify web design",
+          email: settings?.sender_email ?? "",
+          signature: settings?.signature ?? "",
+          services: settings?.service_description ?? "Professional websites for small businesses.",
+        },
+      }),
+    });
+    const out = parseAIJson<{ whatsapp?: string; subject?: string; body?: string }>(raw);
+    if (!out.whatsapp || !out.subject || !out.body) {
+      throw new UpstreamError(502, "The AI did not return usable messages. Try again.");
+    }
+    let body = out.body.trim();
+    if (!body.includes(OPT_OUT_LINE)) body += `\n\n${OPT_OUT_LINE}`;
+    return { whatsapp: out.whatsapp.trim(), subject: out.subject.trim(), body };
+  });
