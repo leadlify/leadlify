@@ -13,6 +13,9 @@ import {
   Settings,
   Sparkles,
   Users,
+  Send,
+  Megaphone,
+  Ban,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -29,6 +32,7 @@ const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/find-leads", label: "Find Leads", icon: Radar },
   { to: "/leads", label: "Leads", icon: Users },
+  { to: "/outreach", label: "Outreach", icon: Send },
   { to: "/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/plans", label: "Plans", icon: ReceiptText },
   { to: "/referrals", label: "Referrals", icon: Gift },
@@ -157,10 +161,57 @@ export function AppShell({
           </div>
         </header>
 
+        <AnnouncementBanner />
         <main className="animate-fade-up mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
-          {children}
+          <SuspensionGate>{children}</SuspensionGate>
         </main>
       </div>
     </div>
   );
+}
+
+function AnnouncementBanner() {
+  const { data } = useQuery({
+    queryKey: ["announcements", "active"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("announcements")
+        .select("id, message")
+        .eq("active", true)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      return data ?? [];
+    },
+    staleTime: 60_000,
+  });
+  const item = data?.[0];
+  if (!item) return null;
+  return (
+    <div className="bg-primary text-primary-foreground flex items-center gap-2 px-4 py-2 text-sm sm:px-6">
+      <Megaphone className="size-4 shrink-0" />
+      <span className="min-w-0">{item.message}</span>
+    </div>
+  );
+}
+
+function SuspensionGate({ children }: { children: ReactNode }) {
+  const { data } = useQuery({
+    queryKey: ["profile", "suspended"],
+    queryFn: async () => {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user) return false;
+      const { data } = await supabase.from("profiles").select("suspended").eq("id", auth.user.id).maybeSingle();
+      return data?.suspended === true;
+    },
+  });
+  if (data) {
+    return (
+      <div className="mx-auto max-w-md py-24 text-center">
+        <Ban className="text-destructive mx-auto mb-4 size-8" />
+        <h2 className="text-lg font-semibold">Account suspended</h2>
+        <p className="text-muted-foreground mt-2 text-sm">Your account has been suspended. Please contact support.</p>
+      </div>
+    );
+  }
+  return <>{children}</>;
 }

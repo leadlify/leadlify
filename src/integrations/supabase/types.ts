@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      action_log: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      announcements: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string
+          id: string
+          message: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string
+          id?: string
+          message: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string
+          id?: string
+          message?: string
+        }
+        Relationships: []
+      }
       app_user_connections: {
         Row: {
           account_label: string | null
@@ -276,6 +321,50 @@ export type Database = {
         }
         Relationships: []
       }
+      outreach: {
+        Row: {
+          channel: string
+          created_at: string
+          id: string
+          lead_id: string
+          notes: string | null
+          sent_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          id?: string
+          lead_id: string
+          notes?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          id?: string
+          lead_id?: string
+          notes?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
@@ -357,6 +446,7 @@ export type Database = {
           monthly_email_quota: number
           monthly_lead_quota: number
           plan: string
+          suspended: boolean
           updated_at: string
           website_builder_enabled: boolean
         }
@@ -368,6 +458,7 @@ export type Database = {
           monthly_email_quota?: number
           monthly_lead_quota?: number
           plan?: string
+          suspended?: boolean
           updated_at?: string
           website_builder_enabled?: boolean
         }
@@ -379,6 +470,7 @@ export type Database = {
           monthly_email_quota?: number
           monthly_lead_quota?: number
           plan?: string
+          suspended?: boolean
           updated_at?: string
           website_builder_enabled?: boolean
         }

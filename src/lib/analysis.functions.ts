@@ -1,3 +1,4 @@
+import { enforceRateLimit } from "@/lib/rate-limit.server";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -46,6 +47,7 @@ export const analyzeLeadWebsite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => IdInput.parse(input))
   .handler(async ({ data, context }) => {
+    await enforceRateLimit(context.supabase, context.userId, "ai_analysis", 10);
     const { supabase } = context;
 
     const { data: lead, error } = await supabase
