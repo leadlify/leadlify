@@ -1,3 +1,4 @@
+import { enforceRateLimit } from "@/lib/rate-limit.server";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
@@ -35,6 +36,7 @@ export const generateInstagramDm = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => GenerateInput.parse(input))
   .handler(async ({ data, context }) => {
+    await enforceRateLimit(context.supabase, context.userId, "ai_outreach", 15);
     const { supabase, userId } = context;
 
     const [{ data: lead, error }, { data: settings }, { data: demo }] = await Promise.all([
@@ -105,6 +107,7 @@ export const generateLeadEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => GenerateInput.parse(input))
   .handler(async ({ data, context }) => {
+    await enforceRateLimit(context.supabase, context.userId, "ai_outreach", 15);
     const { supabase, userId } = context;
 
     const [{ data: lead, error }, { data: settings }, { data: demo }] = await Promise.all([

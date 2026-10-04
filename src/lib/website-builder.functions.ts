@@ -1,3 +1,4 @@
+import { enforceRateLimit } from "@/lib/rate-limit.server";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
@@ -11,6 +12,7 @@ export const generateDemoWebsite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data, context }) => {
+    await enforceRateLimit(context.supabase, context.userId, "ai_website", 5);
     const { supabase, userId } = context;
     const { buildDemoHtml, slugify } = await import("@/lib/website-builder.server");
     const { readPlanEntitlements } = await import("@/server/plan.server");
