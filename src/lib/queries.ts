@@ -125,10 +125,10 @@ export const allPlanRequestsQuery = queryOptions({
 
 export const allLeadsQuery = queryOptions({
   queryKey: ["admin", "leads"],
-  queryFn: async (): Promise<Pick<Lead, "id" | "user_id" | "created_at" | "status">[]> => {
+  queryFn: async (): Promise<Pick<Lead, "id" | "user_id" | "created_at" | "status" | "business_name" | "business_category" | "country">[]> => {
     const { data, error } = await supabase
       .from("leads")
-      .select("id,user_id,created_at,status")
+      .select("id,user_id,created_at,status,business_name,business_category,country")
       .order("created_at", { ascending: false })
       .limit(5000);
     if (error) throw new Error(error.message);
