@@ -16,6 +16,7 @@ import { toast } from "sonner";
 
 import { AppShell } from "@/components/app-shell";
 import { StatCard } from "@/components/stat-card";
+import { AdminExtra } from "@/components/admin-extra";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -235,6 +236,8 @@ function AdminPage() {
             delay={180}
           />
         </div>
+
+        <AdminExtra profiles={users} leads={leads.data ?? []} />
 
         <Card className="shadow-card border-border/60">
           <CardHeader>
