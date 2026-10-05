@@ -201,6 +201,99 @@ export type Database = {
           },
         ]
       }
+      email_replies: {
+        Row: {
+          created_at: string
+          email_history_id: string | null
+          from_email: string | null
+          gmail_message_id: string
+          gmail_thread_id: string
+          id: string
+          is_read: boolean
+          lead_id: string | null
+          received_at: string
+          snippet: string | null
+          subject: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_history_id?: string | null
+          from_email?: string | null
+          gmail_message_id: string
+          gmail_thread_id: string
+          id?: string
+          is_read?: boolean
+          lead_id?: string | null
+          received_at?: string
+          snippet?: string | null
+          subject?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_history_id?: string | null
+          from_email?: string | null
+          gmail_message_id?: string
+          gmail_thread_id?: string
+          id?: string
+          is_read?: boolean
+          lead_id?: string | null
+          received_at?: string
+          snippet?: string | null
+          subject?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_replies_email_history_id_fkey"
+            columns: ["email_history_id"]
+            isOneToOne: false
+            referencedRelation: "email_history"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_replies_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gmail_accounts: {
+        Row: {
+          created_at: string
+          email: string | null
+          last_checked_at: string | null
+          last_error: string | null
+          refresh_token_ciphertext: string
+          scopes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          last_checked_at?: string | null
+          last_error?: string | null
+          refresh_token_ciphertext: string
+          scopes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          last_checked_at?: string | null
+          last_error?: string | null
+          refresh_token_ciphertext?: string
+          scopes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       gmail_oauth_diagnostics: {
         Row: {
           connector_id: string
