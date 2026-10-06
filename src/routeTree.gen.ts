@@ -29,6 +29,8 @@ import { Route as LeadGenerationIndexRouteImport } from './routes/lead-generatio
 import { Route as LeadGenerationCountryRouteImport } from './routes/lead-generation.$country'
 import { Route as SiteSlugRouteImport } from './routes/site.$slug'
 import { Route as AuthenticatedLeadLeadIdRouteImport } from './routes/_authenticated/lead.$leadId'
+import { Route as ApiPublicGmailCallbackRouteImport } from './routes/api/public/gmail/callback'
+import { Route as ApiPublicGmailSyncRepliesRouteImport } from './routes/api/public/gmail/sync-replies'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -129,6 +131,17 @@ const AuthenticatedLeadLeadIdRoute = AuthenticatedLeadLeadIdRouteImport.update({
   path: '/lead/$leadId',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicGmailCallbackRoute = ApiPublicGmailCallbackRouteImport.update({
+  id: '/api/public/gmail/callback',
+  path: '/api/public/gmail/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicGmailSyncRepliesRoute =
+  ApiPublicGmailSyncRepliesRouteImport.update({
+    id: '/api/public/gmail/sync-replies',
+    path: '/api/public/gmail/sync-replies',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -150,6 +163,8 @@ export interface FileRoutesByFullPath {
   '/site/$slug': typeof SiteSlugRoute
   '/lead-generation/': typeof LeadGenerationIndexRoute
   '/lead/$leadId': typeof AuthenticatedLeadLeadIdRoute
+  '/api/public/gmail/callback': typeof ApiPublicGmailCallbackRoute
+  '/api/public/gmail/sync-replies': typeof ApiPublicGmailSyncRepliesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -171,6 +186,8 @@ export interface FileRoutesByTo {
   '/site/$slug': typeof SiteSlugRoute
   '/lead-generation': typeof LeadGenerationIndexRoute
   '/lead/$leadId': typeof AuthenticatedLeadLeadIdRoute
+  '/api/public/gmail/callback': typeof ApiPublicGmailCallbackRoute
+  '/api/public/gmail/sync-replies': typeof ApiPublicGmailSyncRepliesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -194,6 +211,8 @@ export interface FileRoutesById {
   '/site/$slug': typeof SiteSlugRoute
   '/lead-generation/': typeof LeadGenerationIndexRoute
   '/_authenticated/lead/$leadId': typeof AuthenticatedLeadLeadIdRoute
+  '/api/public/gmail/callback': typeof ApiPublicGmailCallbackRoute
+  '/api/public/gmail/sync-replies': typeof ApiPublicGmailSyncRepliesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -217,6 +236,8 @@ export interface FileRouteTypes {
     | '/site/$slug'
     | '/lead-generation/'
     | '/lead/$leadId'
+    | '/api/public/gmail/callback'
+    | '/api/public/gmail/sync-replies'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -238,6 +259,8 @@ export interface FileRouteTypes {
     | '/site/$slug'
     | '/lead-generation'
     | '/lead/$leadId'
+    | '/api/public/gmail/callback'
+    | '/api/public/gmail/sync-replies'
   id:
     | '__root__'
     | '/'
@@ -260,6 +283,8 @@ export interface FileRouteTypes {
     | '/site/$slug'
     | '/lead-generation/'
     | '/_authenticated/lead/$leadId'
+    | '/api/public/gmail/callback'
+    | '/api/public/gmail/sync-replies'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -273,6 +298,8 @@ export interface RootRouteChildren {
   LeadGenerationCountryRoute: typeof LeadGenerationCountryRoute
   SiteSlugRoute: typeof SiteSlugRoute
   LeadGenerationIndexRoute: typeof LeadGenerationIndexRoute
+  ApiPublicGmailCallbackRoute: typeof ApiPublicGmailCallbackRoute
+  ApiPublicGmailSyncRepliesRoute: typeof ApiPublicGmailSyncRepliesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -417,6 +444,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLeadLeadIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/gmail/callback': {
+      id: '/api/public/gmail/callback'
+      path: '/api/public/gmail/callback'
+      fullPath: '/api/public/gmail/callback'
+      preLoaderRoute: typeof ApiPublicGmailCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/gmail/sync-replies': {
+      id: '/api/public/gmail/sync-replies'
+      path: '/api/public/gmail/sync-replies'
+      fullPath: '/api/public/gmail/sync-replies'
+      preLoaderRoute: typeof ApiPublicGmailSyncRepliesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -460,6 +501,8 @@ const rootRouteChildren: RootRouteChildren = {
   LeadGenerationCountryRoute: LeadGenerationCountryRoute,
   SiteSlugRoute: SiteSlugRoute,
   LeadGenerationIndexRoute: LeadGenerationIndexRoute,
+  ApiPublicGmailCallbackRoute: ApiPublicGmailCallbackRoute,
+  ApiPublicGmailSyncRepliesRoute: ApiPublicGmailSyncRepliesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
