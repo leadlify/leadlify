@@ -46,6 +46,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { WebsiteAnalysis } from "@/lib/analysis.functions";
 import { analyzeLeadWebsite } from "@/lib/analysis.functions";
 import { generateInstagramDm, generateLeadEmail } from "@/lib/outreach.functions";
+import { sendLeadEmailViaGmail } from "@/lib/gmail.functions";
 import { demoSiteQuery, errorMessage, leadQuery } from "@/lib/queries";
 import { generateDemoWebsite } from "@/lib/website-builder.functions";
 
@@ -121,6 +122,15 @@ function LeadDetailPage() {
   const [to, setTo] = useState("");
   const [instructions, setInstructions] = useState("");
   const [dm, setDm] = useState("");
+  const sendFn = useServerFn(sendLeadEmailViaGmail);
+  const sendGmail = useMutation({
+    mutationFn: () => sendFn({ data: { leadId, to, subject, body } }),
+    onSuccess: (r) => {
+      queryClient.invalidateQueries();
+      toast.success(`Email sent from ${r.from}`);
+    },
+    onError: (e) => toast.error(errorMessage(e, "Could not send the email.")),
+  });
 
   useEffect(() => {
     if (lead.data?.email && !to) setTo(lead.data.email);
@@ -529,6 +539,16 @@ function LeadDetailPage() {
                   >
                     Copy draft
                   </Button>
+                  {to ? (
+                    <Button
+                      variant="secondary"
+                      disabled={!subject || !body || sendGmail.isPending}
+                      onClick={() => sendGmail.mutate()}
+                    >
+                      {sendGmail.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
+                      Send Email
+                    </Button>
+                  ) : null}
                   {to ? (
                     <Button asChild variant="outline" disabled={!subject || !body}>
                       <a href={`mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`}>
