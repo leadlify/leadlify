@@ -33,6 +33,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { generateQueueMessages } from "@/lib/outreach.functions";
+import { checkGmailReplies } from "@/lib/gmail.functions";
 import { mailtoUrl, toInternationalDigits, whatsappUrl } from "@/lib/phone";
 import { errorMessage, leadsQuery, type Lead } from "@/lib/queries";
 
@@ -58,6 +59,66 @@ const STATUS_LABEL: Record<string, string> = {
   replied: "Replied",
   not_interested: "Not interested",
 };
+
+function RepliesTab() {
+  const queryClient = useQueryClient();
+  const checkFn = useServerFn(checkGmailReplies);
+  const replies = useQuery({
+    queryKey: ["email-replies"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("email_replies")
+        .select("id, lead_id, from_email, subject, snippet, received_at, is_read")
+        .order("received_at", { ascending: false })
+        .limit(200);
+      if (error) throw new Error(error.message);
+      return data;
+    },
+  });
+  const check = useMutation({
+    mutationFn: () => checkFn(),
+    onSuccess: (r) => {
+      queryClient.invalidateQueries();
+      toast.success(r.added ? `${r.added} new repl${r.added === 1 ? "y" : "ies"}` : "No new replies");
+    },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+  return (
+    <>
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" onClick={() => check.mutate()} disabled={check.isPending}>
+          {check.isPending ? <Loader2 className="size-4 animate-spin" /> : <Mail className="size-4" />}
+          Check now
+        </Button>
+      </div>
+      {!replies.data?.length ? (
+        <p className="text-muted-foreground py-12 text-center text-sm">
+          No replies yet. Gmail is checked automatically every 15 minutes.
+        </p>
+      ) : (
+        replies.data.map((r) => (
+          <Card key={r.id} className="border-border/60">
+            <CardContent className="space-y-1 pt-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-medium">{r.from_email}</p>
+                <span className="text-muted-foreground text-xs">
+                  {new Date(r.received_at).toLocaleString()}
+                </span>
+              </div>
+              <p className="text-sm">{r.subject}</p>
+              <p className="text-muted-foreground text-sm">{r.snippet}</p>
+              {r.lead_id ? (
+                <Link to="/lead/$leadId" params={{ leadId: r.lead_id }} className="text-xs underline">
+                  Open lead
+                </Link>
+              ) : null}
+            </CardContent>
+          </Card>
+        ))
+      )}
+    </>
+  );
+}
 const emailSchema = z.string().trim().email().max(255);
 
 const outreachQuery = {
@@ -137,6 +198,7 @@ function OutreachPage() {
           <TabsList>
             <TabsTrigger value="queue">Queue</TabsTrigger>
             <TabsTrigger value="followups">Follow-ups ({followUps.length})</TabsTrigger>
+            <TabsTrigger value="replies">Replies</TabsTrigger>
           </TabsList>
 
           <TabsContent value="queue" className="space-y-4">
@@ -182,6 +244,10 @@ function OutreachPage() {
                 <LeadCard key={lead.id} lead={lead} last={latestByLead.get(lead.id)} followUp />
               ))
             )}
+          </TabsContent>
+
+          <TabsContent value="replies" className="space-y-4">
+            <RepliesTab />
           </TabsContent>
         </Tabs>
       </div>

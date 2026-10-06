@@ -19,6 +19,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { errorMessage, settingsQuery } from "@/lib/queries";
+import { useServerFn } from "@tanstack/react-start";
+import { disconnectGmail, getGmailConnectUrl, getGmailStatus } from "@/lib/gmail.functions";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -37,6 +39,77 @@ export const Route = createFileRoute("/_authenticated/settings")({
 });
 
 const TONES = ["professional", "friendly", "direct", "consultative"] as const;
+
+function GmailCard() {
+  const queryClient = useQueryClient();
+  const statusFn = useServerFn(getGmailStatus);
+  const connectFn = useServerFn(getGmailConnectUrl);
+  const disconnectFn = useServerFn(disconnectGmail);
+  const status = useQuery({ queryKey: ["gmail-status"], queryFn: () => statusFn() });
+
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    const g = p.get("gmail");
+    if (!g) return;
+    if (g === "connected") toast.success("Gmail connected");
+    else toast.error(`Gmail connection failed: ${p.get("detail") ?? "unknown error"}`);
+    window.history.replaceState({}, "", window.location.pathname);
+    queryClient.invalidateQueries({ queryKey: ["gmail-status"] });
+  }, [queryClient]);
+
+  const connect = useMutation({
+    mutationFn: () => connectFn(),
+    onSuccess: ({ url }) => {
+      window.location.href = url;
+    },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+  const disconnect = useMutation({
+    mutationFn: () => disconnectFn(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gmail-status"] });
+      toast.success("Gmail disconnected");
+    },
+  });
+
+  const acct = status.data;
+  return (
+    <Card className="shadow-card border-border/60">
+      <CardHeader>
+        <CardTitle className="text-base">Gmail</CardTitle>
+        <CardDescription>Send emails from your own Gmail and track replies automatically.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {status.isLoading ? (
+          <Loader2 className="size-4 animate-spin" />
+        ) : acct ? (
+          <>
+            <p className="text-sm">
+              Connected as <strong>{acct.email ?? "unknown"}</strong>
+              {acct.last_checked_at
+                ? ` · replies checked ${new Date(acct.last_checked_at).toLocaleString()}`
+                : ""}
+            </p>
+            {acct.last_error ? <p className="text-destructive text-sm">{acct.last_error}</p> : null}
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => connect.mutate()} disabled={connect.isPending}>
+                Reconnect
+              </Button>
+              <Button variant="ghost" onClick={() => disconnect.mutate()} disabled={disconnect.isPending}>
+                Disconnect
+              </Button>
+            </div>
+          </>
+        ) : (
+          <Button onClick={() => connect.mutate()} disabled={connect.isPending}>
+            {connect.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
+            Connect Gmail
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 function SettingsPage() {
   const queryClient = useQueryClient();
@@ -170,6 +243,7 @@ function SettingsPage() {
             </form>
           </CardContent>
         </Card>
+        <GmailCard />
       </div>
     </AppShell>
   );
