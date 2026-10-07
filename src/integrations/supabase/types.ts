@@ -163,6 +163,7 @@ export type Database = {
       email_history: {
         Row: {
           body: string
+          bounced_at: string | null
           created_at: string
           error_message: string | null
           gmail_message_id: string | null
@@ -179,6 +180,7 @@ export type Database = {
         }
         Insert: {
           body: string
+          bounced_at?: string | null
           created_at?: string
           error_message?: string | null
           gmail_message_id?: string | null
@@ -195,6 +197,7 @@ export type Database = {
         }
         Update: {
           body?: string
+          bounced_at?: string | null
           created_at?: string
           error_message?: string | null
           gmail_message_id?: string | null
@@ -622,6 +625,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      unsubscribes: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          lead_id: string | null
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          lead_id?: string | null
+          reason?: string | null
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          lead_id?: string | null
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unsubscribes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
