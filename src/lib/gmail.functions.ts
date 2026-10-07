@@ -156,11 +156,13 @@ export const unsubscribeLead = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { error } = await supabase.from("unsubscribes").upsert(
-      { user_id: userId, email: data.email.toLowerCase(), lead_id: data.leadId ?? null, reason: data.reason ?? null },
-      { onConflict: "user_id,email", ignoreDuplicates: true },
-    );
-    if (error && !error.message.includes("duplicate")) throw new Error(error.message);
+    const { error } = await supabase.from("unsubscribes").insert({
+      user_id: userId,
+      email: data.email.toLowerCase(),
+      lead_id: data.leadId ?? null,
+      reason: data.reason ?? null,
+    });
+    if (error && error.code !== "23505") throw new Error(error.message);
     if (data.leadId) {
       await supabase.from("leads").update({ status: "lost" }).eq("id", data.leadId);
       await supabase.from("outreach").insert({ user_id: userId, lead_id: data.leadId, channel: "email", status: "not_interested" });
