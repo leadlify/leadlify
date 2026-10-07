@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { AlertTriangle, Copy, Loader2, Mail, MessageCircle, Sparkles } from "lucide-react";
+import { AlertTriangle, Check, Copy, Loader2, Mail, Sparkles, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -33,15 +33,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { generateQueueMessages } from "@/lib/outreach.functions";
-import { checkGmailReplies } from "@/lib/gmail.functions";
-import { mailtoUrl, toInternationalDigits, whatsappUrl } from "@/lib/phone";
+import { checkGmailReplies, sendLeadEmailViaGmail, unsubscribeLead } from "@/lib/gmail.functions";
 import { errorMessage, leadsQuery, type Lead } from "@/lib/queries";
 
 export const Route = createFileRoute("/_authenticated/outreach")({
   head: () => ({
     meta: [
       { title: "Outreach queue — Leadlify" },
-      { name: "description", content: "Send WhatsApp and email outreach manually and track replies." },
+      { name: "description", content: "Send cold emails from your Gmail and track delivery, replies and opt-outs." },
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "Outreach queue — Leadlify" },
       { property: "og:description", content: "Semi-automatic outreach queue with follow-ups." },
@@ -51,7 +50,7 @@ export const Route = createFileRoute("/_authenticated/outreach")({
 });
 
 type Outreach = Tables<"outreach">;
-type Channel = "whatsapp" | "email";
+type Channel = "email";
 const DAILY_SOFT_LIMIT = 30;
 const STATUS_LABEL: Record<string, string> = {
   pending: "Pending",
@@ -143,7 +142,12 @@ function OutreachPage() {
   const rows = outreach.data ?? [];
   const today = new Date().toISOString().slice(0, 10);
   const sentToday = rows.filter((r) => r.sent_at?.slice(0, 10) === today).length;
-  const optedOut = new Set(rows.filter((r) => r.status === "not_interested").map((r) => r.lead_id));
+  const unsubs = useQuery(unsubscribesQuery);
+  const blockedEmails = new Set((unsubs.data ?? []).map((u) => u.email.toLowerCase()));
+  const optedOut = new Set([
+    ...rows.filter((r) => r.status === "not_interested").map((r) => r.lead_id),
+    ...(leads.data ?? []).filter((l) => l.email && blockedEmails.has(l.email.toLowerCase())).map((l) => l.id),
+  ]);
 
   const latestByLead = useMemo(() => {
     const map = new Map<string, Outreach>();
@@ -156,11 +160,7 @@ function OutreachPage() {
     const last = latestByLead.get(lead.id);
     const status = last?.status ?? "pending";
     if (statusFilter !== "all" && status !== statusFilter) return false;
-    if (channelFilter !== "all") {
-      if (channelFilter === "email" && !lead.email) return false;
-      if (channelFilter === "whatsapp" && !lead.phone) return false;
-      if (last && last.channel !== channelFilter && status !== "pending") return false;
-    }
+    if (channelFilter === "with_email" && !lead.email) return false;
     return true;
   });
 
@@ -173,7 +173,7 @@ function OutreachPage() {
   });
 
   return (
-    <AppShell title="Outreach queue" description="You send every message yourself — one click each">
+    <AppShell title="Outreach queue" description="Emails go out from your connected Gmail — one click each">
       <div className="space-y-6">
         <Card className={sentToday >= DAILY_SOFT_LIMIT ? "border-destructive/60" : ""}>
           <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
@@ -186,7 +186,7 @@ function OutreachPage() {
             {sentToday >= DAILY_SOFT_LIMIT ? (
               <p className="text-destructive flex items-center gap-2 text-sm">
                 <AlertTriangle className="size-4" /> You've reached today's suggested limit. Sending more
-                may get your number flagged.
+                may hurt your Gmail reputation.
               </p>
             ) : (
               <p className="text-muted-foreground text-sm">Suggested daily limit: {DAILY_SOFT_LIMIT}</p>
@@ -199,6 +199,8 @@ function OutreachPage() {
             <TabsTrigger value="queue">Queue</TabsTrigger>
             <TabsTrigger value="followups">Follow-ups ({followUps.length})</TabsTrigger>
             <TabsTrigger value="replies">Replies</TabsTrigger>
+            <TabsTrigger value="delivery">Delivery</TabsTrigger>
+            <TabsTrigger value="unsubscribed">Unsubscribed ({unsubs.data?.length ?? 0})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="queue" className="space-y-4">
@@ -215,9 +217,8 @@ function OutreachPage() {
               <Select value={channelFilter} onValueChange={setChannelFilter}>
                 <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All channels</SelectItem>
-                  <SelectItem value="whatsapp">WhatsApp</SelectItem>
-                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="all">All leads</SelectItem>
+                  <SelectItem value="with_email">Has email</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -249,6 +250,14 @@ function OutreachPage() {
           <TabsContent value="replies" className="space-y-4">
             <RepliesTab />
           </TabsContent>
+
+          <TabsContent value="delivery" className="space-y-4">
+            <DeliveryTab />
+          </TabsContent>
+
+          <TabsContent value="unsubscribed" className="space-y-4">
+            <UnsubscribedTab />
+          </TabsContent>
         </Tabs>
       </div>
     </AppShell>
@@ -258,12 +267,9 @@ function OutreachPage() {
 function LeadCard({ lead, last, followUp }: { lead: Lead; last?: Outreach; followUp?: boolean }) {
   const queryClient = useQueryClient();
   const generate = useServerFn(generateQueueMessages);
+  const sendFn = useServerFn(sendLeadEmailViaGmail);
+  const unsubFn = useServerFn(unsubscribeLead);
   const firstName = lead.owner_name?.split(" ")[0] || "there";
-  const [whatsapp, setWhatsapp] = useState(
-    followUp
-      ? `Hi ${firstName}, just following up on my message about a website for ${lead.business_name}. Happy to share a free demo if useful — would that help?`
-      : "",
-  );
   const [subject, setSubject] = useState(followUp ? `Quick follow-up — ${lead.business_name}` : "");
   const [body, setBody] = useState(
     followUp
@@ -271,13 +277,12 @@ function LeadCard({ lead, last, followUp }: { lead: Lead; last?: Outreach; follo
       : "",
   );
   const [email, setEmail] = useState(lead.email ?? "");
-  const [confirm, setConfirm] = useState<Channel | null>(null);
-  const phone = toInternationalDigits(lead.phone, lead.country);
+  const [justSent, setJustSent] = useState(false);
+  const [confirmUnsub, setConfirmUnsub] = useState(false);
 
   const gen = useMutation({
     mutationFn: () => generate({ data: { leadId: lead.id } }),
     onSuccess: (r) => {
-      setWhatsapp(r.whatsapp);
       setSubject(r.subject);
       setBody(r.body);
     },
@@ -298,17 +303,34 @@ function LeadCard({ lead, last, followUp }: { lead: Lead; last?: Outreach; follo
     onError: (e) => toast.error(errorMessage(e)),
   });
 
+  const send = useMutation({
+    mutationFn: () => sendFn({ data: { leadId: lead.id, to: lead.email!, subject, body } }),
+    onSuccess: (r) => {
+      setJustSent(true);
+      toast.success(`Sent from ${r.from}`);
+      setTimeout(() => queryClient.invalidateQueries(), 1500);
+    },
+    onError: (e) => {
+      toast.error(errorMessage(e, "Could not send the email."));
+      queryClient.invalidateQueries({ queryKey: ["email-history"] });
+    },
+  });
+
   const record = useMutation({
-    mutationFn: async ({ channel, status }: { channel: Channel; status: string }) => {
-      const { error } = await supabase.from("outreach").insert({
-        lead_id: lead.id,
-        channel,
-        status,
-        sent_at: status === "sent" ? new Date().toISOString() : null,
-      });
+    mutationFn: async ({ status }: { status: string }) => {
+      const { error } = await supabase.from("outreach").insert({ lead_id: lead.id, channel: "email", status });
       if (error) throw new Error(error.message);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["outreach"] }),
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+
+  const unsub = useMutation({
+    mutationFn: () => unsubFn({ data: { email: lead.email!, leadId: lead.id, reason: "Marked not interested" } }),
+    onSuccess: () => {
+      toast.success("Added to unsubscribe list");
+      queryClient.invalidateQueries();
+    },
     onError: (e) => toast.error(errorMessage(e)),
   });
 
@@ -335,95 +357,212 @@ function LeadCard({ lead, last, followUp }: { lead: Lead; last?: Outreach; follo
           {!followUp ? (
             <Button size="sm" variant="outline" disabled={gen.isPending} onClick={() => gen.mutate()}>
               {gen.isPending ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
-              {whatsapp ? "Regenerate" : "Write messages"}
+              {body ? "Regenerate" : "Write email"}
             </Button>
           ) : null}
         </div>
       </CardHeader>
-      <CardContent className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <p className="text-sm font-medium">WhatsApp</p>
-          <Textarea rows={5} value={whatsapp} onChange={(e) => setWhatsapp(e.target.value.slice(0, 1000))} placeholder="Click “Write messages” or type your own." />
+      <CardContent className="space-y-2">
+        <div className="flex gap-2">
+          <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Add business email" maxLength={255} />
+          {email !== (lead.email ?? "") ? (
+            <Button size="sm" variant="outline" onClick={() => saveEmail.mutate()}>Save</Button>
+          ) : null}
+        </div>
+        <Input value={subject} onChange={(e) => setSubject(e.target.value.slice(0, 200))} placeholder="Subject" />
+        <Textarea rows={6} value={body} onChange={(e) => setBody(e.target.value.slice(0, 3000))} placeholder="Email body" />
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap gap-2">
             <Button
               size="sm"
-              disabled={!phone || !whatsapp}
-              onClick={() => {
-                window.open(whatsappUrl(phone!, whatsapp), "_blank", "noopener,noreferrer");
-                setConfirm("whatsapp");
-              }}
+              disabled={!lead.email || !body || !subject || send.isPending || justSent}
+              onClick={() => send.mutate()}
             >
-              <MessageCircle className="size-4" /> Send on WhatsApp
+              {send.isPending ? (
+                <><Loader2 className="size-4 animate-spin" /> Sending…</>
+              ) : justSent ? (
+                <><Check className="size-4" /> Sent</>
+              ) : (
+                <><Mail className="size-4" /> Send Email</>
+              )}
             </Button>
-            <Button size="sm" variant="outline" disabled={!whatsapp} onClick={() => copy(whatsapp, "Message")}>
-              <Copy className="size-4" /> Copy message
-            </Button>
-          </div>
-          {!phone ? <p className="text-muted-foreground text-xs">No phone number on this lead.</p> : null}
-        </div>
-
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Email</p>
-          <div className="flex gap-2">
-            <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Add business email" maxLength={255} />
-            {email !== (lead.email ?? "") ? (
-              <Button size="sm" variant="outline" onClick={() => saveEmail.mutate()}>Save</Button>
-            ) : null}
-          </div>
-          <Input value={subject} onChange={(e) => setSubject(e.target.value.slice(0, 200))} placeholder="Subject" />
-          <Textarea rows={6} value={body} onChange={(e) => setBody(e.target.value.slice(0, 3000))} placeholder="Email body" />
-          <div className="flex flex-wrap gap-2">
-            {lead.email ? (
-              <Button
-                size="sm"
-                disabled={!body || !subject}
-                onClick={() => {
-                  window.location.href = mailtoUrl(lead.email!, subject, body);
-                  setConfirm("email");
-                }}
-              >
-                <Mail className="size-4" /> Send Email
-              </Button>
-            ) : null}
             <Button size="sm" variant="outline" disabled={!body} onClick={() => copy(`${subject}\n\n${body}`, "Email")}>
               <Copy className="size-4" /> Copy email
             </Button>
           </div>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-2 md:col-span-2">
-          <p className="text-muted-foreground text-xs">
-            Tip: Personalize each message and avoid sending the same text to many people to protect your WhatsApp number.
-          </p>
           <div className="flex gap-2">
             {last?.status === "sent" ? (
-              <Button size="sm" variant="outline" onClick={() => record.mutate({ channel: last.channel as Channel, status: "replied" })}>
+              <Button size="sm" variant="outline" onClick={() => record.mutate({ status: "replied" })}>
                 Mark replied
               </Button>
             ) : null}
-            <Button size="sm" variant="ghost" onClick={() => record.mutate({ channel: (last?.channel as Channel) ?? "whatsapp", status: "not_interested" })}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => (lead.email ? setConfirmUnsub(true) : record.mutate({ status: "not_interested" }))}
+            >
               Not interested
             </Button>
           </div>
         </div>
+        {!lead.email ? <p className="text-muted-foreground text-xs">Add and save an email to send.</p> : null}
       </CardContent>
 
-      <AlertDialog open={confirm !== null} onOpenChange={(o) => !o && setConfirm(null)}>
+      <AlertDialog open={confirmUnsub} onOpenChange={setConfirmUnsub}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Did you send it?</AlertDialogTitle>
+            <AlertDialogTitle>Stop contacting {lead.business_name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              We'll mark {lead.business_name} as Sent so it moves out of your queue.
+              {lead.email} will be added to your unsubscribe list and can't be emailed again unless you remove it.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Not yet</AlertDialogCancel>
-            <AlertDialogAction onClick={() => confirm && record.mutate({ channel: confirm, status: "sent" })}>
-              Yes, mark as sent
-            </AlertDialogAction>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => unsub.mutate()}>Yes, unsubscribe</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </Card>
+  );
+}
+
+const unsubscribesQuery = {
+  queryKey: ["unsubscribes"],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from("unsubscribes")
+      .select("id, email, reason, created_at")
+      .order("created_at", { ascending: false })
+      .limit(1000);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  },
+};
+
+const DELIVERY_STYLE: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  sent: "default",
+  failed: "destructive",
+  bounced: "destructive",
+  pending: "outline",
+};
+
+function DeliveryTab() {
+  const [filter, setFilter] = useState("all");
+  const history = useQuery({
+    queryKey: ["email-history"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("email_history")
+        .select("id, lead_id, to_email, subject, sent_status, error_message, sent_at, bounced_at, replied, created_at")
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (error) throw new Error(error.message);
+      return data ?? [];
+    },
+  });
+  const rows = history.data ?? [];
+  const count = (s: string) => rows.filter((r) => r.sent_status === s).length;
+  const shown = filter === "all" ? rows : rows.filter((r) => r.sent_status === filter);
+  return (
+    <>
+      <div className="grid gap-3 sm:grid-cols-3">
+        {[["sent", "Sent"], ["failed", "Failed"], ["bounced", "Bounced"]].map(([k, l]) => (
+          <Card key={k} className={filter === k ? "border-primary" : ""}>
+            <button type="button" className="w-full text-left" onClick={() => setFilter(filter === k ? "all" : k)}>
+              <CardContent className="py-4">
+                <p className="text-muted-foreground text-xs">{l}</p>
+                <p className="text-2xl font-semibold tabular-nums">{count(k)}</p>
+              </CardContent>
+            </button>
+          </Card>
+        ))}
+      </div>
+      <p className="text-muted-foreground text-xs">Bounces are detected when Gmail's reply check runs (every 15 minutes or "Check now" in Replies).</p>
+      {history.isLoading ? (
+        <Loader2 className="text-primary mx-auto size-6 animate-spin" />
+      ) : !shown.length ? (
+        <p className="text-muted-foreground py-12 text-center text-sm">No emails here yet.</p>
+      ) : (
+        shown.map((r) => (
+          <Card key={r.id} className="border-border/60">
+            <CardContent className="space-y-1 pt-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-medium">{r.to_email}</p>
+                <div className="flex items-center gap-2">
+                  {r.replied ? <Badge variant="secondary">Replied</Badge> : null}
+                  <Badge variant={DELIVERY_STYLE[r.sent_status] ?? "outline"} className="capitalize">{r.sent_status}</Badge>
+                </div>
+              </div>
+              <p className="text-sm">{r.subject}</p>
+              <p className="text-muted-foreground text-xs">
+                {new Date(r.bounced_at ?? r.sent_at ?? r.created_at).toLocaleString()}
+              </p>
+              {r.error_message && r.sent_status !== "sent" ? (
+                <p className="text-destructive text-xs">{r.error_message}</p>
+              ) : null}
+              {r.lead_id ? (
+                <Link to="/lead/$leadId" params={{ leadId: r.lead_id }} className="text-xs underline">Open lead</Link>
+              ) : null}
+            </CardContent>
+          </Card>
+        ))
+      )}
+    </>
+  );
+}
+
+function UnsubscribedTab() {
+  const queryClient = useQueryClient();
+  const unsubFn = useServerFn(unsubscribeLead);
+  const list = useQuery(unsubscribesQuery);
+  const [newEmail, setNewEmail] = useState("");
+  const add = useMutation({
+    mutationFn: () => {
+      const parsed = emailSchema.safeParse(newEmail);
+      if (!parsed.success) throw new Error("Enter a valid email address.");
+      return unsubFn({ data: { email: parsed.data, reason: "Added manually" } });
+    },
+    onSuccess: () => {
+      setNewEmail("");
+      toast.success("Added to unsubscribe list");
+      queryClient.invalidateQueries({ queryKey: ["unsubscribes"] });
+    },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("unsubscribes").delete().eq("id", id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["unsubscribes"] }),
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+  return (
+    <>
+      <div className="flex gap-2">
+        <Input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="email@business.com" maxLength={255} />
+        <Button onClick={() => add.mutate()} disabled={add.isPending || !newEmail}>Add</Button>
+      </div>
+      <p className="text-muted-foreground text-xs">Addresses here are blocked — Leadlify will refuse to email them.</p>
+      {!list.data?.length ? (
+        <p className="text-muted-foreground py-12 text-center text-sm">No one has opted out.</p>
+      ) : (
+        list.data.map((u) => (
+          <Card key={u.id} className="border-border/60">
+            <CardContent className="flex items-center justify-between gap-2 py-3">
+              <div>
+                <p className="text-sm font-medium">{u.email}</p>
+                <p className="text-muted-foreground text-xs">
+                  {u.reason ?? "Opted out"} · {new Date(u.created_at).toLocaleDateString()}
+                </p>
+              </div>
+              <Button size="icon" variant="ghost" aria-label="Remove" onClick={() => remove.mutate(u.id)}>
+                <Trash2 className="size-4" />
+              </Button>
+            </CardContent>
+          </Card>
+        ))
+      )}
+    </>
   );
 }

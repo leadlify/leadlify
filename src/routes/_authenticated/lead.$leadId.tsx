@@ -542,18 +542,11 @@ function LeadDetailPage() {
                   {to ? (
                     <Button
                       variant="secondary"
-                      disabled={!subject || !body || sendGmail.isPending}
+                      disabled={!subject || !body || sendGmail.isPending || sendGmail.isSuccess}
                       onClick={() => sendGmail.mutate()}
                     >
                       {sendGmail.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
-                      Send Email
-                    </Button>
-                  ) : null}
-                  {to ? (
-                    <Button asChild variant="outline" disabled={!subject || !body}>
-                      <a href={`mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`}>
-                        Open email app
-                      </a>
+                      {sendGmail.isPending ? "Sending…" : sendGmail.isSuccess ? "Sent ✓" : "Send Email"}
                     </Button>
                   ) : null}
                 </div>
