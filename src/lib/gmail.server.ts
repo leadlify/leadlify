@@ -190,6 +190,14 @@ export async function syncRepliesForUser(userId: string): Promise<number> {
       const h = (n: string) => m.payload?.headers?.find((x) => x.name.toLowerCase() === n)?.value ?? "";
       const from = h("from");
       if (own && from.toLowerCase().includes(own)) continue;
+      if (/mailer-daemon|postmaster|mail delivery/i.test(from)) {
+        await supabaseAdmin
+          .from("email_history")
+          .update({ sent_status: "bounced", bounced_at: new Date().toISOString(), error_message: (m.snippet ?? "").slice(0, 500) })
+          .eq("id", row.id)
+          .neq("sent_status", "bounced");
+        continue;
+      }
       const { data: ins } = await supabaseAdmin
         .from("email_replies")
         .upsert(
@@ -224,4 +232,23 @@ export async function syncRepliesForUser(userId: string): Promise<number> {
     .update({ last_checked_at: new Date().toISOString(), last_error: null })
     .eq("user_id", userId);
   return added;
+}
+
+/** Sends a test email from the connected Gmail address to itself; returns the message id and label ids. */
+export async function sendSelfTest(userId: string) {
+  const { token, email } = await accessTokenFor(userId);
+  if (!email) throw new Error("Connected Gmail address unknown. Reconnect Gmail in Settings.");
+  const sent = await gmailFetch<{ id: string; threadId: string }>(token, "/messages/send", {
+    method: "POST",
+    body: JSON.stringify({
+      raw: rawEmail({
+        from: email,
+        to: email,
+        subject: "Leadlify test email",
+        body: "This is a test email sent by Leadlify through your connected Gmail account.",
+      }),
+    }),
+  });
+  const msg = await gmailFetch<{ labelIds?: string[] }>(token, `/messages/${sent.id}?format=minimal`);
+  return { email, messageId: sent.id, inSent: (msg.labelIds ?? []).includes("SENT") };
 }
