@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { errorMessage, settingsQuery } from "@/lib/queries";
 import { useServerFn } from "@tanstack/react-start";
-import { disconnectGmail, getGmailConnectUrl, getGmailStatus } from "@/lib/gmail.functions";
+import { disconnectGmail, getGmailConnectUrl, getGmailStatus, sendGmailTestEmail } from "@/lib/gmail.functions";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
