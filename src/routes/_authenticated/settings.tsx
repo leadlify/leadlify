@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { errorMessage, settingsQuery } from "@/lib/queries";
 import { useServerFn } from "@tanstack/react-start";
-import { disconnectGmail, getGmailConnectUrl, getGmailStatus } from "@/lib/gmail.functions";
+import { disconnectGmail, getGmailConnectUrl, getGmailStatus, sendGmailTestEmail } from "@/lib/gmail.functions";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -71,6 +71,15 @@ function GmailCard() {
       toast.success("Gmail disconnected");
     },
   });
+  const testFn = useServerFn(sendGmailTestEmail);
+  const testSend = useMutation({
+    mutationFn: () => testFn(),
+    onSuccess: (r) =>
+      r.inSent
+        ? toast.success(`Test email sent to ${r.email} — confirmed in Sent mail.`)
+        : toast.success(`Test email sent to ${r.email}, but it was not found in Sent mail.`),
+    onError: (e) => toast.error(errorMessage(e)),
+  });
 
   const acct = status.data;
   return (
@@ -91,7 +100,11 @@ function GmailCard() {
                 : ""}
             </p>
             {acct.last_error ? <p className="text-destructive text-sm">{acct.last_error}</p> : null}
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={() => testSend.mutate()} disabled={testSend.isPending}>
+                {testSend.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
+                {testSend.isPending ? "Sending…" : "Send test email"}
+              </Button>
               <Button variant="outline" onClick={() => connect.mutate()} disabled={connect.isPending}>
                 Reconnect
               </Button>
