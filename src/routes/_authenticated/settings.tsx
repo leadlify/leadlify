@@ -71,6 +71,15 @@ function GmailCard() {
       toast.success("Gmail disconnected");
     },
   });
+  const testFn = useServerFn(sendGmailTestEmail);
+  const testSend = useMutation({
+    mutationFn: () => testFn(),
+    onSuccess: (r) =>
+      r.inSent
+        ? toast.success(`Test email sent to ${r.email} — confirmed in Sent mail.`)
+        : toast.success(`Test email sent to ${r.email}, but it was not found in Sent mail.`),
+    onError: (e) => toast.error(errorMessage(e)),
+  });
 
   const acct = status.data;
   return (
