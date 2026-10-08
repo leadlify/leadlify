@@ -1,17 +1,17 @@
-# Leadlify roadmap
+# Leadlify roadmap — feature batch (quick wins first)
 
-## In progress
-
-- Find Leads filters: industry, business type suggestions, minimum website quality (done).
-- Landing page: country links section for SEO (done).
-
-## Next
-
-- Instagram outreach mode:
-  - Toggle on the Find Leads form to target businesses that have an Instagram
-    presence but no website.
-  - Store the Instagram handle on the lead.
-  - Generate a ready-to-send Instagram DM (short, casual) alongside the email
-    draft, with the WhatsApp number and demo site link.
-- Google Search Console: connect the account, verify the site and submit the
-  sitemap, then confirm indexing for "leadlify" and "lead generation".
+- [x] 1 Lead scoring (badge, sort by score)
+- [x] 2 Bulk actions (delete, status, add to list)
+- [x] 15 CSV export (filtered, with score + website status)
+- [ ] 14 Exclude filter on search
+- [ ] 4 Notes + reminders
+- [ ] 9 Dark mode toggle saved per user
+- [ ] 13 Mobile audit (outreach, leads, lead detail)
+- [ ] 6 Shareable demo links + view counts
+- [ ] 7 Template library
+- [ ] 5 Analytics page
+- [ ] 8 Review insights
+- [ ] 10 Email open tracking (+ privacy page note)
+- [ ] 11 Insights widget
+- [ ] 12 Referral tracking (shown in Settings; sidebar stays Coming Soon)
+- [ ] 3 Saved searches + daily Gmail alerts

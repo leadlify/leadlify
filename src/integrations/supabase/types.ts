@@ -369,6 +369,7 @@ export type Database = {
           seo_score: number | null
           ssl_enabled: boolean | null
           status: Database["public"]["Enums"]["lead_status"]
+          tags: string[]
           updated_at: string
           user_id: string
           website: string | null
@@ -398,6 +399,7 @@ export type Database = {
           seo_score?: number | null
           ssl_enabled?: boolean | null
           status?: Database["public"]["Enums"]["lead_status"]
+          tags?: string[]
           updated_at?: string
           user_id?: string
           website?: string | null
@@ -427,6 +429,7 @@ export type Database = {
           seo_score?: number | null
           ssl_enabled?: boolean | null
           status?: Database["public"]["Enums"]["lead_status"]
+          tags?: string[]
           updated_at?: string
           user_id?: string
           website?: string | null
