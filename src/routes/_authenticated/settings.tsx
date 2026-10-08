@@ -100,7 +100,11 @@ function GmailCard() {
                 : ""}
             </p>
             {acct.last_error ? <p className="text-destructive text-sm">{acct.last_error}</p> : null}
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={() => testSend.mutate()} disabled={testSend.isPending}>
+                {testSend.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
+                {testSend.isPending ? "Sending…" : "Send test email"}
+              </Button>
               <Button variant="outline" onClick={() => connect.mutate()} disabled={connect.isPending}>
                 Reconnect
               </Button>
