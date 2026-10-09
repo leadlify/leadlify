@@ -18,6 +18,8 @@ const SearchInput = z.object({
   industry: z.string().trim().max(80).optional().default(""),
   businessType: z.string().trim().min(1, "Business type is required").max(80),
   keyword: z.string().trim().max(80).optional().default(""),
+  /** Comma-separated names/keywords; results whose name or category contains any are dropped. */
+  exclude: z.string().trim().max(300).optional().default(""),
   maxLeads: z.number().int().min(1).max(50).default(20),
   radiusKm: z.number().min(1).max(50).default(10),
   onlyWithoutWebsite: z.boolean().optional().default(false),
@@ -220,7 +222,16 @@ export const findLeads = createServerFn({ method: "POST" })
     }
 
     const seen = new Set<string>();
+    const excludeTerms = (data.exclude ?? "")
+      .split(",")
+      .map((term) => term.trim().toLowerCase())
+      .filter(Boolean);
     const candidates = collected
+      .filter((place) => {
+        if (excludeTerms.length === 0) return true;
+        const haystack = `${place.displayName?.text ?? ""} ${place.primaryTypeDisplayName?.text ?? ""}`.toLowerCase();
+        return !excludeTerms.some((term) => haystack.includes(term));
+      })
       .filter((place) => {
         // Instagram mode: the business links an Instagram page instead of a real website.
         if (wantsInstagram) return Boolean(instagramHandle(place.websiteUri));
