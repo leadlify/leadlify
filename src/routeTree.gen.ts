@@ -24,6 +24,7 @@ import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedOutreachRouteImport } from './routes/_authenticated/outreach'
 import { Route as AuthenticatedPlansRouteImport } from './routes/_authenticated/plans'
 import { Route as AuthenticatedReferralsRouteImport } from './routes/_authenticated/referrals'
+import { Route as AuthenticatedRemindersRouteImport } from './routes/_authenticated/reminders'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as LeadGenerationIndexRouteImport } from './routes/lead-generation.index'
 import { Route as LeadGenerationCountryRouteImport } from './routes/lead-generation.$country'
@@ -106,6 +107,11 @@ const AuthenticatedReferralsRoute = AuthenticatedReferralsRouteImport.update({
   path: '/referrals',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRemindersRoute = AuthenticatedRemindersRouteImport.update({
+  id: '/reminders',
+  path: '/reminders',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -158,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/outreach': typeof AuthenticatedOutreachRoute
   '/plans': typeof AuthenticatedPlansRoute
   '/referrals': typeof AuthenticatedReferralsRoute
+  '/reminders': typeof AuthenticatedRemindersRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/lead-generation/$country': typeof LeadGenerationCountryRoute
   '/site/$slug': typeof SiteSlugRoute
@@ -181,6 +188,7 @@ export interface FileRoutesByTo {
   '/outreach': typeof AuthenticatedOutreachRoute
   '/plans': typeof AuthenticatedPlansRoute
   '/referrals': typeof AuthenticatedReferralsRoute
+  '/reminders': typeof AuthenticatedRemindersRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/lead-generation/$country': typeof LeadGenerationCountryRoute
   '/site/$slug': typeof SiteSlugRoute
@@ -206,6 +214,7 @@ export interface FileRoutesById {
   '/_authenticated/outreach': typeof AuthenticatedOutreachRoute
   '/_authenticated/plans': typeof AuthenticatedPlansRoute
   '/_authenticated/referrals': typeof AuthenticatedReferralsRoute
+  '/_authenticated/reminders': typeof AuthenticatedRemindersRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/lead-generation/$country': typeof LeadGenerationCountryRoute
   '/site/$slug': typeof SiteSlugRoute
@@ -231,6 +240,7 @@ export interface FileRouteTypes {
     | '/outreach'
     | '/plans'
     | '/referrals'
+    | '/reminders'
     | '/settings'
     | '/lead-generation/$country'
     | '/site/$slug'
@@ -254,6 +264,7 @@ export interface FileRouteTypes {
     | '/outreach'
     | '/plans'
     | '/referrals'
+    | '/reminders'
     | '/settings'
     | '/lead-generation/$country'
     | '/site/$slug'
@@ -278,6 +289,7 @@ export interface FileRouteTypes {
     | '/_authenticated/outreach'
     | '/_authenticated/plans'
     | '/_authenticated/referrals'
+    | '/_authenticated/reminders'
     | '/_authenticated/settings'
     | '/lead-generation/$country'
     | '/site/$slug'
@@ -409,6 +421,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReferralsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/reminders': {
+      id: '/_authenticated/reminders'
+      path: '/reminders'
+      fullPath: '/reminders'
+      preLoaderRoute: typeof AuthenticatedRemindersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -470,6 +489,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOutreachRoute: typeof AuthenticatedOutreachRoute
   AuthenticatedPlansRoute: typeof AuthenticatedPlansRoute
   AuthenticatedReferralsRoute: typeof AuthenticatedReferralsRoute
+  AuthenticatedRemindersRoute: typeof AuthenticatedRemindersRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedLeadLeadIdRoute: typeof AuthenticatedLeadLeadIdRoute
 }
@@ -483,6 +503,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOutreachRoute: AuthenticatedOutreachRoute,
   AuthenticatedPlansRoute: AuthenticatedPlansRoute,
   AuthenticatedReferralsRoute: AuthenticatedReferralsRoute,
+  AuthenticatedRemindersRoute: AuthenticatedRemindersRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedLeadLeadIdRoute: AuthenticatedLeadLeadIdRoute,
 }

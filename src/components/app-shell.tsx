@@ -26,6 +26,8 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { isAdminQuery } from "@/lib/queries";
+import { pendingRemindersQuery } from "@/lib/reminders";
+import { Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -154,8 +156,8 @@ export function AppShell({
             </div>
 
             <div className="flex items-center gap-2">
-              
               {actions}
+              <ReminderBell />
               <ThemeToggle />
             </div>
           </div>
@@ -167,6 +169,19 @@ export function AppShell({
         </main>
       </div>
     </div>
+  );
+}
+
+function ReminderBell() {
+  const { data } = useQuery(pendingRemindersQuery);
+  const due = (data ?? []).filter((r) => new Date(r.remind_at).getTime() <= Date.now()).length;
+  return (
+    <Button asChild variant="ghost" size="icon" className="relative rounded-full">
+      <Link to="/reminders" aria-label={due ? `${due} reminders due` : "Reminders"}>
+        <Bell className="size-4" />
+        {due ? <span className="bg-destructive absolute top-1.5 right-1.5 size-2 rounded-full" /> : null}
+      </Link>
+    </Button>
   );
 }
 
