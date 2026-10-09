@@ -125,30 +125,39 @@ export type Database = {
           created_at: string
           html: string
           id: string
+          last_viewed_at: string | null
           lead_id: string | null
+          share_token: string | null
           slug: string
           updated_at: string
           user_id: string
+          view_count: number
         }
         Insert: {
           business_name: string
           created_at?: string
           html: string
           id?: string
+          last_viewed_at?: string | null
           lead_id?: string | null
+          share_token?: string | null
           slug: string
           updated_at?: string
           user_id?: string
+          view_count?: number
         }
         Update: {
           business_name?: string
           created_at?: string
           html?: string
           id?: string
+          last_viewed_at?: string | null
           lead_id?: string | null
+          share_token?: string | null
           slug?: string
           updated_at?: string
           user_id?: string
+          view_count?: number
         }
         Relationships: [
           {
@@ -170,12 +179,15 @@ export type Database = {
           gmail_thread_id: string | null
           id: string
           lead_id: string | null
+          opened_at: string | null
           replied: boolean
           replied_at: string | null
           sent_at: string | null
           sent_status: string
           subject: string
+          template_id: string | null
           to_email: string
+          tracking_id: string
           user_id: string
         }
         Insert: {
@@ -187,12 +199,15 @@ export type Database = {
           gmail_thread_id?: string | null
           id?: string
           lead_id?: string | null
+          opened_at?: string | null
           replied?: boolean
           replied_at?: string | null
           sent_at?: string | null
           sent_status?: string
           subject: string
+          template_id?: string | null
           to_email: string
+          tracking_id?: string
           user_id?: string
         }
         Update: {
@@ -204,12 +219,15 @@ export type Database = {
           gmail_thread_id?: string | null
           id?: string
           lead_id?: string | null
+          opened_at?: string | null
           replied?: boolean
           replied_at?: string | null
           sent_at?: string | null
           sent_status?: string
           subject?: string
+          template_id?: string | null
           to_email?: string
+          tracking_id?: string
           user_id?: string
         }
         Relationships: [
@@ -218,6 +236,13 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_history_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -281,6 +306,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      email_templates: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean
+          name: string
+          tone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name: string
+          tone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          tone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       gmail_accounts: {
         Row: {
@@ -363,9 +418,11 @@ export type Database = {
           mobile_friendly: boolean | null
           notes: string | null
           owner_name: string | null
+          pain_points: string[]
           phone: string | null
           place_id: string | null
           review_count: number | null
+          reviews: Json
           seo_score: number | null
           ssl_enabled: boolean | null
           status: Database["public"]["Enums"]["lead_status"]
@@ -393,9 +450,11 @@ export type Database = {
           mobile_friendly?: boolean | null
           notes?: string | null
           owner_name?: string | null
+          pain_points?: string[]
           phone?: string | null
           place_id?: string | null
           review_count?: number | null
+          reviews?: Json
           seo_score?: number | null
           ssl_enabled?: boolean | null
           status?: Database["public"]["Enums"]["lead_status"]
@@ -423,9 +482,11 @@ export type Database = {
           mobile_friendly?: boolean | null
           notes?: string | null
           owner_name?: string | null
+          pain_points?: string[]
           phone?: string | null
           place_id?: string | null
           review_count?: number | null
+          reviews?: Json
           seo_score?: number | null
           ssl_enabled?: boolean | null
           status?: Database["public"]["Enums"]["lead_status"]
@@ -563,7 +624,10 @@ export type Database = {
           monthly_email_quota: number
           monthly_lead_quota: number
           plan: string
+          referral_code: string | null
+          referred_by: string | null
           suspended: boolean
+          theme: string
           updated_at: string
           website_builder_enabled: boolean
         }
@@ -575,7 +639,10 @@ export type Database = {
           monthly_email_quota?: number
           monthly_lead_quota?: number
           plan?: string
+          referral_code?: string | null
+          referred_by?: string | null
           suspended?: boolean
+          theme?: string
           updated_at?: string
           website_builder_enabled?: boolean
         }
@@ -587,9 +654,92 @@ export type Database = {
           monthly_email_quota?: number
           monthly_lead_quota?: number
           plan?: string
+          referral_code?: string | null
+          referred_by?: string | null
           suspended?: boolean
+          theme?: string
           updated_at?: string
           website_builder_enabled?: boolean
+        }
+        Relationships: []
+      }
+      reminders: {
+        Row: {
+          created_at: string
+          done: boolean
+          id: string
+          label: string | null
+          lead_id: string
+          remind_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          done?: boolean
+          id?: string
+          label?: string | null
+          lead_id: string
+          remind_at: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          done?: boolean
+          id?: string
+          label?: string | null
+          lead_id?: string
+          remind_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminders_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_searches: {
+        Row: {
+          alerts_enabled: boolean
+          created_at: string
+          id: string
+          last_alert_at: string | null
+          last_run_at: string | null
+          name: string
+          params: Json
+          seen_place_ids: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alerts_enabled?: boolean
+          created_at?: string
+          id?: string
+          last_alert_at?: string | null
+          last_run_at?: string | null
+          name: string
+          params?: Json
+          seen_place_ids?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          alerts_enabled?: boolean
+          created_at?: string
+          id?: string
+          last_alert_at?: string | null
+          last_run_at?: string | null
+          name?: string
+          params?: Json
+          seen_place_ids?: string[]
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -697,10 +847,20 @@ export type Database = {
         }
         Returns: boolean
       }
+      my_referrals: {
+        Args: never
+        Returns: {
+          display: string
+          joined_at: string
+        }[]
+      }
+      record_demo_view: { Args: { _token: string }; Returns: string }
+      record_email_open: { Args: { _tracking: string }; Returns: undefined }
       review_plan_request: {
         Args: { _approve: boolean; _request_id: string }
         Returns: undefined
       }
+      seed_starter_templates: { Args: { _user: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "user"
