@@ -91,6 +91,7 @@ function FindLeadsPage() {
   const [industry, setIndustry] = useState("");
   const [businessType, setBusinessType] = useState("");
   const [keyword, setKeyword] = useState("");
+  const [exclude, setExclude] = useState("");
   const [maxLeads, setMaxLeads] = useState(20);
   const [radiusKm, setRadiusKm] = useState(10);
   const [websiteQuality, setWebsiteQuality] =
@@ -109,6 +110,7 @@ function FindLeadsPage() {
           industry,
           businessType,
           keyword,
+          exclude,
           maxLeads,
           radiusKm,
           onlyWithoutWebsite,
@@ -241,6 +243,19 @@ function FindLeadsPage() {
                     maxLength={80}
                     onChange={(e) => setKeyword(e.target.value)}
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="exclude">Exclude</Label>
+                  <Input
+                    id="exclude"
+                    placeholder="pizza, franchise, Tony's"
+                    value={exclude}
+                    maxLength={300}
+                    onChange={(e) => setExclude(e.target.value)}
+                  />
+                  <p className="text-muted-foreground text-xs">
+                    Comma-separated. Skips any business whose name or category contains a term.
+                  </p>
                 </div>
               </div>
 
