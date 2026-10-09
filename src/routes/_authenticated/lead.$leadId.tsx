@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/app-shell";
+import { LeadReminders } from "@/components/lead-reminders";
 import {
   LEAD_STATUSES,
   STATUS_LABEL,
@@ -122,6 +123,7 @@ function LeadDetailPage() {
   const [to, setTo] = useState("");
   const [instructions, setInstructions] = useState("");
   const [dm, setDm] = useState("");
+  const [notesDraft, setNotesDraft] = useState<string | null>(null);
   const sendFn = useServerFn(sendLeadEmailViaGmail);
   const sendGmail = useMutation({
     mutationFn: () => sendFn({ data: { leadId, to, subject, body } }),
@@ -297,16 +299,25 @@ function LeadDetailPage() {
                 <Textarea
                   id="notes"
                   rows={4}
-                  defaultValue={record.notes ?? ""}
+                  value={notesDraft ?? record.notes ?? ""}
                   placeholder="Anything worth remembering about this lead…"
-                  onBlur={(e) => {
-                    if (e.target.value !== (record.notes ?? "")) {
-                      updateLead.mutate({ notes: e.target.value });
-                      toast.success("Notes saved");
-                    }
-                  }}
+                  onChange={(e) => setNotesDraft(e.target.value)}
                 />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={notesDraft === null || notesDraft === (record.notes ?? "") || updateLead.isPending}
+                  onClick={() =>
+                    updateLead.mutate(
+                      { notes: notesDraft ?? "" },
+                      { onSuccess: () => { setNotesDraft(null); toast.success("Notes saved"); } },
+                    )
+                  }
+                >
+                  Save notes
+                </Button>
               </div>
+              <LeadReminders leadId={leadId} />
             </CardContent>
           </Card>
         </div>
