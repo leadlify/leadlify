@@ -847,15 +847,15 @@ export type Database = {
         }
         Returns: boolean
       }
-      my_referrals: {
-        Args: never
+      record_demo_view: { Args: { _token: string }; Returns: string }
+      record_email_open: { Args: { _tracking: string }; Returns: undefined }
+      referrals_for: {
+        Args: { _user: string }
         Returns: {
           display: string
           joined_at: string
         }[]
       }
-      record_demo_view: { Args: { _token: string }; Returns: string }
-      record_email_open: { Args: { _tracking: string }; Returns: undefined }
       review_plan_request: {
         Args: { _approve: boolean; _request_id: string }
         Returns: undefined
